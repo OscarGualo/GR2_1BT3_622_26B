@@ -30,13 +30,17 @@ class PersonalComedorEntregaTest {
         pedido = andrea.crearPedido();
         pedido.agregarItem(new Plato("Arroz con pollo", 3.50, "Disponible", "", 20), 1);
         pedido.confirmarPago();
-        comprobante = new Comprobante("PD-0457", new Date(), pedido);
+        asignarId(pedido, 457);
+        comprobante = pedido.generarCodigoEntrega();
     }
 
-    /** Mensajes 5-8: validarCodigo(codigo, comprobante) delega en validarCodigoEntrega() y registra quién valida. */
+    /** validarCodigo confirma el código; entregarPedido registra quién validó ("valida"). */
     @Test
-    void validarCodigoCorrectoDevuelveTrueYRegistraLaValidacion() {
+    void validarCodigoCorrectoYEntregaRegistraLaValidacion() {
         assertTrue(maria.validarCodigo("pd-0457", comprobante));
+
+        maria.entregarPedido(comprobante.getPedido());
+
         assertSame(maria, comprobante.getPersonalValida());
     }
 
@@ -71,5 +75,16 @@ class PersonalComedorEntregaTest {
                 new Policuenta("2024-0999", 1.00)).crearPedido();
 
         assertThrows(IllegalStateException.class, () -> maria.entregarPedido(sinPagar));
+    }
+
+    /** Soporte de prueba: simula el id que JPA asigna al guardar el pedido. */
+    private static void asignarId(Pedido pedido, int id) {
+        try {
+            java.lang.reflect.Field campo = Pedido.class.getDeclaredField("id");
+            campo.setAccessible(true);
+            campo.setInt(pedido, id);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

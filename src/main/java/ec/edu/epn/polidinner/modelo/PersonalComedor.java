@@ -1,5 +1,7 @@
 package ec.edu.epn.polidinner.modelo;
 
+import ec.edu.epn.polidinner.persistencia.ComprobanteDAO;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -73,35 +75,44 @@ public class PersonalComedor implements Serializable {
         producto.cambiarEstado("Agotado");
     }
 
+
     /**
-     * Trazabilidad: Diagrama de clases (Fig. 15) - PersonalComedor.validarCodigo(codigo: String): boolean,
-     * ajustado a validarCodigo(codigo, comprobante): la entidad no consulta la base; el controlador
-     * busca el Comprobante con ComprobanteDAO y se lo entrega (decisión documentada en la trazabilidad).
-     * Diagrama de secuencia CU04 - mensajes 5 (validarCodigo), 6-7 (comprobante.validarCodigoEntrega())
-     * y 8 (resultado). Si es válido, queda registrado quién lo validó (asociación "valida").
+     * Trazabilidad: Diagrama de clases - +validarCodigo(codigo: String): boolean.
+     * Relación "valida" (PersonalComedor 1 — 0..* Comprobante): busca el comprobante del código
+     * y comprueba que se pueda entregar (no usado, del día y con pedido pagado).
      */
-    public boolean validarCodigo(String codigo, Comprobante comprobante) {
+    public boolean  validarCodigo(String codigo) {
+        if (codigo == null || codigo.trim().isEmpty()) {
+            return false;
+        }
+        Comprobante comprobante = new ComprobanteDAO().buscarPorCodigo(codigo.trim());
+        return validarCodigo(codigo, comprobante);
+    }
+
+    /**
+     * Soporte técnico (no es público): la regla de validación separada de la búsqueda,
+     * para poder probarla sin base de datos.
+     */
+    boolean validarCodigo(String codigo, Comprobante comprobante) {
         if (codigo == null || comprobante == null
                 || !comprobante.getCodigo().equalsIgnoreCase(codigo.trim())) {
             return false;
         }
-        boolean valido = comprobante.validarCodigoEntrega();
-        if (valido) {
-            comprobante.registrarValidacion(this);
-        }
-        return valido;
+        return comprobante.validarCodigoEntrega();
     }
 
     /**
-     * Trazabilidad: Diagrama de clases (Fig. 15) - PersonalComedor.entregarPedido(pedido: Pedido).
-     * Diagrama de secuencia CU04 - mensaje 9: entregarPedido(pedido); el pedido pasa a "Entregado"
-     * y queda asociado al personal (asociación "entrega").
+     * Trazabilidad: Diagrama de clases - +entregarPedido(pedido: Pedido).
+     * Relación "entrega" (PersonalComedor 1 — 0..* Pedido) y "valida" (PersonalComedor 1 — 0..* Comprobante).
      */
     public void entregarPedido(Pedido pedido) {
         if (!"Pagado".equals(pedido.getEstado())) {
             throw new IllegalStateException("Solo se entrega un pedido pagado");
         }
         pedido.registrarEntrega(this);
+        if (pedido.getComprobante() != null) {
+            pedido.getComprobante().registrarValidacion(this);
+        }
     }
 
 

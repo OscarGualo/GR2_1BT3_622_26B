@@ -82,7 +82,7 @@ public class HabilitarEntregaServlet extends HttpServlet {
                         "El código " + codigo + " no existe. Verifique el comprobante que presenta el cliente.");
             }
             PersonalComedor personal = personalDAO.buscarPorId(cedulaPersonal, tx);
-            if (!personal.validarCodigo(codigo, comprobante)) {
+            if (!personal.validarCodigo(codigo)) {
                 return new ResultadoEntrega(false, codigo, motivoRechazo(comprobante));
             }
             personal.entregarPedido(comprobante.getPedido());
