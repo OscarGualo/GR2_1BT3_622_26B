@@ -22,7 +22,8 @@ import javax.persistence.TemporalType;
 /**
  * Trazabilidad: Diagrama de clases (Fig. 7) - clase Menu.
  * Atributos del diagrama: Fecha, id, Estado.
- * Métodos: publicarParaVenta(), cerrarParaVenta(), agregarItem(), obtenerItem().
+ * Métodos: publicarParaVenta(), cerrarParaVenta(), agregarItem(), obtenerItems()
+ * (obtenerItem() en la Fig. 7; renombrado obtenerItems() en el Diagrama de clases del incremento 2, Fig. 15).
  * Asociaciones: "contiene" (1 Menu - * ItemMenu) y "administra" (* Menu - 1 PersonalComedor).
  */
 @Entity
@@ -99,10 +100,12 @@ public class Menu implements Serializable {
     }
 
     /**
-     * Trazabilidad: Diagrama de clases (Fig. 7) - Menu.obtenerItem().
-     * Diagrama de secuencia CU02 - mensajes 5 y 6: obtenerItem() / lista de ítems.
+     * Trazabilidad: Diagrama de clases (Fig. 15) - Menu.obtenerItems() (obtenerItem() en la Fig. 7).
+     * Diagrama de secuencia CU02 - mensajes 5 y 6: obtenerItems() / lista de ítems.
+     * Diagrama de secuencia CU03 - mensajes 9 y 10: obtenerItems() / lista de ItemMenu.
+     * Devuelve todos los ítems; cada controlador filtra los que necesita (CU02 y CU03: "Disponible").
      */
-    public List<ItemMenu> obtenerItem() {
+    public List<ItemMenu> obtenerItems() {
         return Collections.unmodifiableList(items);
     }
 

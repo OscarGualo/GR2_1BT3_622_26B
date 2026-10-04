@@ -17,7 +17,7 @@ sequenceDiagram
     UI->>C: iniciarRetiro()
     C->>MD: buscarMenuDelDia()
     MD-->>C: menuHoy
-    C->>M: obtenerItem()
+    C->>M: obtenerItems()
     M-->>C: lista de ítems
     C-->>UI: muestra ítems con estado "Disponible"
 

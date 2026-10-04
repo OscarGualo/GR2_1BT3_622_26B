@@ -76,15 +76,16 @@
                                    <c:if test="${not empty errores.precio}">aria-invalid="true" aria-describedby="error-precio"</c:if>>
                             <c:if test="${not empty errores.precio}"><p class="error-campo" id="error-precio"><c:out value="${errores.precio}"/></p></c:if>
                         </div>
-                        <div class="fila-campos solo-producto" id="campos-producto" ${esProducto ? '' : 'hidden'}>
+                        <div class="fila-campos">
+                            <%-- Incremento 2 (Fig. 15): ItemMenu.stockActual; porciones del plato o unidades del producto --%>
                             <div class="campo">
-                                <label for="stock">Stock <span class="requerido" aria-hidden="true">*</span></label>
+                                <label for="stock"><span id="etiqueta-stock">${esProducto ? 'Stock' : 'Porciones'}</span> <span class="requerido" aria-hidden="true">*</span></label>
                                 <input class="entrada" type="number" id="stock" name="stock" min="1" step="1" inputmode="numeric"
                                        value="<c:out value='${param.stock}'/>"
                                        <c:if test="${not empty errores.stock}">aria-invalid="true" aria-describedby="error-stock"</c:if>>
                                 <c:if test="${not empty errores.stock}"><p class="error-campo" id="error-stock"><c:out value="${errores.stock}"/></p></c:if>
                             </div>
-                            <div class="campo">
+                            <div class="campo solo-producto" id="campos-producto" ${esProducto ? '' : 'hidden'}>
                                 <label for="fechaCaducidad">Fecha de caducidad <span class="requerido" aria-hidden="true">*</span></label>
                                 <input class="entrada" type="date" id="fechaCaducidad" name="fechaCaducidad"
                                        value="<c:out value='${param.fechaCaducidad}'/>"
@@ -107,10 +108,10 @@
                     </div>
                     <div class="resumen-menu">
                         <span>Fecha: <strong><fmt:formatDate value="${menuHoy.fecha}" pattern="dd/MM/yyyy"/></strong></span>
-                        <span>Ítems: <strong>${menuHoy.obtenerItem().size()}</strong></span>
+                        <span>Ítems: <strong>${menuHoy.obtenerItems().size()}</strong></span>
                     </div>
                     <c:choose>
-                        <c:when test="${empty menuHoy.obtenerItem()}">
+                        <c:when test="${empty menuHoy.obtenerItems()}">
                             <div class="vacio">
                                 <svg class="icono icono-lg" aria-hidden="true"><use href="#i-plato"/></svg>
                                 <p>Aún no hay ítems. Use el formulario para agregar el primer plato o producto.</p>
@@ -129,7 +130,7 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <c:forEach var="item" items="${menuHoy.obtenerItem()}">
+                                    <c:forEach var="item" items="${menuHoy.obtenerItems()}">
                                         <tr>
                                             <td data-etiqueta="Nombre">
                                                 <strong><c:out value="${item.nombre}"/></strong>
@@ -137,7 +138,7 @@
                                             </td>
                                             <td data-etiqueta="Tipo" class="tipo">
                                                 <c:out value="${item.tipo}"/>
-                                                <c:if test="${item.tipo == 'Producto'}"> · stock ${item.stock}</c:if>
+                                                 · ${item.tipo == 'Producto' ? 'stock' : 'porciones'} ${item.stockActual}
                                             </td>
                                             <td data-etiqueta="Precio" class="numero">$<fmt:formatNumber value="${item.precio}" pattern="0.00"/></td>
                                             <td data-etiqueta="Estado"><span class="estado estado-${item.estado.toLowerCase()}"><c:out value="${item.estado}"/></span></td>
@@ -150,7 +151,7 @@
                     </c:choose>
                     <form method="post" action="${pageContext.request.contextPath}/personal/crear-menu" class="acciones-pie">
                         <input type="hidden" name="accion" value="publicar">
-                        <button type="submit" class="btn btn-primario" ${empty menuHoy.obtenerItem() ? 'disabled' : ''}>
+                        <button type="submit" class="btn btn-primario" ${empty menuHoy.obtenerItems() ? 'disabled' : ''}>
                             <svg class="icono" aria-hidden="true"><use href="#i-publicar"/></svg>
                             ${menuHoy.estado == 'Publicado' ? 'Volver a publicar' : 'Publicar menú'}
                         </button>
@@ -161,13 +162,15 @@
     </c:choose>
 </main>
 <script>
-    // Muestra stock y fecha de caducidad solo cuando el tipo es Producto (alt [tipo = Producto] de la secuencia)
+    // Fecha de caducidad solo para Producto (alt [tipo = Producto] de la secuencia); la etiqueta del stock cambia
     (function () {
         var campos = document.getElementById('campos-producto');
         if (!campos) return;
         document.querySelectorAll('input[name="tipo"]').forEach(function (radio) {
             radio.addEventListener('change', function () {
-                campos.hidden = document.getElementById('tipo-producto').checked === false;
+                var esProducto = document.getElementById('tipo-producto').checked;
+                campos.hidden = !esProducto;
+                document.getElementById('etiqueta-stock').textContent = esProducto ? 'Stock' : 'Porciones';
             });
         });
         var resumen = document.getElementById('resumen-errores');

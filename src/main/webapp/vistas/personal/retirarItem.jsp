@@ -74,7 +74,7 @@
                                                 <svg class="icono" aria-hidden="true"><use href="${item.tipo == 'Producto' ? '#i-producto' : '#i-plato'}"/></svg>
                                                 <c:out value="${item.tipo}"/>
                                             </span>
-                                            <c:if test="${item.tipo == 'Producto'}"> · stock ${item.stock}</c:if>
+                                             · ${item.tipo == 'Producto' ? 'stock' : 'porciones'} ${item.stockActual}
                                         </td>
                                         <td data-etiqueta="Precio" class="numero">$<fmt:formatNumber value="${item.precio}" pattern="0.00"/></td>
                                         <td data-etiqueta="Estado"><span class="estado estado-${item.estado.toLowerCase()}"><c:out value="${item.estado}"/></span></td>
