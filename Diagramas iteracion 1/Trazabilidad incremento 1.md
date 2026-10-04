@@ -70,21 +70,21 @@ Diagrama: `Diagrama de secuencia CU02 retirar item.png` (fuente Mermaid: `.mmd`)
 | # | Mensaje | Código |
 |---|---|---|
 | 1 | Solicita retirar plato/producto | `panel.jsp` (opción "Retirar plato y/o producto" → `/personal/retirar`) |
-| 2 | iniciarRetiro() | `RetirarItemMenuServlet.java:47` (`doGet`) |
-| 3-4 | buscarMenuDelDia() / menuHoy | `RetirarItemMenuServlet.java:49` → `persistencia/MenuDAO.java:26` |
-| 5-6 | obtenerItem() / lista de ítems | `RetirarItemMenuServlet.java:53` → `Menu.java:105` |
-| 7 | muestra ítems con estado "Disponible" | `RetirarItemMenuServlet.java:54` (filtro) → `retirarItem.jsp:34-95` |
+| 2 | iniciarRetiro() | `RetirarItemMenuServlet.java:43` (`doGet`) → `iniciarRetiro()` `:54` |
+| 3-4 | buscarMenuDelDia() / menuHoy | `RetirarItemMenuServlet.java:55` → `persistencia/MenuDAO.java:26` |
+| 5-6 | obtenerItem() / lista de ítems | `RetirarItemMenuServlet.java:59` → `Menu.java:105` |
+| 7 | muestra ítems con estado "Disponible" | `RetirarItemMenuServlet.java:60` (filtro) → `retirarItem.jsp:34-95` |
 | 8 | Selecciona ítem y confirma el retiro | `retirarItem.jsp:82` (botón Retirar) + diálogo de confirmación `retirarItem.jsp:107` |
-| 9 | retirarItem(idItem) | `RetirarItemMenuServlet.java:68` (`doPost`, `accion=retirar`) → `retirarItem()` `:95` |
-| 10-11 | buscarPorId(idItem) / item | `RetirarItemMenuServlet.java:102` → `GenericDAO.java:36` |
-| 12 | alt [Plato] eliminarPlato(plato) | `RetirarItemMenuServlet.java:119` → `PersonalComedor.java:61` |
+| 9 | retirarItem(idItem) | `RetirarItemMenuServlet.java:73` (`doPost`, `accion=retirar`) → `retirarItem()` `:103` |
+| 10-11 | buscarPorId(idItem) / item | `RetirarItemMenuServlet.java:110` → `GenericDAO.java:36` |
+| 12 | alt [Plato] eliminarPlato(plato) | `RetirarItemMenuServlet.java:127` → `PersonalComedor.java:61` |
 | 13 | cambiarEstado("Agotado") | `PersonalComedor.java:62` → `ItemMenu.java:58` |
-| 14 | alt [Producto] eliminarProducto(producto) | `RetirarItemMenuServlet.java:121` → `PersonalComedor.java:70` |
+| 14 | alt [Producto] eliminarProducto(producto) | `RetirarItemMenuServlet.java:129` → `PersonalComedor.java:70` |
 | 15 | cambiarEstado("Agotado") | `PersonalComedor.java:71` → `ItemMenu.java:58` |
-| 16 | actualizar(item) | `RetirarItemMenuServlet.java:125` → `GenericDAO.java:32` |
-| 17 | "Ítem retirado del menú" | `RetirarItemMenuServlet.java:127` |
-| 18 | alt [OptimisticLockException] "El ítem está siendo comprado, intente de nuevo" | `RetirarItemMenuServlet.java:114` (versión de la vista desactualizada) y `:133` (`OptimisticLockException` / `StaleStateException`) |
-| 19 | Muestra mensaje y la lista sin el ítem retirado | `RetirarItemMenuServlet.java:85` (redirect) → `mensajes.jsp` + `retirarItem.jsp` |
+| 16 | actualizar(item) | `RetirarItemMenuServlet.java:133` → `GenericDAO.java:32` |
+| 17 | alt [actualización correcta] "Ítem retirado del menú" | `RetirarItemMenuServlet.java:135` |
+| 18 | alt [versión desactualizada u OptimisticLockException] "El ítem está siendo comprado, intente de nuevo" | `RetirarItemMenuServlet.java:122` (versión de la vista desactualizada) y `:141` (`OptimisticLockException` / `StaleStateException`) |
+| 19 | Muestra mensaje y la lista sin el ítem retirado | `RetirarItemMenuServlet.java:90` (redirect) → `mensajes.jsp` + `retirarItem.jsp` |
 
 ## 5. Pruebas JUnit ↔ mensajes
 
@@ -108,3 +108,21 @@ Diagrama: `Diagrama de secuencia CU02 retirar item.png` (fuente Mermaid: `.mmd`)
 | `LoginPersonalServlet`, `LogoutServlet`, `FiltroPersonal` | Autenticación del actor (precondición) |
 | `JPAUtil`, `GenericDAO`, `MenuDAO`, `ItemMenuDAO`, `PersonalComedorDAO`, `CierreJPAListener` | Acceso a datos y ciclo de vida de JPA |
 | Asociación "contiene" unidireccional (`@JoinColumn` en `Menu`) | Evita agregar a `ItemMenu` un atributo `menu` que el diagrama de clases no tiene |
+| `perteneceAlMenu()` (`RetirarItemMenuServlet.java:146`) y la segunda llamada a `buscarMenuDelDia()` (`:104`) | Validación de seguridad: rechaza ids manipulados en el formulario que no pertenecen al menú de hoy |
+| No se implementó `ItemMenuDAO.listarPorMenu(Menu m)` (sugerido en el plan de trabajo) | Se usa `Menu.obtenerItem()`, que **sí** está en el diagrama de clases; un método DAO paralelo sería código muerto |
+| Retirar = `cambiarEstado("Agotado")`, no DELETE | El diagrama de actividades dice "Borrar … de la cartelera"; en el sistema eso significa dejar de ofrecer el ítem. El caso de prueba exige que el estado pase a agotado y el registro se conserve |
+| Atributos `fecha` / `estado` en minúscula | El diagrama escribe `Fecha` / `Estado`; se sigue la convención Java (camelCase) sin cambiar el nombre |
+
+## 7. Diagrama de actividades ↔ diagramas de secuencia
+
+Las notas amarillas de los diagramas de secuencia copian el texto exacto de las actividades.
+
+| Actividad (diagrama de actividades) | Secuencia | Código |
+|---|---|---|
+| CU 01: "Revisar ingredientes y productos disponibles en cocina" | Nota previa al msj 1 | Actividad manual (fuera del sistema); texto de apoyo en `crearMenu.jsp` |
+| CU 01: "Definir platos" + "Escribir nombre / descripción / precio" | Loop msj 9-18 | Formulario de `crearMenu.jsp` → `CrearMenuServlet.agregarItem()` |
+| CU 01: "Ubicar cartelera en lugar visible para el comensal" | Nota previa a msj 19-25 | `Menu.publicarParaVenta()` (estado "Publicado") |
+| CU 02: "Revisar el estado de las porciones restantes en la línea de servicio" | Nota previa al msj 1 | Actividad manual (fuera del sistema) |
+| CU 02: "Ubicar plato en el menú de la cartelera" | Nota previa al msj 8 | Tabla de ítems disponibles en `retirarItem.jsp` |
+| CU 02: "Borrar nombre, descripción y precio del plato de la cartelera" | Nota sobre msj 12-16 | `eliminarPlato` / `eliminarProducto` → `cambiarEstado("Agotado")` |
+| CU 02: [No se agotaron] "Continuar despachando el producto" | — (el actor no inicia el caso de uso) | — |

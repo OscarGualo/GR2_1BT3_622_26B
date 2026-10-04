@@ -11,7 +11,7 @@ sequenceDiagram
     participant PR as producto : Producto
 
     Note over C,PC: personal obtenido de la sesión (precondición: login)
-    Note over P,UI: Actividad: "Revisar porciones disponibles"
+    Note over P,C: Actividad previa: "Revisar el estado de las porciones restantes en la línea de servicio"
 
     P->>UI: Solicita retirar plato/producto
     UI->>C: iniciarRetiro()
@@ -21,11 +21,13 @@ sequenceDiagram
     M-->>C: lista de ítems
     C-->>UI: muestra ítems con estado "Disponible"
 
+    Note over P,C: Actividad: "Ubicar plato en el menú de la cartelera"
     P->>UI: Selecciona ítem y confirma el retiro
     UI->>C: retirarItem(idItem)
     C->>ID: buscarPorId(idItem)
     ID-->>C: item
 
+    Note over C,PR: Actividad: "Borrar nombre, descripción y precio del plato de la cartelera" (el ítem pasa a "Agotado", el registro no se elimina)
     alt item es Plato
         C->>PC: eliminarPlato(plato)
         PC->>PL: cambiarEstado("Agotado")
@@ -38,7 +40,7 @@ sequenceDiagram
 
     alt actualización correcta
         C-->>UI: "Ítem retirado del menú"
-    else OptimisticLockException (el ítem se está comprando)
+    else versión desactualizada u OptimisticLockException (el ítem se está comprando)
         C-->>UI: "El ítem está siendo comprado, intente de nuevo"
     end
 

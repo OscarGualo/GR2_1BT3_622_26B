@@ -38,14 +38,20 @@ public class RetirarItemMenuServlet extends HttpServlet {
     private final MenuDAO menuDAO = new MenuDAO();
     private final ItemMenuDAO itemMenuDAO = new ItemMenuDAO();
 
-    /**
-     * Trazabilidad: Diagrama de secuencia CU02 - mensaje 2 iniciarRetiro().
-     * Mensajes 3-4: MenuDAO.buscarMenuDelDia() / menuHoy. Mensajes 5-6: menuHoy.obtenerItem() / lista de ítems.
-     * Mensaje 7: muestra solo los ítems con estado "Disponible" (un ítem retirado ya no aparece).
-     */
+    /** Trazabilidad: Diagrama de secuencia CU02 - mensajes 2 iniciarRetiro() y 7 (muestra ítems). */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        iniciarRetiro(request);
+        request.getRequestDispatcher(VISTA).forward(request, response);
+    }
+
+    /**
+     * Trazabilidad: Diagrama de secuencia CU02 - mensaje 2 iniciarRetiro().
+     * Mensajes 3-4: MenuDAO.buscarMenuDelDia() / menuHoy. Mensajes 5-6: menuHoy.obtenerItem() / lista de ítems.
+     * Mensaje 7: deja para la vista solo los ítems con estado "Disponible" (un ítem retirado ya no aparece).
+     */
+    private void iniciarRetiro(HttpServletRequest request) {
         Menu menuHoy = menuDAO.buscarMenuDelDia();
         List<ItemMenu> disponibles = new ArrayList<>();
         int retirados = 0;
@@ -61,7 +67,6 @@ public class RetirarItemMenuServlet extends HttpServlet {
         request.setAttribute("menuHoy", menuHoy);
         request.setAttribute("items", disponibles);
         request.setAttribute("retirados", retirados);
-        request.getRequestDispatcher(VISTA).forward(request, response);
     }
 
     @Override
@@ -90,7 +95,10 @@ public class RetirarItemMenuServlet extends HttpServlet {
      * Mensajes 10-11: ItemMenuDAO.buscarPorId(idItem) / item.
      * Fragmento alt: [Plato] mensajes 12-13 eliminarPlato(plato) → cambiarEstado("Agotado");
      * [Producto] mensajes 14-15 eliminarProducto(producto) → cambiarEstado("Agotado").
-     * Mensaje 16: ItemMenuDAO.actualizar(item). Fragmento alt: mensaje 17 (éxito) o 18 (OptimisticLockException).
+     * Mensaje 16: ItemMenuDAO.actualizar(item). Fragmento alt: mensaje 17 (éxito) o
+     * 18 [versión desactualizada u OptimisticLockException].
+     * Validación técnica no modelada: antes del mensaje 10 se comprueba que el ítem pertenezca al menú
+     * de hoy (perteneceAlMenu), para rechazar ids manipulados en el formulario.
      */
     private void retirarItem(HttpSession sesion, PersonalComedor personal, int idItem, Integer versionVista) {
         Menu menuHoy = menuDAO.buscarMenuDelDia();
@@ -134,6 +142,7 @@ public class RetirarItemMenuServlet extends HttpServlet {
         }
     }
 
+    /** Validación técnica no modelada: el ítem debe estar en menuHoy.obtenerItem(). */
     private static boolean perteneceAlMenu(Menu menu, int idItem) {
         for (ItemMenu item : menu.obtenerItem()) {
             if (item.getId() == idItem) {
