@@ -10,6 +10,11 @@
         <class>ec.edu.epn.polidinner.modelo.Producto</class>
         <class>ec.edu.epn.polidinner.modelo.Menu</class>
         <class>ec.edu.epn.polidinner.modelo.PersonalComedor</class>
+        <class>ec.edu.epn.polidinner.modelo.ClienteUniversitario</class>
+        <class>ec.edu.epn.polidinner.modelo.Policuenta</class>
+        <class>ec.edu.epn.polidinner.modelo.Pedido</class>
+        <class>ec.edu.epn.polidinner.modelo.DetallePedido</class>
+        <class>ec.edu.epn.polidinner.modelo.Comprobante</class>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
             <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=PoliDinner;encrypt=true;trustServerCertificate=true"/>
