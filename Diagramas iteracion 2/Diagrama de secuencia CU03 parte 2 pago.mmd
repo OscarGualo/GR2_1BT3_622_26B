@@ -1,0 +1,49 @@
+sequenceDiagram
+    autonumber 32
+    actor CL as Cliente universitario
+    participant UI as Interfaz de pedidos de comida
+    participant C as Controlador (Realizar pedido de comida)
+    participant PD as PedidoDAO
+    participant PE as pedido : Pedido
+    participant IT as item : ItemMenu
+    participant PC as policuenta : Policuenta
+    participant CO as comprobante : Comprobante
+    participant CD as ComprobanteDAO
+    participant S as Salida
+
+    Note over CL,C: Continúa desde el mensaje 31 (total y saldo mostrados). Actividad: "Pagar el pedido"
+    CL->>UI: Confirma y paga
+    UI->>C: confirmar()
+    Note over C,PD: Inicia la transacción (todo o nada)
+    C->>PD: adjuntar(pedido)
+    C->>PE: confirmarPago()
+    PE->>PE: calcularTotal()
+    loop Por cada detalle del pedido
+        PE->>IT: hayStock(cantidad)
+        IT-->>PE: true
+    end
+    Note over PE,PC: Actividad: "Recibir el dinero"
+    PE->>PC: debitar(monto)
+    PC-->>PE: true (saldo descontado)
+    loop Por cada detalle del pedido
+        PE->>IT: reducirStock(cantidad)
+    end
+    Note over PE: estado cambia a "Pagado"
+    PE-->>C: true
+
+    alt pago confirmado
+        Note over C,PD: Actividad: "Anotar pedido"
+        C->>PD: guardar(pedido)
+        Note over C,CO: Actividad: "Emitir Comprobante"
+        C->>PE: generarCodigoEntrega()
+        PE->>CO: <<create>> Comprobante(codigo="PD-0000", fechaGeneracion=hoy, pedido)
+        CO-->>PE: instancia creada
+        PE-->>C: comprobante
+        C->>CD: guardar(comprobante)
+        Note over C,CD: commit de la transacción
+        C->>S: muestra comprobante con el código de retiro
+    else saldo insuficiente, sin stock o conflicto de versión
+        Note over C,PD: rollback: no se descuenta saldo ni stock
+        C->>S: "Saldo insuficiente en PoliCuenta" o motivo del rechazo
+    end
+    S-->>CL: Muestra comprobante o mensaje (actividad "Recibir comprobante")

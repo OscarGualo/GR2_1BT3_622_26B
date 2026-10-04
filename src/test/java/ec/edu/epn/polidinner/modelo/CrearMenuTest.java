@@ -36,18 +36,19 @@ class CrearMenuTest {
         SimpleDateFormat dia = new SimpleDateFormat("yyyy-MM-dd");
         assertEquals(dia.format(new Date()), dia.format(menuHoy.getFecha()));
         assertSame(personal, menuHoy.getPersonal());
-        assertTrue(menuHoy.obtenerItem().isEmpty());
+        assertTrue(menuHoy.obtenerItems().isEmpty());
     }
 
-    /** Mensaje 11: <<create>> Plato(nombre, precio, "Disponible", descripcion). */
+    /** Mensaje 11: <<create>> Plato(nombre, precio, "Disponible", descripcion) + porciones (stockActual, Fig. 15). */
     @Test
     void constructorPlatoSigueLaSecuencia() {
-        Plato plato = new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", "Sopa, segundo y jugo");
+        Plato plato = new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", "Sopa, segundo y jugo", 10);
 
         assertEquals("Almuerzo Ejecutivo", plato.getNombre());
         assertEquals(2.50, plato.getPrecio(), 0.001);
         assertEquals("Disponible", plato.getEstado());
         assertEquals("Sopa, segundo y jugo", plato.getDescripcion());
+        assertEquals(10, plato.getStockActual());
     }
 
     /** Mensaje 13: <<create>> Producto(nombre, precio, "Disponible", descripcion, stock, fechaCaducidad). */
@@ -65,42 +66,42 @@ class CrearMenuTest {
     @Test
     void agregarItemDevuelveTrueYLaListaCrece() {
         Menu menuHoy = personal.crearMenuDiario();
-        Plato plato = new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", "");
+        Plato plato = new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", "", 10);
         Producto producto = new Producto("Agua", 0.50, "Disponible", "", 10, new Date());
 
         assertTrue(menuHoy.agregarItem(plato));
         assertTrue(menuHoy.agregarItem(producto));
 
-        assertEquals(2, menuHoy.obtenerItem().size());
-        assertSame(plato, menuHoy.obtenerItem().get(0));
+        assertEquals(2, menuHoy.obtenerItems().size());
+        assertSame(plato, menuHoy.obtenerItems().get(0));
     }
 
     @Test
     void agregarItemRechazaNuloRepetidoYMenuCerrado() {
         Menu menuHoy = personal.crearMenuDiario();
-        Plato plato = new Plato("Seco de Pollo", 3.00, "Disponible", "");
+        Plato plato = new Plato("Seco de Pollo", 3.00, "Disponible", "", 10);
 
         assertFalse(menuHoy.agregarItem(null));
         assertTrue(menuHoy.agregarItem(plato));
         assertFalse(menuHoy.agregarItem(plato));
 
         menuHoy.cerrarParaVenta();
-        assertFalse(menuHoy.agregarItem(new Plato("Menestra", 2.00, "Disponible", "")));
-        assertEquals(1, menuHoy.obtenerItem().size());
+        assertFalse(menuHoy.agregarItem(new Plato("Menestra", 2.00, "Disponible", "", 10)));
+        assertEquals(1, menuHoy.obtenerItems().size());
     }
 
     @Test
     void obtenerItemNoPermiteModificarLaListaDesdeFuera() {
         Menu menuHoy = personal.crearMenuDiario();
         assertThrows(UnsupportedOperationException.class,
-                () -> menuHoy.obtenerItem().add(new Plato("X", 1, "Disponible", "")));
+                () -> menuHoy.obtenerItems().add(new Plato("X", 1, "Disponible", "", 10)));
     }
 
     /** Mensajes 21-22: publicarParaVenta() devuelve true y el estado cambia a "Publicado". */
     @Test
     void publicarParaVentaCambiaEstadoAPublicado() {
         Menu menuHoy = personal.crearMenuDiario();
-        menuHoy.agregarItem(new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", ""));
+        menuHoy.agregarItem(new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", "", 10));
 
         assertTrue(menuHoy.publicarParaVenta());
         assertEquals("Publicado", menuHoy.getEstado());
@@ -117,7 +118,7 @@ class CrearMenuTest {
     @Test
     void cerrarParaVentaCambiaEstadoACerradoYYaNoSePublica() {
         Menu menuHoy = personal.crearMenuDiario();
-        menuHoy.agregarItem(new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", ""));
+        menuHoy.agregarItem(new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", "", 10));
 
         menuHoy.cerrarParaVenta();
 

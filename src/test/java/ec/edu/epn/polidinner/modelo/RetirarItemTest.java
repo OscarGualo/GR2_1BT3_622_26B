@@ -28,7 +28,7 @@ class RetirarItemTest {
     /** Diagrama de clases: ItemMenu.cambiarEstado() cambia el estado del ítem. */
     @Test
     void cambiarEstadoCambiaElEstado() {
-        Plato plato = new Plato("Seco de Pollo", 3.00, "Disponible", "");
+        Plato plato = new Plato("Seco de Pollo", 3.00, "Disponible", "", 10);
 
         plato.cambiarEstado("Agotado");
 
@@ -37,7 +37,7 @@ class RetirarItemTest {
 
     @Test
     void cambiarEstadoRechazaEstadoVacioONulo() {
-        Plato plato = new Plato("Seco de Pollo", 3.00, "Disponible", "");
+        Plato plato = new Plato("Seco de Pollo", 3.00, "Disponible", "", 10);
 
         assertThrows(IllegalArgumentException.class, () -> plato.cambiarEstado(null));
         assertThrows(IllegalArgumentException.class, () -> plato.cambiarEstado("  "));
@@ -47,7 +47,7 @@ class RetirarItemTest {
     /** Mensajes 12-13: eliminarPlato(plato) → cambiarEstado("Agotado"). */
     @Test
     void eliminarPlatoDejaElPlatoAgotado() {
-        Plato plato = new Plato("Seco de Pollo", 3.00, "Disponible", "Arroz, pollo y menestra");
+        Plato plato = new Plato("Seco de Pollo", 3.00, "Disponible", "Arroz, pollo y menestra", 10);
 
         personal.eliminarPlato(plato);
 
@@ -67,21 +67,21 @@ class RetirarItemTest {
 
     /**
      * Caso de prueba del informe: "Seco de Pollo" disponible se retira; el registro no se borra
-     * (sigue en obtenerItem(), mensajes 5-6) pero ya no aparece entre los ítems disponibles (mensaje 7).
+     * (sigue en obtenerItems(), mensajes 5-6) pero ya no aparece entre los ítems disponibles (mensaje 7).
      */
     @Test
     void secoDePolloRetiradoNoApareceEntreLosDisponibles() {
         Menu menuHoy = personal.crearMenuDiario();
-        Plato seco = new Plato("Seco de Pollo", 3.00, "Disponible", "");
-        Plato almuerzo = new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", "");
+        Plato seco = new Plato("Seco de Pollo", 3.00, "Disponible", "", 10);
+        Plato almuerzo = new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", "", 10);
         menuHoy.agregarItem(seco);
         menuHoy.agregarItem(almuerzo);
         menuHoy.publicarParaVenta();
 
         personal.eliminarPlato(seco);
 
-        assertEquals(2, menuHoy.obtenerItem().size());
-        List<ItemMenu> disponibles = menuHoy.obtenerItem().stream()
+        assertEquals(2, menuHoy.obtenerItems().size());
+        List<ItemMenu> disponibles = menuHoy.obtenerItems().stream()
                 .filter(i -> "Disponible".equals(i.getEstado()))
                 .collect(Collectors.toList());
         assertFalse(disponibles.contains(seco));

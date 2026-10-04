@@ -61,6 +61,24 @@ public class GenericDAO<T, ID> {
         });
     }
 
+    /** Guarda la entidad dentro de una transacción compartida (no hace commit). */
+    public void guardar(T entidad, Transaccion tx) {
+        tx.em().persist(entidad);
+        tx.em().flush();
+    }
+
+    /** Actualiza la entidad dentro de una transacción compartida; devuelve la entidad gestionada. */
+    public T actualizar(T entidad, Transaccion tx) {
+        T gestionada = tx.em().merge(entidad);
+        tx.em().flush();
+        return gestionada;
+    }
+
+    /** Busca la entidad dentro de una transacción compartida (queda gestionada hasta el commit). */
+    public T buscarPorId(ID id, Transaccion tx) {
+        return tx.em().find(clase, id);
+    }
+
     protected <R> R enTransaccion(Function<EntityManager, R> operacion) {
         EntityManager em = JPAUtil.getEntityManager();
         EntityTransaction tx = em.getTransaction();
