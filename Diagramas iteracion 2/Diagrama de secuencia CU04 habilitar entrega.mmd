@@ -1,0 +1,41 @@
+sequenceDiagram
+    autonumber
+    actor PER as Personal del comedor
+    participant UI as Interfaz del sistema de comida
+    participant C as Controlador (Habilitar entrega de comida)
+    participant CD as ComprobanteDAO
+    participant PC as personal : PersonalComedor
+    participant CO as comprobante : Comprobante
+    participant PE as pedido : Pedido
+    participant S as Salida
+
+    Note over C,PC: personal obtenido de la sesión (precondición: login)
+    Note over PER,C: Actividades: "Solicitar comprobante al cliente", "Recibir el comprobante"
+    PER->>UI: Ingresa el código del comprobante
+    UI->>C: habilitarEntrega(codigo)
+    Note over C,CD: Inicia la transacción (todo o nada)
+    C->>CD: buscarPorCodigo(codigo)
+    CD-->>C: comprobante
+
+    alt el comprobante existe
+        Note over C,CO: Actividad: "Comprobar veracidad del comprobante"
+        C->>PC: validarCodigo(codigo, comprobante)
+        PC->>CO: validarCodigoEntrega()
+        CO-->>PC: true (no usado, del día y pedido "Pagado")
+        PC-->>C: true
+        alt código válido
+            Note over C,PE: Actividad: "Autorizar despacho del pedido"
+            C->>PC: entregarPedido(pedido)
+            Note over PE: estado cambia a "Entregado"
+            C->>CO: marcarCodigoUsado()
+            C->>CD: actualizar(comprobante)
+            Note over C,CD: commit de la transacción
+            C->>S: "Pedido autorizado para despacho" y detalle del pedido
+        else código ya usado, de otro día o pedido no pagado
+            Note over C,CD: rollback: el pedido no se entrega
+            C->>S: motivo del rechazo
+        end
+    else código inexistente
+        C->>S: "El código no existe"
+    end
+    S-->>PER: Muestra el resultado
