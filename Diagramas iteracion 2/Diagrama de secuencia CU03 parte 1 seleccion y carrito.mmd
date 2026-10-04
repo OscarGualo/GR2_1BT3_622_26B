@@ -1,0 +1,57 @@
+sequenceDiagram
+    autonumber
+    actor CL as Cliente universitario
+    participant UI as Interfaz de pedidos de comida
+    participant C as Controlador (Realizar pedido de comida)
+    participant CU as cliente : ClienteUniversitario
+    participant MD as MenuDAO
+    participant M as menuHoy : Menu
+    participant PE as pedido : Pedido
+    participant IT as item : ItemMenu
+    participant DP as detalle : DetallePedido
+    participant PC as policuenta : Policuenta
+
+    Note over C,CU: cliente obtenido de la sesión (precondición: login)
+    Note over CL,C: Actividades previas: "Acercarse al despacho del comedor", "Revisar platos en la cartelera"
+
+    CL->>UI: Solicita realizar pedido
+    UI->>C: iniciar()
+    C->>CU: crearPedido()
+    CU->>PE: <<create>> Pedido(fecha=hoy, estado="Creado", cliente)
+    PE-->>CU: pedido
+    CU-->>C: pedido
+    C->>MD: buscarMenuDelDia()
+    MD-->>C: menuHoy
+    C->>M: obtenerItems()
+    M-->>C: lista de ItemMenu
+    C-->>UI: muestra ítems "Disponible" con stock
+
+    loop Por cada ítem seleccionado
+        Note over CL,C: Actividades: "Elegir platos o productos", "Solicitar pedido al personal"
+        CL->>UI: Elige ítem y cantidad
+        UI->>C: agregarItem(idItem, cantidad)
+        C->>PE: agregarItem(item, cantidad)
+        Note over PE,IT: Actividad: "Comprobar disponibilidad del plato o producto"
+        PE->>IT: hayStock(cantidad)
+        IT-->>PE: true
+        PE->>DP: <<create>> DetallePedido(cantidad, precioUnitario)
+        DP-->>PE: instancia creada
+        PE-->>C: confirmación de ítem agregado
+        C-->>UI: "Ítem agregado" y carrito actualizado
+    end
+    Note over CL,C: Sin stock (hayStock = false): agregarItem lanza excepción y la interfaz lo informa (actividad "Preguntar si desea elegir otro plato o producto")
+
+    CL->>UI: Revisa el carrito
+    UI->>C: calcular()
+    C->>PE: calcularTotal()
+    loop Por cada detalle del pedido
+        PE->>DP: calcularSubtotal()
+        DP-->>PE: subtotal
+    end
+    PE-->>C: total del pedido
+    C->>CU: consultarSaldo()
+    CU->>PC: consultarSaldo()
+    PC-->>CU: saldo
+    CU-->>C: saldo
+    C-->>UI: muestra total y saldo de PoliCuenta
+    Note over CL,C: Actividad: "Informar valor a pagar"
