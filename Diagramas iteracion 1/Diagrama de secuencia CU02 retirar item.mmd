@@ -1,0 +1,45 @@
+sequenceDiagram
+    autonumber
+    actor P as Personal del comedor
+    participant UI as Interfaz del sistema de comida
+    participant C as Controlador (Retirar plato y/o producto)
+    participant PC as personal : PersonalComedor
+    participant MD as MenuDAO
+    participant M as menuHoy : Menu
+    participant ID as ItemMenuDAO
+    participant PL as plato : Plato
+    participant PR as producto : Producto
+
+    Note over C,PC: personal obtenido de la sesión (precondición: login)
+    Note over P,UI: Actividad: "Revisar porciones disponibles"
+
+    P->>UI: Solicita retirar plato/producto
+    UI->>C: iniciarRetiro()
+    C->>MD: buscarMenuDelDia()
+    MD-->>C: menuHoy
+    C->>M: obtenerItem()
+    M-->>C: lista de ítems
+    C-->>UI: muestra ítems con estado "Disponible"
+
+    P->>UI: Selecciona ítem y confirma el retiro
+    UI->>C: retirarItem(idItem)
+    C->>ID: buscarPorId(idItem)
+    ID-->>C: item
+
+    alt item es Plato
+        C->>PC: eliminarPlato(plato)
+        PC->>PL: cambiarEstado("Agotado")
+    else item es Producto
+        C->>PC: eliminarProducto(producto)
+        PC->>PR: cambiarEstado("Agotado")
+    end
+
+    C->>ID: actualizar(item)
+
+    alt actualización correcta
+        C-->>UI: "Ítem retirado del menú"
+    else OptimisticLockException (el ítem se está comprando)
+        C-->>UI: "El ítem está siendo comprado, intente de nuevo"
+    end
+
+    UI-->>P: Muestra mensaje y la lista sin el ítem retirado
