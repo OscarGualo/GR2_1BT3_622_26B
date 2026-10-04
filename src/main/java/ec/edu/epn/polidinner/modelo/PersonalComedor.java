@@ -1,5 +1,6 @@
 package ec.edu.epn.polidinner.modelo;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -12,7 +13,9 @@ import javax.persistence.Id;
  * Asociación "administra": 1 PersonalComedor administra * Menu (navegable desde Menu).
  */
 @Entity
-public class PersonalComedor {
+public class PersonalComedor implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     private String cedula;

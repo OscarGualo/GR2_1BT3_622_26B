@@ -1,5 +1,6 @@
 package ec.edu.epn.polidinner.modelo;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -25,7 +26,9 @@ import javax.persistence.TemporalType;
  * Asociaciones: "contiene" (1 Menu - * ItemMenu) y "administra" (* Menu - 1 PersonalComedor).
  */
 @Entity
-public class Menu {
+public class Menu implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

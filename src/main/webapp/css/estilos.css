@@ -414,6 +414,48 @@ textarea.entrada { min-height: 88px; resize: vertical; }
 .estado-borrador { background: var(--color-acento-suave); color: var(--color-acento); }
 
 .tipo { font-size: .85rem; color: var(--color-texto-suave); }
+.tipo__etiqueta { display: inline-flex; align-items: center; gap: var(--esp-1); }
+.tipo__etiqueta .icono { width: 16px; height: 16px; }
+
+/* ---------- Diálogo de confirmación (acciones destructivas) ---------- */
+.dialogo {
+    width: min(440px, calc(100% - 2 * var(--esp-4)));
+    padding: var(--esp-5);
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    background: var(--color-superficie);
+    color: var(--color-texto);
+    box-shadow: 0 20px 48px rgba(15, 23, 42, .28);
+}
+.dialogo::backdrop { background: rgba(15, 23, 42, .55); }
+.dialogo[open] { animation: dialogo-entra 180ms ease-out; }
+@keyframes dialogo-entra {
+    from { opacity: 0; transform: translateY(8px) scale(.98); }
+    to { opacity: 1; transform: none; }
+}
+.dialogo__icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--esp-3);
+    border-radius: 50%;
+    color: var(--color-peligro);
+    background: var(--color-peligro-suave);
+}
+.dialogo h2 { overflow-wrap: anywhere; }
+.dialogo p { color: var(--color-texto-suave); }
+.dialogo__acciones {
+    display: flex;
+    gap: var(--esp-3);
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+@media (max-width: 480px) {
+    .dialogo__acciones { flex-direction: column-reverse; }
+    .dialogo__acciones .btn { width: 100%; }
+}
 
 .resumen-menu {
     display: flex;
