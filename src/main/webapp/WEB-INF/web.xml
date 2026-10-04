@@ -9,6 +9,10 @@
         <welcome-file>index.jsp</welcome-file>
     </welcome-file-list>
 
+    <!-- Servlet 4.0: parámetros y respuestas en UTF-8 (tildes y eñes) -->
+    <request-character-encoding>UTF-8</request-character-encoding>
+    <response-character-encoding>UTF-8</response-character-encoding>
+
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
