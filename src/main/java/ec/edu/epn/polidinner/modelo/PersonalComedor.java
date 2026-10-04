@@ -47,14 +47,14 @@ public class PersonalComedor implements Serializable {
     }
 
     /**
-     * Trazabilidad: Diagrama de clases (Fig. 7) - PersonalComedor.crearMenuDiario().
-     * Diagrama de secuencia CU01 - mensajes 3 (crearMenuDiario()),
-     * 4 (&lt;&lt;create&gt;&gt; Menu(fecha=hoy, estado="Borrador", personal)) y 5-6 (menuHoy).
+     * Trazabilidad: Secuencia "Crear Menú" - mensaje 2 crearMenuDiario() y
+     * mensajes 3-4 <<create>> Menu(Fecha=hoy, Estado="Borrador") / retorna menuHoy.
      */
     public Menu crearMenuDiario() {
-        return new Menu(new Date(), "Borrador", this);
+        Menu menuHoy = new Menu(new Date(), "Borrador");
+        menuHoy.asignarPersonal(this);
+        return menuHoy;
     }
-
     /**
      * Trazabilidad: Diagrama de clases (Fig. 7) - PersonalComedor.eliminarPlato().
      * Diagrama de secuencia CU02 - mensajes 12 (eliminarPlato(plato)) y 13 (cambiarEstado("Agotado")).
@@ -103,6 +103,8 @@ public class PersonalComedor implements Serializable {
         }
         pedido.registrarEntrega(this);
     }
+
+
 
     /** Comprueba la clave ingresada en el inicio de sesión (soporte del login, no modelado). */
     public boolean verificarClave(String claveIngresada) {

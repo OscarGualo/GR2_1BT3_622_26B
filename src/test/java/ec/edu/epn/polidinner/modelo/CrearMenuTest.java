@@ -125,4 +125,26 @@ class CrearMenuTest {
         assertEquals("Cerrado", menuHoy.getEstado());
         assertFalse(menuHoy.publicarParaVenta());
     }
+
+
+    /** Mensaje 6: <<create>> Plato(nombre, precio, estado, descripcion); luego se asignan las porciones. */
+    @Test
+    void constructorPlatoDelMensaje6YAsignacionDeStock() {
+        Plato nuevoPlato = new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", "Sopa, segundo y jugo");
+
+        assertEquals("Almuerzo Ejecutivo", nuevoPlato.getNombre());
+        assertEquals(2.50, nuevoPlato.getPrecio(), 0.001);
+        assertEquals("Disponible", nuevoPlato.getEstado());
+        assertEquals(0, nuevoPlato.getStockActual());
+
+        nuevoPlato.setStockActual(15);
+        assertEquals(15, nuevoPlato.getStockActual());
+        assertTrue(nuevoPlato.hayStock(15));
+    }
+
+    @Test
+    void setStockActualRechazaValoresNegativos() {
+        Plato nuevoPlato = new Plato("Seco de Pollo", 3.00, "Disponible", "");
+        assertThrows(IllegalArgumentException.class, () -> nuevoPlato.setStockActual(-1));
+    }
 }

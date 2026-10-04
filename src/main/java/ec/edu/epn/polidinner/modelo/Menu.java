@@ -49,7 +49,7 @@ public class Menu implements Serializable {
      * Extremo de la asociación "contiene" (1 Menu contiene * ItemMenu).
      * Unidireccional: la columna menu_id vive en la tabla ItemMenu, sin añadir atributos a ItemMenu.
      */
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "menu_id")
     @OrderBy("id")
     private List<ItemMenu> items = new ArrayList<>();
@@ -66,12 +66,24 @@ public class Menu implements Serializable {
         this.estado = estado;
         this.personal = personal;
     }
+    /** Trazabilidad: Secuencia "Crear Menú" - mensaje 3 <<create>> Menu(Fecha=hoy, Estado="Borrador"). */
+    public Menu(Date fecha, String estado) {
+        this.fecha = fecha;
+        this.estado = estado;
+    }
+
+    /** Trazabilidad: Diagrama de clases - relación "administra" (PersonalComedor 1 — 0..* Menu). */
+    void asignarPersonal(PersonalComedor personal) {
+        this.personal = personal;
+    }
 
     /**
      * Trazabilidad: Diagrama de clases (Fig. 7) - Menu.publicarParaVenta().
      * Diagrama de secuencia CU01 - mensajes 21 (publicarParaVenta()) y 22 (true, confirma publicación).
      * El estado cambia a "Publicado". No se publica un menú cerrado ni un menú sin ítems.
      */
+    /** Trazabilidad: Secuencia "Crear Menú" - mensajes 10-11 publicarParaVenta(); el estado cambia a "Publicado". */
+
     public boolean publicarParaVenta() {
         if ("Cerrado".equals(estado) || items.isEmpty()) {
             return false;
@@ -88,6 +100,7 @@ public class Menu implements Serializable {
         this.estado = "Cerrado";
     }
 
+    /** Trazabilidad: Secuencia "Crear Menú" - mensajes 8-9 agregarItem(nuevoPlato) / confirma adición. */
     /**
      * Trazabilidad: Diagrama de clases (Fig. 7) - Menu.agregarItem().
      * Diagrama de secuencia CU01 - mensajes 15 (agregarItem(nuevoItem)) y 16 (true, confirma adición).
