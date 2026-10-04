@@ -48,7 +48,7 @@ public class RetirarItemMenuServlet extends HttpServlet {
 
     /**
      * Trazabilidad: Diagrama de secuencia CU02 - mensaje 2 iniciarRetiro().
-     * Mensajes 3-4: MenuDAO.buscarMenuDelDia() / menuHoy. Mensajes 5-6: menuHoy.obtenerItem() / lista de ítems.
+     * Mensajes 3-4: MenuDAO.buscarMenuDelDia() / menuHoy. Mensajes 5-6: menuHoy.obtenerItems() / lista de ítems.
      * Mensaje 7: deja para la vista solo los ítems con estado "Disponible" (un ítem retirado ya no aparece).
      */
     private void iniciarRetiro(HttpServletRequest request) {
@@ -56,7 +56,7 @@ public class RetirarItemMenuServlet extends HttpServlet {
         List<ItemMenu> disponibles = new ArrayList<>();
         int retirados = 0;
         if (menuHoy != null) {
-            for (ItemMenu item : menuHoy.obtenerItem()) {
+            for (ItemMenu item : menuHoy.obtenerItems()) {
                 if (DISPONIBLE.equals(item.getEstado())) {
                     disponibles.add(item);
                 } else {
@@ -142,9 +142,9 @@ public class RetirarItemMenuServlet extends HttpServlet {
         }
     }
 
-    /** Validación técnica no modelada: el ítem debe estar en menuHoy.obtenerItem(). */
+    /** Validación técnica no modelada: el ítem debe estar en menuHoy.obtenerItems(). */
     private static boolean perteneceAlMenu(Menu menu, int idItem) {
-        for (ItemMenu item : menu.obtenerItem()) {
+        for (ItemMenu item : menu.obtenerItems()) {
             if (item.getId() == idItem) {
                 return true;
             }

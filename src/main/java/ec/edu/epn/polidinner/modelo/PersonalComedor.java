@@ -10,7 +10,9 @@ import javax.persistence.Id;
  * Trazabilidad: Diagrama de clases (Fig. 7) - clase PersonalComedor.
  * Atributos del diagrama: nombres, apellidos, rol, cedula (la cédula es la clave primaria).
  * Métodos: crearMenuDiario(), eliminarProducto(), eliminarPlato().
- * Asociación "administra": 1 PersonalComedor administra * Menu (navegable desde Menu).
+ * Incremento 2 (Fig. 15): validarCodigo(codigo, comprobante) y entregarPedido(pedido).
+ * Asociaciones: "administra" (1 - * Menu, navegable desde Menu), "entrega" (1 - 0..* Pedido,
+ * navegable desde Pedido) y "valida" (1 - 0..* Comprobante, navegable desde Comprobante).
  */
 @Entity
 public class PersonalComedor implements Serializable {
@@ -69,6 +71,37 @@ public class PersonalComedor implements Serializable {
      */
     public void eliminarProducto(Producto producto) {
         producto.cambiarEstado("Agotado");
+    }
+
+    /**
+     * Trazabilidad: Diagrama de clases (Fig. 15) - PersonalComedor.validarCodigo(codigo: String): boolean,
+     * ajustado a validarCodigo(codigo, comprobante): la entidad no consulta la base; el controlador
+     * busca el Comprobante con ComprobanteDAO y se lo entrega (decisión documentada en la trazabilidad).
+     * Diagrama de secuencia CU04 - mensajes 5 (validarCodigo), 6-7 (comprobante.validarCodigoEntrega())
+     * y 8 (resultado). Si es válido, queda registrado quién lo validó (asociación "valida").
+     */
+    public boolean validarCodigo(String codigo, Comprobante comprobante) {
+        if (codigo == null || comprobante == null
+                || !comprobante.getCodigo().equalsIgnoreCase(codigo.trim())) {
+            return false;
+        }
+        boolean valido = comprobante.validarCodigoEntrega();
+        if (valido) {
+            comprobante.registrarValidacion(this);
+        }
+        return valido;
+    }
+
+    /**
+     * Trazabilidad: Diagrama de clases (Fig. 15) - PersonalComedor.entregarPedido(pedido: Pedido).
+     * Diagrama de secuencia CU04 - mensaje 9: entregarPedido(pedido); el pedido pasa a "Entregado"
+     * y queda asociado al personal (asociación "entrega").
+     */
+    public void entregarPedido(Pedido pedido) {
+        if (!"Pagado".equals(pedido.getEstado())) {
+            throw new IllegalStateException("Solo se entrega un pedido pagado");
+        }
+        pedido.registrarEntrega(this);
     }
 
     /** Comprueba la clave ingresada en el inicio de sesión (soporte del login, no modelado). */

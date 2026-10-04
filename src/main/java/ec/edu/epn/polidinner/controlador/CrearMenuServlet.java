@@ -112,7 +112,8 @@ public class CrearMenuServlet extends HttpServlet {
         if ("Producto".equals(tipo)) {
             nuevoItem = new Producto(nombre, precio, "Disponible", descripcion, stock, fechaCaducidad);
         } else {
-            nuevoItem = new Plato(nombre, precio, "Disponible", descripcion);
+            // Incremento 2 (Fig. 15): el plato también registra sus porciones en stockActual
+            nuevoItem = new Plato(nombre, precio, "Disponible", descripcion, stock);
         }
         if (!menuHoy.agregarItem(nuevoItem)) {
             return false;
@@ -163,17 +164,21 @@ public class CrearMenuServlet extends HttpServlet {
             errores.put("precio", "Ingrese un precio numérico, por ejemplo 2.50.");
         }
 
+        // Plato: porciones disponibles; Producto: unidades en stock (ItemMenu.stockActual, Fig. 15)
+        String nombreStock = "Producto".equals(tipo) ? "stock" : "número de porciones";
         int stock = 0;
+        try {
+            stock = Integer.parseInt(textoStock);
+            if (stock < 1) {
+                errores.put("stock", "El " + nombreStock + " debe ser al menos 1.");
+            } else if (stock > 10000) {
+                errores.put("stock", "El " + nombreStock + " admite máximo 10000.");
+            }
+        } catch (NumberFormatException e) {
+            errores.put("stock", "Ingrese el " + nombreStock + " como número entero.");
+        }
         Date fechaCaducidad = null;
         if ("Producto".equals(tipo)) {
-            try {
-                stock = Integer.parseInt(textoStock);
-                if (stock < 1) {
-                    errores.put("stock", "El stock debe ser al menos 1.");
-                }
-            } catch (NumberFormatException e) {
-                errores.put("stock", "Ingrese el stock como número entero.");
-            }
             try {
                 SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
                 formato.setLenient(false);
