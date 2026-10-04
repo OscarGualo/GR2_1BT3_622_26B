@@ -1,17 +1,12 @@
 package ec.edu.epn.polidinner.modelo;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.lang.reflect.Field;
 import java.util.Date;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Pruebas del CU 03 Realizar pedido de comida (carrito y pago).
@@ -178,5 +173,43 @@ class PedidoTest {
         Field campo = Pedido.class.getDeclaredField("id");
         campo.setAccessible(true);
         campo.setInt(pedido, id);
+    }
+
+    /** Secuencia: confirmarPago() → debitar(monto) → <<create>> CodigoEntrega (Comprobante). */
+    @Test
+    void confirmarPagoCreaElComprobante() {
+        Pedido pedido = andrea.crearPedido();
+        pedido.agregarItem(arroz, 1);
+
+        assertTrue(pedido.confirmarPago());
+
+        assertNotNull(pedido.getComprobante());
+        assertSame(pedido, pedido.getComprobante().getPedido());
+        assertFalse(pedido.getComprobante().isUsado());
+    }
+
+    @Test
+    void confirmarPagoFallidoNoCreaComprobante() {
+        ClienteUniversitario sinSaldo = new ClienteUniversitario("1750000002", "Luis", "Mora", "clave",
+                new Policuenta("2024-0999", 2.00));
+        Pedido pedido = sinSaldo.crearPedido();
+        pedido.agregarItem(arroz, 1);
+
+        assertFalse(pedido.confirmarPago());
+        assertNull(pedido.getComprobante());
+    }
+
+    /** El código PD-0000 se completa cuando el pedido ya tiene id (al guardarse). */
+    @Test
+    void elCodigoSeCompletaCuandoElPedidoTieneId() throws Exception {
+        Pedido pedido = andrea.crearPedido();
+        pedido.agregarItem(arroz, 1);
+        pedido.confirmarPago();
+        assertNull(pedido.getComprobante().getCodigo());
+
+        asignarId(pedido, 12);
+
+        assertSame(pedido.getComprobante(), pedido.generarCodigoEntrega());
+        assertEquals("PD-0012", pedido.getComprobante().getCodigo());
     }
 }
