@@ -1,5 +1,7 @@
 package ec.edu.epn.polidinner.modelo;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,7 +17,9 @@ import javax.persistence.Version;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class ItemMenu {
+public abstract class ItemMenu implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
