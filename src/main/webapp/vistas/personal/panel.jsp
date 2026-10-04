@@ -1,7 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%-- Frontera "Interfaz del sistema de comida" (Diagrama de robustez): punto de entrada a los casos de uso
-     del personal del comedor (Diagrama de casos de uso: Crear Menú, Retirar plato y/o producto del menú). --%>
+     del personal del comedor (Diagramas de casos de uso: Crear Menú, Retirar plato y/o producto del menú
+     y, en el incremento 2, Habilitar entrega de comida). --%>
 <c:set var="titulo" value="Panel del personal" scope="request"/>
 <jsp:include page="/vistas/comun/encabezado.jsp"/>
 <main class="contenido" id="contenido">
@@ -22,6 +23,12 @@
             <h2>Retirar plato y/o producto</h2>
             <p>Marque como agotado un plato o producto cuyas porciones se terminaron.</p>
             <span class="opcion__accion">Ir a retirar ítems &rarr;</span>
+        </a>
+        <a class="opcion" href="${pageContext.request.contextPath}/personal/entrega">
+            <span class="opcion__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-entrega"/></svg></span>
+            <h2>Habilitar entrega</h2>
+            <p>Valide el código de retiro del comprobante y autorice el despacho del pedido.</p>
+            <span class="opcion__accion">Validar código &rarr;</span>
         </a>
     </div>
 </main>
