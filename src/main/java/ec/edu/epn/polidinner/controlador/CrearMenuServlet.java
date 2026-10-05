@@ -85,11 +85,10 @@ public class CrearMenuServlet extends HttpServlet {
     }
 
     /**
-     * Trazabilidad: Diagrama de secuencia CU01 - mensaje 2 iniciarCreacion().
-     * Mensajes 3-6: personal.crearMenuDiario() crea menuHoy (fecha=hoy, estado="Borrador").
-     * Mensaje 7: MenuDAO.guardar(menuHoy).
-     * Si ya existe un menú de hoy (no cerrado), se reutiliza en lugar de crear otro.
-     */
+ * Trazabilidad: Secuencia "Crear Menú" - mensaje 1 (el personal inicia el proceso de creación de menú),
+            * mensaje 2 crearMenuDiario(), mensajes 3-4 <<create>> Menu(Fecha=hoy, Estado="Borrador") / retorna menuHoy.
+            * Validación técnica no modelada: si ya existe el menú del día, se reutiliza en lugar de crear otro.
+ */
     private Menu iniciarCreacion(PersonalComedor personal) {
         Menu existente = menuDAO.buscarMenuDelDia();
         if (existente != null) {
@@ -101,10 +100,12 @@ public class CrearMenuServlet extends HttpServlet {
     }
 
     /**
-     * Trazabilidad: Diagrama de secuencia CU01 - mensaje 10
-     * agregarItem(tipo, nombre, descripcion, precio, stock, fechaCaducidad).
-     * Fragmento alt: [tipo = Plato] mensajes 11-12, [tipo = Producto] mensajes 13-14.
-     * Mensajes 15-16: menuHoy.agregarItem(nuevoItem) / true. Mensaje 17: MenuDAO.actualizar(menuHoy).
+     * Trazabilidad: Secuencia "Crear Menú" - loop [Por cada plato a preparar]:
+     * mensaje 5 el personal ingresa nombre, descripción y precio (el formulario además pide las porciones);
+     * mensajes 6-7 <<create>> Plato(nombre, precio, estado, descripcion) / retorna nuevoPlato;
+     * mensajes 8-9 menuHoy.agregarItem(nuevoPlato) / confirma adición.
+     * Alternativa no modelada en la secuencia: si el formulario indica "Producto", se crea un Producto
+     * con stock y fecha de caducidad (clase Producto del diagrama de clases).
      */
     private boolean agregarItem(Menu menuHoy, String tipo, String nombre, String descripcion,
                                 double precio, int stock, Date fechaCaducidad) {
@@ -112,9 +113,12 @@ public class CrearMenuServlet extends HttpServlet {
         if ("Producto".equals(tipo)) {
             nuevoItem = new Producto(nombre, precio, "Disponible", descripcion, stock, fechaCaducidad);
         } else {
-            // Incremento 2 (Fig. 15): el plato también registra sus porciones en stockActual
-            nuevoItem = new Plato(nombre, precio, "Disponible", descripcion, stock);
+            // Mensajes 6-7: <<create>> Plato(nombre, precio, estado, descripcion)
+            Plato nuevoPlato = new Plato(nombre, precio, "Disponible", descripcion);
+            nuevoPlato.setStockActual(stock);
+            nuevoItem = nuevoPlato;
         }
+        // Mensajes 8-9: agregarItem(nuevoPlato) / confirma adición
         if (!menuHoy.agregarItem(nuevoItem)) {
             return false;
         }
@@ -123,8 +127,10 @@ public class CrearMenuServlet extends HttpServlet {
     }
 
     /**
-     * Trazabilidad: Diagrama de secuencia CU01 - mensaje 20 publicar().
-     * Mensajes 21-22: menuHoy.publicarParaVenta() / true. Mensaje 23: MenuDAO.actualizar(menuHoy).
+     * Trazabilidad: Secuencia "Crear Menú" - mensaje 10 publicarParaVenta(), mensaje 11 confirma publicación
+     * (el estado del menú cambia a "Publicado") y mensaje 12 "Menú publicado exitosamente" (lo muestra doPost).
+     * El controlador envía el mensaje 10 en nombre del personal del comedor.
+     * Validación técnica no modelada: no se publica un menú sin ítems.
      */
     private boolean publicar(Menu menuHoy) {
         if (!menuHoy.publicarParaVenta()) {
