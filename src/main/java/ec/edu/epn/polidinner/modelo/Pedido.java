@@ -131,11 +131,8 @@ public class Pedido implements Serializable {
     }
 
     /**
-     * Trazabilidad: Diagrama de clases (Fig. 15) - Pedido.confirmarPago(): boolean.
-     * Diagrama de secuencia CU03 - mensajes 35 (confirmarPago()), 36 (calcularTotal()),
-     * loop 37-38 (hayStock(cantidad)), 39-40 (policuenta.debitar(monto) / true, saldo descontado),
-     * loop 41 (reducirStock(cantidad)) y 42 (true). El estado cambia a "Pagado".
-     * Devuelve false, sin modificar nada, si falta stock o el saldo no alcanza.
+     * Trazabilidad: Secuencia "Realizar Pedido y Pagar" - confirmarPago() → debitar(monto) → true (saldo descontado)
+     * → <<create>> CodigoEntrega (Comprobante). Verifica stock con hayStock() y lo descuenta con reducirStock().
      */
     public boolean confirmarPago() {
         if (!"Creado".equals(estado) || detalles.isEmpty()) {
@@ -154,24 +151,22 @@ public class Pedido implements Serializable {
             detalle.getItem().reducirStock(detalle.getCantidad());
         }
         estado = "Pagado";
+        generarCodigoEntrega();
         return true;
     }
 
     /**
-     * Trazabilidad: Diagrama de clases (Fig. 15) - Pedido.generarCodigoEntrega().
-     * Diagrama de secuencia CU03 - mensajes 44 (generarCodigoEntrega()),
-     * 45-46 (&lt;&lt;create&gt;&gt; Comprobante(codigo, fechaGeneracion, pedido)) y 47 (comprobante).
-     * El código tiene el formato PD-0000 con el id del pedido (el pedido 457 da PD-0457), por eso
-     * el pedido debe estar guardado (con id) antes de llamarlo.
+     * Trazabilidad: Diagrama de clases - +generarCodigoEntrega(): Comprobante.
+     * Lo invoca confirmarPago(). Si el comprobante ya existe devuelve el mismo; solo completa el código si falta.
      */
     public Comprobante generarCodigoEntrega() {
         if (!"Pagado".equals(estado)) {
             throw new IllegalStateException("Solo un pedido pagado genera código de entrega");
         }
-        if (id == 0) {
-            throw new IllegalStateException("El pedido debe guardarse antes de generar el código");
+        if (comprobante == null) {
+            comprobante = new Comprobante(new Date(), this);
         }
-        comprobante = new Comprobante("PD-" + String.format("%04d", id), new Date(), this);
+        comprobante.asignarCodigo();
         return comprobante;
     }
 

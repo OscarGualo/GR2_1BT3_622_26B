@@ -5,16 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Version;
+import javax.persistence.*;
 
 /**
  * Trazabilidad: Diagrama de clases (Fig. 15) - clase Comprobante
@@ -62,8 +53,7 @@ public class Comprobante implements Serializable {
     }
 
     /**
-     * Trazabilidad: Diagrama de secuencia CU03 - mensaje 45:
-     * &lt;&lt;create&gt;&gt; Comprobante(codigo, fechaGeneracion, pedido); nace sin usar.
+     * Constructor con código ya conocido (lo usan las pruebas de Comprobante).
      */
     public Comprobante(String codigo, Date fechaGeneracion, Pedido pedido) {
         this.idComprobante = UUID.randomUUID().toString();
@@ -71,6 +61,29 @@ public class Comprobante implements Serializable {
         this.fechaGeneracion = fechaGeneracion;
         this.pedido = pedido;
         this.usado = false;
+    }
+    /**
+     * Trazabilidad: Secuencia "Realizar Pedido y Pagar" - <<create>> CodigoEntrega()
+     * (clase Comprobante del diagrama de clases). Se crea dentro de confirmarPago(), después de debitar(monto).
+     * El código se arma con asignarCodigo() cuando el pedido ya tiene id.
+     */
+    public Comprobante(Date fechaGeneracion, Pedido pedido) {
+        this.idComprobante = UUID.randomUUID().toString();
+        this.fechaGeneracion = fechaGeneracion;
+        this.pedido = pedido;
+        this.usado = false;
+        asignarCodigo();
+    }
+
+    /**
+     * Soporte técnico: el código PD-0000 usa el id del pedido, que la base de datos asigna al guardarlo.
+     * JPA llama a este método justo antes de insertar el comprobante (@PrePersist).
+     */
+    @PrePersist
+    void asignarCodigo() {
+        if (codigo == null && pedido != null && pedido.getId() != 0) {
+            codigo = "PD-" + String.format("%04d", pedido.getId());
+        }
     }
 
     /**

@@ -34,4 +34,16 @@ public class PedidoDAO extends GenericDAO<Pedido, Integer> {
         }
         pedido.reemplazarPolicuenta(em.find(Policuenta.class, pedido.getPolicuenta().getNumero()));
     }
+
+    /**
+     * Trazabilidad: Secuencia "Realizar Pedido y Pagar" - guarda el Pedido y el Comprobante (CodigoEntrega)
+     * que creó confirmarPago(). Primero el pedido, para que la base de datos le asigne el id; luego el comprobante,
+     * cuyo @PrePersist arma el código PD-0000 con ese id. Un solo flush al final.
+     */
+    public void guardarConComprobante(Pedido pedido, Transaccion tx) {
+        EntityManager em = tx.em();
+        em.persist(pedido);
+        em.persist(pedido.getComprobante());
+        em.flush();
+    }
 }
