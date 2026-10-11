@@ -135,23 +135,37 @@ public class Pedido implements Serializable {
      * → <<create>> CodigoEntrega (Comprobante). Verifica stock con hayStock() y lo descuenta con reducirStock().
      */
     public boolean confirmarPago() {
-        if (!"Creado".equals(estado) || detalles.isEmpty()) {
-            return false;
-        }
+        if (!"Creado".equals(estado) || detalles.isEmpty()) {return false;}
         calcularTotal();
+        if (!hayStockDeTodosLosItems()) return false;
+        if (!policuenta.debitar(total)) {return false;}
+        reducirStock();
+        estado = "Pagado";
+        generarCodigoEntrega();
+        return true;
+    }
+
+    /**
+     * Refactorización: Extract Method (desde confirmarPago()).
+     * Descuenta del stock de cada ítem la cantidad pedida en su detalle; se invoca después del débito exitoso.
+     */
+    private void reducirStock() {
+        for (DetallePedido detalle : detalles) {
+            detalle.getItem().reducirStock(detalle.getCantidad());
+        }
+    }
+
+    /**
+     * Refactorización: Extract Method (desde confirmarPago()).
+     * Revisa con hayStock() cada detalle antes de cobrar. Retorna true si todos los ítems tienen stock
+     * suficiente para la cantidad pedida, y false en cuanto alguno no lo tiene.
+     */
+    private boolean hayStockDeTodosLosItems() {
         for (DetallePedido detalle : detalles) {
             if (!detalle.getItem().hayStock(detalle.getCantidad())) {
                 return false;
             }
         }
-        if (!policuenta.debitar(total)) {
-            return false;
-        }
-        for (DetallePedido detalle : detalles) {
-            detalle.getItem().reducirStock(detalle.getCantidad());
-        }
-        estado = "Pagado";
-        generarCodigoEntrega();
         return true;
     }
 
