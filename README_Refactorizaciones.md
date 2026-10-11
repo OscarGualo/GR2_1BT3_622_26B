@@ -354,6 +354,108 @@ elimina el código duplicado entre dos controladores y los servlets quedan más 
 
 ---
 
+## 4.1 Corrección Move Method
+
+**Origen:** `src/main/java/ec/edu/epn/polidinner/controlador/RetirarItemMenuServlet.java` (líneas 145-153)
+**Destino:** `src/main/java/ec/edu/epn/polidinner/modelo/Menu.java`
+
+> **Por qué se corrige.** La propuesta anterior mezcla tres cosas: (a) mueve el método, (b) le cambia el
+> nombre y el tipo de retorno (`boolean` → `ItemMenu`) y (c) modifica `RealizarPedidoServlet.buscarItemOfrecido()`.
+> Según la definición de Move Method (*"Crear un nuevo método con un cuerpo similar en la clase que más usa.
+> Convertir el método antiguo en una simple delegación o eliminarlo por completo"*), solo (a) es Move Method.
+>
+> Además, `buscarItemOfrecido()` **no** cumple el olor de Move Method: usa una *feature* propia del servlet
+> (`menuDAO.buscarMenuDelDia()`) y reglas del caso de uso (menú `"Publicado"`, ítem `"Disponible"`), por lo
+> que debe quedarse en `RealizarPedidoServlet`. Reemplazar su bucle sería una eliminación de duplicación
+> posterior, no parte de esta refactorización.
+
+### Código antes de la refactorización
+
+```java
+// RetirarItemMenuServlet.java
+/** Validación técnica no modelada: el ítem debe estar en menuHoy.obtenerItems(). */
+private static boolean perteneceAlMenu(Menu menu, int idItem) {   // ◄── no usa nada del servlet
+    for (ItemMenu item : menu.obtenerItems()) {                    // ◄── solo usa features de Menu
+        if (item.getId() == idItem) {                              // ◄──
+            return true;                                           // ◄──
+        }                                                          // ◄──
+    }                                                              // ◄──
+    return false;                                                  // ◄──
+}
+
+// uso dentro de retirarItem(...)
+if (menuHoy == null || !perteneceAlMenu(menuHoy, idItem)) {        // ◄── llamada al método
+    sesion.setAttribute("flashError", "El ítem no pertenece al menú de hoy.");
+    return;
+}
+```
+
+### Pasos de la refactorización
+
+1. **Detectar el olor.** `perteneceAlMenu()` está definido en `RetirarItemMenuServlet`, pero no usa ningún
+   atributo ni método del servlet: todo su cuerpo trabaja con la lista de ítems de `Menu`. Es un método
+   *usado por más features de otra clase que por la clase en la cual está definido*.
+2. **Crear un nuevo método con un cuerpo similar en la clase que más usa (`Menu`).** Se conserva el nombre
+   `perteneceAlMenu` y el tipo de retorno `boolean`. El parámetro `Menu menu` desaparece porque ahora el menú
+   es `this`, y `menu.obtenerItems()` pasa a ser el atributo propio `items` (igual que en el ejemplo de la
+   clase, donde `_type.isPremium()` pasa a ser `isPremium()` dentro de `AccountType`).
+3. **Documentar el método** con su Javadoc de trazabilidad como soporte técnico no modelado.
+4. **Cambiar la llamada en el origen:** `perteneceAlMenu(menuHoy, idItem)` pasa a ser
+   `menuHoy.perteneceAlMenu(idItem)` (igual que `overdraftCharge()` pasa a ser
+   `_type.overdraftCharge(_daysOverdrawn)` en el ejemplo de la clase).
+5. **Eliminar por completo el método antiguo** del servlet: es `private static` y solo tiene una llamada,
+   así que no hace falta dejarlo como delegación.
+6. **Ejecutar las pruebas** (`RetirarItemTest`) y agregar una prueba de `Menu.perteneceAlMenu()`.
+
+### Código después de la refactorización
+
+```java
+// Menu.java – el método ahora vive en la clase cuyas features usa
+/**
+ * Soporte técnico NO modelado – Refactorización: Move Method (desde RetirarItemMenuServlet.perteneceAlMenu()).
+ * Validación técnica: indica si el ítem con el id dado pertenece a este menú.
+ */
+public boolean perteneceAlMenu(int idItem) {      // ◄── método movido, cuerpo similar
+    for (ItemMenu item : items) {                 // ◄── usa su propio atributo
+        if (item.getId() == idItem) {
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+```java
+// RetirarItemMenuServlet.java – dentro de retirarItem(...)
+if (menuHoy == null || !menuHoy.perteneceAlMenu(idItem)) {         // ◄── llama al método movido
+    sesion.setAttribute("flashError", "El ítem no pertenece al menú de hoy.");
+    return;
+}
+// (el método perteneceAlMenu(Menu, int) se elimina del servlet)
+```
+
+```java
+// RealizarPedidoServlet.java – NO se modifica en esta refactorización
+private ItemMenu buscarItemOfrecido(int idItem) {
+    Menu menuHoy = menuDAO.buscarMenuDelDia();                     // ◄── usa una feature del servlet (DAO)
+    if (menuHoy == null || !"Publicado".equals(menuHoy.getEstado())) {
+        return null;
+    }
+    for (ItemMenu item : menuHoy.obtenerItems()) {
+        if (item.getId() == idItem && "Disponible".equals(item.getEstado())) {
+            return item;
+        }
+    }
+    return null;
+}
+```
+
+**Beneficio:** la validación de pertenencia queda en `Menu`, que es la clase dueña de los ítems; el servlet
+pierde un método que no le correspondía y la refactorización respeta exactamente la definición de Move Method
+(mismo cuerpo, mismo retorno, método antiguo eliminado), sin mezclarla con otros cambios.
+
+---
+
 ## 5. Extract Class
 
 **Origen:** `src/main/java/ec/edu/epn/polidinner/controlador/CrearMenuServlet.java`
