@@ -101,11 +101,10 @@ public class Pedido implements Serializable {
         if (cantidad < 1) {
             throw new IllegalArgumentException("La cantidad debe ser al menos 1");
         }
-        DetallePedido existente = buscarDetalle(item);
-        int cantidadTotal = cantidad + (existente == null ? 0 : existente.getCantidad());
-        if (!item.hayStock(cantidadTotal)) {
+        if (!item.hayStock(cantidad + cantidadEnPedido(item))) {
             throw new IllegalStateException("No hay stock suficiente de \"" + item.getNombre() + "\"");
         }
+        DetallePedido existente = buscarDetalle(item);
         if (existente != null) {
             existente.sumarCantidad(cantidad);
             return existente;
@@ -114,6 +113,15 @@ public class Pedido implements Serializable {
         detalle.asignarItem(item);
         detalles.add(detalle);
         return detalle;
+    }
+
+    /**
+     * Soporte técnico NO modelado – Refactorización: Replace Temp with Query (desde agregarItem()).
+     * Unidades de este ítem que ya están en el pedido (0 si todavía no se agregó).
+     */
+    private int cantidadEnPedido(ItemMenu item) {
+        DetallePedido existente = buscarDetalle(item);
+        return existente == null ? 0 : existente.getCantidad();
     }
 
     /**
