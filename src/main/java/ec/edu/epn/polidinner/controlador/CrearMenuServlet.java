@@ -1,12 +1,7 @@
 package ec.edu.epn.polidinner.controlador;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -143,70 +138,20 @@ public class CrearMenuServlet extends HttpServlet {
     /** Lee y valida los datos del ítem (mensaje 9 "Ingresa datos del ítem") antes de llamar a agregarItem. */
     private void procesarAgregarItem(HttpServletRequest request, HttpServletResponse response, Menu menuHoy)
             throws ServletException, IOException {
-        String tipo = "Producto".equals(request.getParameter("tipo")) ? "Producto" : "Plato";
-        String nombre = recortar(request.getParameter("nombre"));
-        String descripcion = recortar(request.getParameter("descripcion"));
-        String textoPrecio = recortar(request.getParameter("precio"));
-        String textoStock = recortar(request.getParameter("stock"));
-        String textoFecha = recortar(request.getParameter("fechaCaducidad"));
+        FormularioItemMenu formulario = FormularioItemMenu.desde(request);
 
-        Map<String, String> errores = new LinkedHashMap<>();
-        if (nombre.isEmpty()) {
-            errores.put("nombre", "Ingrese el nombre del ítem.");
-        } else if (nombre.length() > 100) {
-            errores.put("nombre", "El nombre admite máximo 100 caracteres.");
-        }
-        if (descripcion.length() > 255) {
-            errores.put("descripcion", "La descripción admite máximo 255 caracteres.");
-        }
-
-        double precio = 0;
-        try {
-            precio = Double.parseDouble(textoPrecio.replace(',', '.'));
-            if (!(precio > 0)) {
-                errores.put("precio", "El precio debe ser mayor que 0.");
-            }
-        } catch (NumberFormatException e) {
-            errores.put("precio", "Ingrese un precio numérico, por ejemplo 2.50.");
-        }
-
-        // Plato: porciones disponibles; Producto: unidades en stock (ItemMenu.stockActual, Fig. 15)
-        String nombreStock = "Producto".equals(tipo) ? "stock" : "número de porciones";
-        int stock = 0;
-        try {
-            stock = Integer.parseInt(textoStock);
-            if (stock < 1) {
-                errores.put("stock", "El " + nombreStock + " debe ser al menos 1.");
-            } else if (stock > 10000) {
-                errores.put("stock", "El " + nombreStock + " admite máximo 10000.");
-            }
-        } catch (NumberFormatException e) {
-            errores.put("stock", "Ingrese el " + nombreStock + " como número entero.");
-        }
-        Date fechaCaducidad = null;
-        if ("Producto".equals(tipo)) {
-            try {
-                SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
-                formato.setLenient(false);
-                fechaCaducidad = formato.parse(textoFecha);
-                if (fechaCaducidad.before(inicioDeHoy())) {
-                    errores.put("fechaCaducidad", "La fecha de caducidad no puede ser anterior a hoy.");
-                }
-            } catch (ParseException e) {
-                errores.put("fechaCaducidad", "Seleccione la fecha de caducidad del producto.");
-            }
-        }
-
-        if (!errores.isEmpty()) {
-            request.setAttribute("errores", errores);
+        if (!formulario.esValido()) {
+            request.setAttribute("errores", formulario.getErrores());
             request.setAttribute(MENU_HOY, menuHoy);
             request.getRequestDispatcher(VISTA).forward(request, response);
             return;
         }
 
         HttpSession sesion = request.getSession();
-        if (agregarItem(menuHoy, tipo, nombre, descripcion, precio, stock, fechaCaducidad)) {
-            sesion.setAttribute("flashExito", tipo + " \"" + nombre + "\" agregado al menú.");
+        if (agregarItem(menuHoy, formulario.getTipo(), formulario.getNombre(), formulario.getDescripcion(),
+                formulario.getPrecio(), formulario.getStock(), formulario.getFechaCaducidad())) {
+            sesion.setAttribute("flashExito", formulario.getTipo() + " \"" + formulario.getNombre()
+                    + "\" agregado al menú.");
         } else {
             sesion.setAttribute("flashError", "No se pudo agregar el ítem: el menú está cerrado.");
         }
@@ -231,16 +176,4 @@ public class CrearMenuServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/personal/crear-menu");
     }
 
-    private static String recortar(String valor) {
-        return valor == null ? "" : valor.trim();
-    }
-
-    private static Date inicioDeHoy() {
-        Calendar hoy = Calendar.getInstance();
-        hoy.set(Calendar.HOUR_OF_DAY, 0);
-        hoy.set(Calendar.MINUTE, 0);
-        hoy.set(Calendar.SECOND, 0);
-        hoy.set(Calendar.MILLISECOND, 0);
-        return hoy.getTime();
-    }
 }
