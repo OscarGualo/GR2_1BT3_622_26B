@@ -20,7 +20,7 @@
             <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=PoliDinner;encrypt=true;trustServerCertificate=true"/>
             <!-- Usuario y clave reales: variables de entorno POLIDINNER_DB_USER y POLIDINNER_DB_PASSWORD (ver JPAUtil) -->
             <property name="javax.persistence.jdbc.user" value="polidinner"/>
-            <property name="javax.persistence.jdbc.password" value="CAMBIAR_LOCALMENTE"/>
+            <property name="javax.persistence.jdbc.password" value="admin   "/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServer2012Dialect"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <!-- nvarchar en SQL Server para guardar tildes y eñes -->
