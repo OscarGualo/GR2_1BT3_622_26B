@@ -1,0 +1,234 @@
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex 05a888b..47e5423 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -4,11 +4,7 @@[m [mtarget/[m
+ !**/src/test/**/target/[m
+ .kotlin[m
+ [m
+[31m-### Tests: solo se versiona CerrarMenuTest (T1, CU 05) ###[m
+[31m-/src/test/**[m
+[31m-!/src/test/**/[m
+[31m-!/src/test/**/CerrarMenuTest.java[m
+[31m-[m
+[32m+[m[32m/src/test/[m
+ ### IntelliJ IDEA ###[m
+ .idea/modules.xml[m
+ .idea/jarRepositories.xml[m
+[1mdiff --git a/.idea/misc.xml b/.idea/misc.xml[m
+[1mindex 0b02285..88aa9a7 100644[m
+[1m--- a/.idea/misc.xml[m
+[1m+++ b/.idea/misc.xml[m
+[36m@@ -8,7 +8,7 @@[m
+       </list>[m
+     </option>[m
+   </component>[m
+[31m-  <component name="ProjectRootManager" version="2" project-jdk-name="24" project-jdk-type="JavaSDK">[m
+[32m+[m[32m  <component name="ProjectRootManager" version="2" project-jdk-name="17" project-jdk-type="JavaSDK">[m
+     <output url="file://$PROJECT_DIR$/out" />[m
+   </component>[m
+ </project>[m
+\ No newline at end of file[m
+[1mdiff --git a/pom.xml b/pom.xml[m
+[1mindex 4a13941..77e3c14 100644[m
+[1m--- a/pom.xml[m
+[1m+++ b/pom.xml[m
+[36m@@ -58,20 +58,12 @@[m
+             <version>${junit.version}</version>[m
+             <scope>test</scope>[m
+         </dependency>[m
+[31m-        <dependency>[m
+[31m-            <groupId>org.junit.jupiter</groupId>[m
+[31m-            <artifactId>junit-jupiter</artifactId>[m
+[31m-            <version>5.12.2</version>[m
+[31m-            <scope>test</scope>[m
+[31m-        </dependency>[m
+         <dependency>[m
+             <groupId>org.mockito</groupId>[m
+             <artifactId>mockito-junit-jupiter</artifactId>[m
+[31m-            <version>5.17.0</version>[m
+[32m+[m[32m            <version>5.14.2</version>[m
+             <scope>test</scope>[m
+         </dependency>[m
+[31m-[m
+[31m-[m
+     </dependencies>[m
+ [m
+     <build>[m
+[1mdiff --git a/src/main/java/ec/edu/epn/polidinner/modelo/Menu.java b/src/main/java/ec/edu/epn/polidinner/modelo/Menu.java[m
+[1mindex 90a3711..7efd129 100644[m
+[1m--- a/src/main/java/ec/edu/epn/polidinner/modelo/Menu.java[m
+[1m+++ b/src/main/java/ec/edu/epn/polidinner/modelo/Menu.java[m
+[36m@@ -31,11 +31,6 @@[m [mpublic class Menu implements Serializable {[m
+ [m
+     private static final long serialVersionUID = 1L;[m
+ [m
+[31m-    /** Estados del menú: Borrador → Publicado → Cerrado. */[m
+[31m-    public static final String BORRADOR = "Borrador";[m
+[31m-    public static final String PUBLICADO = "Publicado";[m
+[31m-    public static final String CERRADO = "Cerrado";[m
+[31m-[m
+     @Id[m
+     @GeneratedValue(strategy = GenerationType.IDENTITY)[m
+     private int id;[m
+[36m@@ -90,27 +85,19 @@[m [mpublic class Menu implements Serializable {[m
+     /** Trazabilidad: Secuencia "Crear Menú" - mensajes 10-11 publicarParaVenta(); el estado cambia a "Publicado". */[m
+ [m
+     public boolean publicarParaVenta() {[m
+[31m-        if (CERRADO.equals(estado) || items.isEmpty()) {[m
+[32m+[m[32m        if ("Cerrado".equals(estado) || items.isEmpty()) {[m
+             return false;[m
+         }[m
+[31m-        this.estado = PUBLICADO;[m
+[32m+[m[32m        this.estado = "Publicado";[m
+         return true;[m
+     }[m
+ [m
+     /**[m
+[31m-     * Trazabilidad: Diagrama de clases Inc. 3 - Menu.cerrarParaVenta(): boolean[m
+[31m-     * (en la Fig. 7 era void). Diagrama de secuencia CU05 - cerrarParaVenta().[m
+[31m-     * Solo se cierra un menú "Publicado"; un "Borrador" nunca estuvo a la venta y no cambia.[m
+[31m-     * Origen TDD: CerrarMenuTest (T1).[m
+[31m-     *[m
+[31m-     * @return true si el menú pasó a "Cerrado"; false si no estaba publicado[m
+[32m+[m[32m     * Trazabilidad: Diagrama de clases (Fig. 7) - Menu.cerrarParaVenta().[m
+[32m+[m[32m     * El estado cambia a "Cerrado".[m
+      */[m
+[31m-    public boolean cerrarParaVenta() {[m
+[31m-        if (!PUBLICADO.equals(estado)) {[m
+[31m-            return false;[m
+[31m-        }[m
+[31m-        this.estado = CERRADO;[m
+[31m-        return true;[m
+[32m+[m[32m    public void cerrarParaVenta() {[m
+[32m+[m[32m        this.estado = "Cerrado";[m
+     }[m
+ [m
+     /** Trazabilidad: Secuencia "Crear Menú" - mensajes 8-9 agregarItem(nuevoPlato) / confirma adición. */[m
+[36m@@ -119,7 +106,7 @@[m [mpublic class Menu implements Serializable {[m
+      * Diagrama de secuencia CU01 - mensajes 15 (agregarItem(nuevoItem)) y 16 (true, confirma adición).[m
+      */[m
+     public boolean agregarItem(ItemMenu item) {[m
+[31m-        if (item == null || CERRADO.equals(estado) || items.contains(item)) {[m
+[32m+[m[32m        if (item == null || "Cerrado".equals(estado) || items.contains(item)) {[m
+             return false;[m
+         }[m
+         return items.add(item);[m
+[1mdiff --git a/src/main/java/ec/edu/epn/polidinner/modelo/PersonalComedor.java b/src/main/java/ec/edu/epn/polidinner/modelo/PersonalComedor.java[m
+[1mindex 28af64f..6a97287 100644[m
+[1m--- a/src/main/java/ec/edu/epn/polidinner/modelo/PersonalComedor.java[m
+[1m+++ b/src/main/java/ec/edu/epn/polidinner/modelo/PersonalComedor.java[m
+[36m@@ -53,7 +53,7 @@[m [mpublic class PersonalComedor implements Serializable {[m
+      * mensajes 3-4 <<create>> Menu(Fecha=hoy, Estado="Borrador") / retorna menuHoy.[m
+      */[m
+     public Menu crearMenuDiario() {[m
+[31m-        Menu menuHoy = new Menu(new Date(), Menu.BORRADOR);[m
+[32m+[m[32m        Menu menuHoy = new Menu(new Date(), "Borrador");[m
+         menuHoy.asignarPersonal(this);[m
+         return menuHoy;[m
+     }[m
+[1mdiff --git a/src/main/java/ec/edu/epn/polidinner/modelo/Policuenta.java b/src/main/java/ec/edu/epn/polidinner/modelo/Policuenta.java[m
+[1mindex b99964b..edba6c5 100644[m
+[1m--- a/src/main/java/ec/edu/epn/polidinner/modelo/Policuenta.java[m
+[1m+++ b/src/main/java/ec/edu/epn/polidinner/modelo/Policuenta.java[m
+[36m@@ -52,17 +52,26 @@[m [mpublic class Policuenta implements Serializable {[m
+      * Si el saldo alcanza, descuenta el monto y devuelve true; si no, no cambia nada y devuelve false.[m
+      */[m
+     public boolean debitar(double monto) {[m
+[31m-        if (!(monto > 0)) {[m
+[31m-            throw new IllegalArgumentException("El monto a debitar debe ser mayor que 0");[m
+[32m+[m[32m        if (monto <= 0) {[m
+[32m+[m[32m            throw new IllegalArgumentException("El monto a debitar debe ser mayor a 0");[m
+         }[m
+[31m-        // Tolerancia de medio centavo por la representación de double[m
+[31m-        if (saldo + 0.005 < monto) {[m
+[32m+[m[32m        if (monto > saldo) {[m
+             return false;[m
+         }[m
+[31m-        saldo = Math.round((saldo - monto) * 100) / 100.0;[m
+[32m+[m[32m        saldo -= monto;[m
+[32m+[m[32m        saldo = redondear(saldo);[m
+         return true;[m
+     }[m
+ [m
+[32m+[m[32m    private static double redondear(double valor) {[m
+[32m+[m[32m        return Math.round(valor * 100) / 100.0;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    public void acreditar(double monto) {[m
+[32m+[m[32m        saldo += monto;[m
+[32m+[m[32m        saldo = redondear(saldo); // Usamos el método extraído[m
+[32m+[m[32m    }[m
+[32m+[m
+     public String getNumero() {[m
+         return numero;[m
+     }[m
+[1mdiff --git a/src/test/java/ec/edu/epn/polidinner/CerrarMenuTest.java b/src/test/java/ec/edu/epn/polidinner/CerrarMenuTest.java[m
+[1mdeleted file mode 100644[m
+[1mindex 3190de1..0000000[m
+[1m--- a/src/test/java/ec/edu/epn/polidinner/CerrarMenuTest.java[m
+[1m+++ /dev/null[m
+[36m@@ -1,32 +0,0 @@[m
+[31m-package ec.edu.epn.polidinner;[m
+[31m-[m
+[31m-import ec.edu.epn.polidinner.modelo.Menu;[m
+[31m-import ec.edu.epn.polidinner.modelo.PersonalComedor;[m
+[31m-import ec.edu.epn.polidinner.modelo.Plato;[m
+[31m-import org.junit.jupiter.api.BeforeEach;[m
+[31m-import org.junit.jupiter.api.Test;[m
+[31m-[m
+[31m-import static org.junit.jupiter.api.Assertions.*;[m
+[31m-[m
+[31m-public class CerrarMenuTest {[m
+[31m-    private PersonalComedor personal;[m
+[31m-    @BeforeEach[m
+[31m-    void preparar() {[m
+[31m-        personal = new PersonalComedor("1700000001", "Carlos", "Pérez", "Cocinero", "clave");[m
+[31m-    }[m
+[31m-    @Test[m
+[31m-    void cerrarParaVentaSoloCierraUnMenuPublicado() {[m
+[31m-        //Escenario 1: El menu borrador no se puede cerrar ya que no ha sido publicado[m
+[31m-        Menu borrador = personal.crearMenuDiario();[m
+[31m-        assertFalse(borrador.cerrarParaVenta());[m
+[31m-       assertEquals("Borrador", borrador.getEstado());[m
+[31m-        //Escenario 2: El menu publicado puede cambiar de estado a cerrar ya que fue publicado para los clientes.[m
+[31m-       Menu publicado = personal.crearMenuDiario();[m
+[31m-       publicado.agregarItem(new Plato("Almuerzo Ejecutivo", 2.50, "Disponible", "Sopa, segundo y jugo", 10));[m
+[31m-       publicado.publicarParaVenta();[m
+[31m-        assertTrue(publicado.cerrarParaVenta());[m
+[31m-       assertEquals("Cerrado", publicado.getEstado());[m
+[31m-[m
+[31m-}[m
+[31m-[m
+[31m-}[m
+[1mdiff --git a/src/test/java/ec/edu/epn/polidinner/modelo/PolicuentaAcreditarTest.java b/src/test/java/ec/edu/epn/polidinner/modelo/PolicuentaAcreditarTest.java[m
+[1mnew file mode 100644[m
+[1mindex 0000000..fab914a[m
+[1m--- /dev/null[m
+[1m+++ b/src/test/java/ec/edu/epn/polidinner/modelo/PolicuentaAcreditarTest.java[m
+[36m@@ -0,0 +1,24 @@[m
+[32m+[m[32mpackage ec.edu.epn.polidinner.modelo;[m
+[32m+[m
+[32m+[m[32mimport org.junit.jupiter.params.ParameterizedTest;[m
+[32m+[m[32mimport org.junit.jupiter.params.provider.CsvSource;[m
+[32m+[m[32mimport static org.junit.jupiter.api.Assertions.assertEquals;[m
+[32m+[m
+[32m+[m[32mclass PolicuentaAcreditarTest {[m
+[32m+[m
+[32m+[m[32m    /** T5 (TDD, parametrizado): acreditar(monto) suma el monto al saldo de la PoliCuenta. */[m
+[32m+[m[32m    @ParameterizedTest(name = "saldo {0} + acreditar {1} = {2}")[m
+[32m+[m[32m    @CsvSource({[m
+[32m+[m[32m            "5.75, 4.25, 10.00",   // reembolso del caso de prueba de Andrea[m
+[32m+[m[32m            "0.00, 3.50, 3.50",    // cuenta en cero[m
+[32m+[m[32m            "10.00, 0.75, 10.75",[m
+[32m+[m[32m            "2.10, 0.20, 2.30"     // decimales que en double dan 2.3000000000000003[m
+[32m+[m[32m    })[m
+[32m+[m[32m    void acreditarSumaElMontoAlSaldo(double saldoInicial, double monto, double saldoEsperado) {[m
+[32m+[m[32m        Policuenta cuenta = new Policuenta("2024-0153", saldoInicial);[m
+[32m+[m
+[32m+[m[32m        cuenta.acreditar(monto);[m
+[32m+[m
+[32m+[m[32m        assertEquals(saldoEsperado, cuenta.consultarSaldo(), 0.001);[m
+[32m+[m[32m    }[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
