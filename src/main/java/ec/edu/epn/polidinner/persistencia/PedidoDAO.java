@@ -1,5 +1,6 @@
-package ec.edu.epn.polidinner.persistencia;import java.util.List;
+package ec.edu.epn.polidinner.persistencia;
 
+import java.util.List;
 import javax.persistence.EntityManager;
 import ec.edu.epn.polidinner.modelo.DetallePedido;
 import ec.edu.epn.polidinner.modelo.ItemMenu;
