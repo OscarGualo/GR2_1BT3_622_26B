@@ -1,7 +1,6 @@
-package ec.edu.epn.polidinner.persistencia;
+package ec.edu.epn.polidinner.persistencia;import java.util.List;
 
 import javax.persistence.EntityManager;
-
 import ec.edu.epn.polidinner.modelo.DetallePedido;
 import ec.edu.epn.polidinner.modelo.ItemMenu;
 import ec.edu.epn.polidinner.modelo.Pedido;
@@ -46,4 +45,23 @@ public class PedidoDAO extends GenericDAO<Pedido, Integer> {
         em.persist(pedido.getComprobante());
         em.flush();
     }
+
+    /**
+     * Trazabilidad: Diagrama de secuencia CU06 - mensajes 3-4: buscarPorCliente(cedula) / lista de pedidos.
+     * Devuelve los pedidos del cliente, del más reciente al más antiguo, para la vista "Mis pedidos".
+     */
+    public List<Pedido> buscarPorCliente(String cedula) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT p FROM Pedido p WHERE p.cliente.cedula = :cedula ORDER BY p.fecha DESC",
+                            Pedido.class)
+                    .setParameter("cedula", cedula)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+
 }
