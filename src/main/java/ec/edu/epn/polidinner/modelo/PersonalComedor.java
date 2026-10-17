@@ -53,7 +53,7 @@ public class PersonalComedor implements Serializable {
      * mensajes 3-4 <<create>> Menu(Fecha=hoy, Estado="Borrador") / retorna menuHoy.
      */
     public Menu crearMenuDiario() {
-        Menu menuHoy = new Menu(new Date(), "Borrador");
+        Menu menuHoy = new Menu(new Date(), Menu.BORRADOR);
         menuHoy.asignarPersonal(this);
         return menuHoy;
     }

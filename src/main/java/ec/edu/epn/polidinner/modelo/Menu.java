@@ -31,6 +31,11 @@ public class Menu implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /** Estados del menú: Borrador → Publicado → Cerrado. */
+    public static final String BORRADOR = "Borrador";
+    public static final String PUBLICADO = "Publicado";
+    public static final String CERRADO = "Cerrado";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -85,22 +90,26 @@ public class Menu implements Serializable {
     /** Trazabilidad: Secuencia "Crear Menú" - mensajes 10-11 publicarParaVenta(); el estado cambia a "Publicado". */
 
     public boolean publicarParaVenta() {
-        if ("Cerrado".equals(estado) || items.isEmpty()) {
+        if (CERRADO.equals(estado) || items.isEmpty()) {
             return false;
         }
-        this.estado = "Publicado";
+        this.estado = PUBLICADO;
         return true;
     }
 
     /**
-     * Trazabilidad: Diagrama de clases (Fig. 7) - Menu.cerrarParaVenta().
-     * El estado cambia a "Cerrado".
+     * Trazabilidad: Diagrama de clases Inc. 3 - Menu.cerrarParaVenta(): boolean
+     * (en la Fig. 7 era void). Diagrama de secuencia CU05 - cerrarParaVenta().
+     * Solo se cierra un menú "Publicado"; un "Borrador" nunca estuvo a la venta y no cambia.
+     * Origen TDD: CerrarMenuTest (T1).
+     *
+     * @return true si el menú pasó a "Cerrado"; false si no estaba publicado
      */
     public boolean cerrarParaVenta() {
-        if (!"Publicado".equals(estado)) {
+        if (!PUBLICADO.equals(estado)) {
             return false;
         }
-        this.estado = "Cerrado";
+        this.estado = CERRADO;
         return true;
     }
 
@@ -110,7 +119,7 @@ public class Menu implements Serializable {
      * Diagrama de secuencia CU01 - mensajes 15 (agregarItem(nuevoItem)) y 16 (true, confirma adición).
      */
     public boolean agregarItem(ItemMenu item) {
-        if (item == null || "Cerrado".equals(estado) || items.contains(item)) {
+        if (item == null || CERRADO.equals(estado) || items.contains(item)) {
             return false;
         }
         return items.add(item);
