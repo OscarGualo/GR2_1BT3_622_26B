@@ -133,6 +133,16 @@ public abstract class ItemMenu implements Serializable {
         return stockActual;
     }
 
+    /**
+     * Trazabilidad: Diagrama de clases - atributo stockActual de ItemMenu.
+     * Secuencia "Crear Menú": después del mensaje 6 (<<create>> Plato) el controlador asigna las porciones.
+     */
+    public void setStockActual(int stockActual) {
+        if (stockActual < 0) {
+            throw new IllegalArgumentException("El stock no puede ser negativo");
+        }
+        this.stockActual = stockActual;
+    }
     public int getVersion() {
         return version;
     }

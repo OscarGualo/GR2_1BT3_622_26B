@@ -1,12 +1,7 @@
 package ec.edu.epn.polidinner.controlador;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -85,11 +80,10 @@ public class CrearMenuServlet extends HttpServlet {
     }
 
     /**
-     * Trazabilidad: Diagrama de secuencia CU01 - mensaje 2 iniciarCreacion().
-     * Mensajes 3-6: personal.crearMenuDiario() crea menuHoy (fecha=hoy, estado="Borrador").
-     * Mensaje 7: MenuDAO.guardar(menuHoy).
-     * Si ya existe un menú de hoy (no cerrado), se reutiliza en lugar de crear otro.
-     */
+ * Trazabilidad: Secuencia "Crear Menú" - mensaje 1 (el personal inicia el proceso de creación de menú),
+            * mensaje 2 crearMenuDiario(), mensajes 3-4 <<create>> Menu(Fecha=hoy, Estado="Borrador") / retorna menuHoy.
+            * Validación técnica no modelada: si ya existe el menú del día, se reutiliza en lugar de crear otro.
+ */
     private Menu iniciarCreacion(PersonalComedor personal) {
         Menu existente = menuDAO.buscarMenuDelDia();
         if (existente != null) {
@@ -101,10 +95,12 @@ public class CrearMenuServlet extends HttpServlet {
     }
 
     /**
-     * Trazabilidad: Diagrama de secuencia CU01 - mensaje 10
-     * agregarItem(tipo, nombre, descripcion, precio, stock, fechaCaducidad).
-     * Fragmento alt: [tipo = Plato] mensajes 11-12, [tipo = Producto] mensajes 13-14.
-     * Mensajes 15-16: menuHoy.agregarItem(nuevoItem) / true. Mensaje 17: MenuDAO.actualizar(menuHoy).
+     * Trazabilidad: Secuencia "Crear Menú" - loop [Por cada plato a preparar]:
+     * mensaje 5 el personal ingresa nombre, descripción y precio (el formulario además pide las porciones);
+     * mensajes 6-7 <<create>> Plato(nombre, precio, estado, descripcion) / retorna nuevoPlato;
+     * mensajes 8-9 menuHoy.agregarItem(nuevoPlato) / confirma adición.
+     * Alternativa no modelada en la secuencia: si el formulario indica "Producto", se crea un Producto
+     * con stock y fecha de caducidad (clase Producto del diagrama de clases).
      */
     private boolean agregarItem(Menu menuHoy, String tipo, String nombre, String descripcion,
                                 double precio, int stock, Date fechaCaducidad) {
@@ -112,9 +108,12 @@ public class CrearMenuServlet extends HttpServlet {
         if ("Producto".equals(tipo)) {
             nuevoItem = new Producto(nombre, precio, "Disponible", descripcion, stock, fechaCaducidad);
         } else {
-            // Incremento 2 (Fig. 15): el plato también registra sus porciones en stockActual
-            nuevoItem = new Plato(nombre, precio, "Disponible", descripcion, stock);
+            // Mensajes 6-7: <<create>> Plato(nombre, precio, estado, descripcion)
+            Plato nuevoPlato = new Plato(nombre, precio, "Disponible", descripcion);
+            nuevoPlato.setStockActual(stock);
+            nuevoItem = nuevoPlato;
         }
+        // Mensajes 8-9: agregarItem(nuevoPlato) / confirma adición
         if (!menuHoy.agregarItem(nuevoItem)) {
             return false;
         }
@@ -123,8 +122,10 @@ public class CrearMenuServlet extends HttpServlet {
     }
 
     /**
-     * Trazabilidad: Diagrama de secuencia CU01 - mensaje 20 publicar().
-     * Mensajes 21-22: menuHoy.publicarParaVenta() / true. Mensaje 23: MenuDAO.actualizar(menuHoy).
+     * Trazabilidad: Secuencia "Crear Menú" - mensaje 10 publicarParaVenta(), mensaje 11 confirma publicación
+     * (el estado del menú cambia a "Publicado") y mensaje 12 "Menú publicado exitosamente" (lo muestra doPost).
+     * El controlador envía el mensaje 10 en nombre del personal del comedor.
+     * Validación técnica no modelada: no se publica un menú sin ítems.
      */
     private boolean publicar(Menu menuHoy) {
         if (!menuHoy.publicarParaVenta()) {
@@ -137,70 +138,20 @@ public class CrearMenuServlet extends HttpServlet {
     /** Lee y valida los datos del ítem (mensaje 9 "Ingresa datos del ítem") antes de llamar a agregarItem. */
     private void procesarAgregarItem(HttpServletRequest request, HttpServletResponse response, Menu menuHoy)
             throws ServletException, IOException {
-        String tipo = "Producto".equals(request.getParameter("tipo")) ? "Producto" : "Plato";
-        String nombre = recortar(request.getParameter("nombre"));
-        String descripcion = recortar(request.getParameter("descripcion"));
-        String textoPrecio = recortar(request.getParameter("precio"));
-        String textoStock = recortar(request.getParameter("stock"));
-        String textoFecha = recortar(request.getParameter("fechaCaducidad"));
+        FormularioItemMenu formulario = FormularioItemMenu.desde(request);
 
-        Map<String, String> errores = new LinkedHashMap<>();
-        if (nombre.isEmpty()) {
-            errores.put("nombre", "Ingrese el nombre del ítem.");
-        } else if (nombre.length() > 100) {
-            errores.put("nombre", "El nombre admite máximo 100 caracteres.");
-        }
-        if (descripcion.length() > 255) {
-            errores.put("descripcion", "La descripción admite máximo 255 caracteres.");
-        }
-
-        double precio = 0;
-        try {
-            precio = Double.parseDouble(textoPrecio.replace(',', '.'));
-            if (!(precio > 0)) {
-                errores.put("precio", "El precio debe ser mayor que 0.");
-            }
-        } catch (NumberFormatException e) {
-            errores.put("precio", "Ingrese un precio numérico, por ejemplo 2.50.");
-        }
-
-        // Plato: porciones disponibles; Producto: unidades en stock (ItemMenu.stockActual, Fig. 15)
-        String nombreStock = "Producto".equals(tipo) ? "stock" : "número de porciones";
-        int stock = 0;
-        try {
-            stock = Integer.parseInt(textoStock);
-            if (stock < 1) {
-                errores.put("stock", "El " + nombreStock + " debe ser al menos 1.");
-            } else if (stock > 10000) {
-                errores.put("stock", "El " + nombreStock + " admite máximo 10000.");
-            }
-        } catch (NumberFormatException e) {
-            errores.put("stock", "Ingrese el " + nombreStock + " como número entero.");
-        }
-        Date fechaCaducidad = null;
-        if ("Producto".equals(tipo)) {
-            try {
-                SimpleDateFormat formato = new SimpleDateFormat("yyyy-MM-dd");
-                formato.setLenient(false);
-                fechaCaducidad = formato.parse(textoFecha);
-                if (fechaCaducidad.before(inicioDeHoy())) {
-                    errores.put("fechaCaducidad", "La fecha de caducidad no puede ser anterior a hoy.");
-                }
-            } catch (ParseException e) {
-                errores.put("fechaCaducidad", "Seleccione la fecha de caducidad del producto.");
-            }
-        }
-
-        if (!errores.isEmpty()) {
-            request.setAttribute("errores", errores);
+        if (!formulario.esValido()) {
+            request.setAttribute("errores", formulario.getErrores());
             request.setAttribute(MENU_HOY, menuHoy);
             request.getRequestDispatcher(VISTA).forward(request, response);
             return;
         }
 
         HttpSession sesion = request.getSession();
-        if (agregarItem(menuHoy, tipo, nombre, descripcion, precio, stock, fechaCaducidad)) {
-            sesion.setAttribute("flashExito", tipo + " \"" + nombre + "\" agregado al menú.");
+        if (agregarItem(menuHoy, formulario.getTipo(), formulario.getNombre(), formulario.getDescripcion(),
+                formulario.getPrecio(), formulario.getStock(), formulario.getFechaCaducidad())) {
+            sesion.setAttribute("flashExito", formulario.getTipo() + " \"" + formulario.getNombre()
+                    + "\" agregado al menú.");
         } else {
             sesion.setAttribute("flashError", "No se pudo agregar el ítem: el menú está cerrado.");
         }
@@ -225,16 +176,4 @@ public class CrearMenuServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/personal/crear-menu");
     }
 
-    private static String recortar(String valor) {
-        return valor == null ? "" : valor.trim();
-    }
-
-    private static Date inicioDeHoy() {
-        Calendar hoy = Calendar.getInstance();
-        hoy.set(Calendar.HOUR_OF_DAY, 0);
-        hoy.set(Calendar.MINUTE, 0);
-        hoy.set(Calendar.SECOND, 0);
-        hoy.set(Calendar.MILLISECOND, 0);
-        return hoy.getTime();
-    }
 }

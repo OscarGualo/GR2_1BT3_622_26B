@@ -175,12 +175,8 @@ public class RealizarPedidoServlet extends HttpServlet {
     }
 
     /**
-     * Trazabilidad: Diagrama de secuencia CU03 parte 2 - mensaje 33 confirmar(), en una sola transacción:
-     * 34 PedidoDAO.adjuntar(pedido); 35-42 pedido.confirmarPago() (calcularTotal, hayStock, debitar, reducirStock);
-     * alt [pago confirmado]: 43 PedidoDAO.guardar(pedido), 44-47 pedido.generarCodigoEntrega() crea el Comprobante,
-     * 48 ComprobanteDAO.guardar(comprobante), commit y 49 Salida con el código de retiro;
-     * alt [saldo insuficiente / sin stock / conflicto]: rollback y 50 mensaje en la Salida.
-     * Devuelve la parte de la URL a la que se redirige.
+     * Trazabilidad: Secuencia "Realizar Pedido y Pagar" - confirmarPago() → debitar(monto) → <<create>> CodigoEntrega
+     * (Comprobante) → instancia de CodigoEntrega al cliente. Todo en una transacción: si el pago falla, no se guarda nada.
      */
     private String confirmar(HttpSession sesion) {
         Pedido pedido = (Pedido) sesion.getAttribute(PEDIDO);
@@ -195,9 +191,8 @@ public class RealizarPedidoServlet extends HttpServlet {
                 sesion.setAttribute("flashError", motivoRechazo(pedido));
                 return "?vista=carrito";
             }
-            pedidoDAO.guardar(pedido, tx);
-            Comprobante comprobante = pedido.generarCodigoEntrega();
-            comprobanteDAO.guardar(comprobante, tx);
+            pedidoDAO.guardarConComprobante(pedido, tx);
+            Comprobante comprobante = pedido.getComprobante();
             tx.confirmar();
 
             sesion.removeAttribute(PEDIDO);

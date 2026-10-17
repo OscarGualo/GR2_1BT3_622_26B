@@ -1,0 +1,298 @@
+[33mcommit b29ff31c0ab71e2bd1209d4ff283783f83f538c5[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sat Oct 10 21:56:30 2026 -0500
+
+    Se realiza la factorizacion Extract Method en el metodo confirmarPago , para esto se creo 2 nuevos metodos privados llamados reducir stock y hayStockDeTodosLosItems
+
+[33mcommit 46d887cdd55610fb274824ce201155416609364f[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sat Oct 10 15:36:34 2026 -0500
+
+    Se agrega unas posibles factorizaciones para el codigo
+
+[33mcommit 5197ab3d521418d030d12b828f007524aed12546[m
+Merge: c2fdea7 8441cd1
+Author: Sh4dws <msebaslo2005@gmail.com>
+Date:   Sun Oct 4 19:38:39 2026 -0500
+
+    Merge pull request #8 from OscarGualo/fix/trazabilidad-crear-menu
+
+[33mcommit 8441cd1124e597e5a98ec4d35e3dae99484f5e3a[m[33m ([m[1;31morigin/fix/trazabilidad-crear-menu[m[33m)[m
+Author: Mauricio <msebaslo2005@gmail.com>
+Date:   Sun Oct 4 19:35:55 2026 -0500
+
+    Trazabilidad: CrearMenuServlet sigue la secuencia Crear Menu (Plato de 4 parametros)
+
+[33mcommit c2fdea7544ccddda3e134a3b2d5b6f4dc874c174[m
+Merge: 4499ec2 19cf415
+Author: Christian-Yanchatipan <yanchatipan.christian2d@gmail.com>
+Date:   Sun Oct 4 19:06:54 2026 -0500
+
+    Merge pull request #7 from OscarGualo/fix/trazabilidad-pedido
+    
+    confirmarPago crea el Comprobante segun secuencia Realzar Pedido y Pagar
+
+[33mcommit 19cf4153ac03c0093b120d108ab5e19e4077416a[m[33m ([m[1;31morigin/fix/trazabilidad-pedido[m[33m)[m
+Author: Christian-Yanchatipan <christian.yanchatipan@epn.edu.ec>
+Date:   Sun Oct 4 18:52:11 2026 -0500
+
+    Trazabilidad: confirmarPago crea el Comprobante segun secuencia Realizar Pedido y Pagar
+
+[33mcommit 4499ec2bae806fbafd57dccd3bbb7efa232e5a1a[m
+Merge: 94da540 c22ef93
+Author: Jean Pierre <jeanespinosavizcaino@gmail.com>
+Date:   Sun Oct 4 18:05:40 2026 -0500
+
+    Merge pull request #6 from OscarGualo/fix-personal
+    
+    Trazabilidad: cambios en funciones.
+
+[33mcommit c22ef939211644c5df30e84c7eaf21d2421b1ddc[m[33m ([m[1;31morigin/fix-personal[m[33m)[m
+Author: 21Piero <jeanespinosavizcaino@gmail.com>
+Date:   Sun Oct 4 18:03:52 2026 -0500
+
+    Trazabilidad: cambios en funciones.
+
+[33mcommit 94da54061576e26825e633e940f01e6a55ec1706[m
+Merge: ba3ff58 71fa66d
+Author: Jorge Gabriel Vinueza Tigse <jgabrielvinueza@gmail.com>
+Date:   Sun Oct 4 17:28:29 2026 -0500
+
+    trazabilidad del modelo del menú con diagrama de clases y secuencia Crear Menú (#5)
+    
+    Trazabilidad: constructores de Menu y Plato segun secuencia Crear Menu
+
+[33mcommit 71fa66da087d808fdcbde30a0637fca3cd4945e6[m[33m ([m[1;31morigin/fix/trazabilidad-modelo-menu[m[33m)[m
+Author: jgabrielvinuezat14 <jgabrielvinueza@gmail.com>
+Date:   Sun Oct 4 17:25:14 2026 -0500
+
+    Trazabilidad: constructores de Menu y Plato segun secuencia Crear Menu
+
+[33mcommit ba3ff5854c097403182be7cc54e20f9bdfad6556[m
+Author: Christian-Yanchatipan <yanchatipan.christian2d@gmail.com>
+Date:   Sun Oct 4 16:15:22 2026 -0500
+
+    Cambios de los archivos
+
+[33mcommit 10d9b797a2f17d5c9881243e8c090bd9ad109e24[m
+Author: Christian-Yanchatipan <yanchatipan.christian2d@gmail.com>
+Date:   Sun Oct 4 16:15:01 2026 -0500
+
+    Cambio de archivo
+
+[33mcommit 7a9d1758c1104359b04a73bc0d18d8d332a07989[m
+Merge: c0a3edb 970c65e
+Author: Oscar Gualotuña <150308092+OscarGualo@users.noreply.github.com>
+Date:   Sun Oct 4 15:49:49 2026 -0500
+
+    Merge pull request #4 from OscarGualo/develop
+    
+    Incremento 2: CU03 Realizar pedido de comida y CU04 Habilitar entrega de comida
+
+[33mcommit c0a3edb783025c58c3d0fe1fd0eff3927cd7feb3[m
+Merge: 7d525bf 3610bfd
+Author: Oscar Gualotuña <150308092+OscarGualo@users.noreply.github.com>
+Date:   Sun Oct 4 15:47:16 2026 -0500
+
+    Merge pull request #3 from OscarGualo/feature/inc2-trazabilidad
+    
+    Feature/inc2 trazabilidad
+
+[33mcommit 970c65e7f710790b03ec70cf5e65c1936153a98b[m[33m ([m[1;31morigin/develop[m[33m, [m[1;32mfeature/trazabilidad-diagramas[m[33m, [m[1;32mdevelop[m[33m)[m
+Merge: 8eec938 3610bfd
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:29:04 2026 -0500
+
+    Merge feature/inc2-trazabilidad en develop
+
+[33mcommit 3610bfdf3be372594eade1f4ca048923d84637f3[m[33m ([m[1;31morigin/feature/inc2-trazabilidad[m[33m, [m[1;32mfeature/inc2-trazabilidad[m[33m)[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:29:03 2026 -0500
+
+    INC2: tabla de trazabilidad del incremento 2 (Fig. 15, secuencias CU03/CU04, robustez, actividades) y actualizacion de la del incremento 1
+
+[33mcommit 8eec93887f01336a3dc68c19f0b81e005d7c99a3[m
+Merge: 982392f dc47a6d
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:26:10 2026 -0500
+
+    Merge feature/cu04-habilitar-entrega en develop
+
+[33mcommit dc47a6d6425361984c17b76a0dc993ec0a9a2977[m[33m ([m[1;31morigin/feature/cu04-habilitar-entrega[m[33m, [m[1;32mfeature/cu04-habilitar-entrega[m[33m)[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:26:10 2026 -0500
+
+    CU04: pruebas JUnit de validarCodigoEntrega, marcarCodigoUsado, validarCodigo y entregarPedido
+
+[33mcommit ed1edf376414aa91ab63b1856eadaadfc8b00f24[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:26:10 2026 -0500
+
+    CU04: implementa HabilitarEntregaServlet segun diagrama de secuencia (validarCodigo, entregarPedido, marcarCodigoUsado en una transaccion)
+
+[33mcommit f087a01012d7efbfcb9b41c2d8f9f1c58964094d[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:26:10 2026 -0500
+
+    CU04: agrega diagrama de secuencia Habilitar entrega de comida (mensajes 1-15) a partir del diagrama de actividades
+
+[33mcommit 982392f7c8b3cda4d5c05461afd45f932c5ffbcb[m
+Merge: 5f1716c 450f738
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:21:34 2026 -0500
+
+    Merge feature/cu03-realizar-pedido en develop
+
+[33mcommit 450f738931a94a69114689848a6dfd285254e26b[m[33m ([m[1;31morigin/feature/cu03-realizar-pedido[m[33m, [m[1;32mfeature/cu03-realizar-pedido[m[33m)[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:21:34 2026 -0500
+
+    CU03: Interfaz de pedidos de comida (menuDia, carrito) y frontera Salida con el comprobante
+
+[33mcommit 350d57628b47a79a7689732c1b65a1a1f08b6864[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:21:33 2026 -0500
+
+    CU03: implementa RealizarPedidoServlet segun diagrama de secuencia (iniciar, agregarItem, calcular, confirmar con transaccion y rollback)
+
+[33mcommit d21b8b7ce75c7e668dbfcaa020a68037a3dff058[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:21:33 2026 -0500
+
+    CU03: inicio de sesion del cliente universitario, filtro /cliente/* y portal de inicio
+
+[33mcommit 12eb9ad3f59e273992783b2411299511c3b85439[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:21:33 2026 -0500
+
+    CU03: diagrama de secuencia corregido y numerado (partes 1 y 2) con frontera, controlador, Comprobante, hayStock y reducirStock
+
+[33mcommit 5f1716c3c68626b36ab17e9e615438698d23b4d3[m
+Merge: 6a42df4 bbc4a31
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:10:31 2026 -0500
+
+    Merge feature/inc2-modelo-pago en develop
+
+[33mcommit bbc4a317df4d6be1c1fe35f90e649bb7200fbc91[m[33m ([m[1;31morigin/feature/inc2-modelo-pago[m[33m, [m[1;32mfeature/inc2-modelo-pago[m[33m)[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:10:27 2026 -0500
+
+    INC2: pruebas JUnit de debitar, stock, agregarItem, calcularTotal (4.25), confirmarPago y generarCodigoEntrega (PD-0457)
+
+[33mcommit af5f79ff6c36b62cec49372eb08d2ff02cfe1120[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:10:26 2026 -0500
+
+    INC2: Transaccion, DAOs del incremento 2, migracion de stock y datos del caso de prueba (Andrea Gomez, PoliCuenta 2024-0153)
+
+[33mcommit 00007eecea3697327895132d7c869b3e3030ce22[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:10:26 2026 -0500
+
+    INC2: entidades del diagrama de clases Fig. 15 (ClienteUniversitario, Policuenta, Pedido, DetallePedido, Comprobante) con confirmarPago y generarCodigoEntrega
+
+[33mcommit fca12b5aa6448eed9d8f6b18deb5470c8d2d56f2[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:10:25 2026 -0500
+
+    INC2: evolucion de ItemMenu segun Fig. 15 (stockActual, hayStock, reducirStock) y Menu.obtenerItems(); el CU01 registra porciones del plato
+
+[33mcommit 0828bba31e5b765d1c1e18f12a3ed4c0ceadcc4c[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 15:10:25 2026 -0500
+
+    INC2: agrega diagramas del incremento 2 (clases, secuencia CU03, robustez, casos de uso y actividades)
+
+[33mcommit 7d525bfc9e82e9dea57702a5aa8f7a1af58023aa[m
+Merge: 19950dd 6a42df4
+Author: Oscar Gualotuña <150308092+OscarGualo@users.noreply.github.com>
+Date:   Sun Oct 4 14:50:08 2026 -0500
+
+    Merge pull request #2 from OscarGualo/develop
+    
+    Merge feature/cu02-retirar-item en develop
+
+[33mcommit 19950ddd8175395ffdc5e51a5bc3ba1d481d0242[m
+Merge: 60a01b2 057c3f8
+Author: Oscar Gualotuña <150308092+OscarGualo@users.noreply.github.com>
+Date:   Sun Oct 4 14:49:46 2026 -0500
+
+    Merge pull request #1 from OscarGualo/feature/cu02-retirar-item
+    
+    Feature/cu02 retirar item
+
+[33mcommit 6a42df4c3e364f5f1b97b206384e6847c2985694[m
+Merge: fc4430f 057c3f8
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 14:44:58 2026 -0500
+
+    Merge feature/cu02-retirar-item en develop
+
+[33mcommit 057c3f8375ad8c43162817fd1b5b0f1505f375ae[m[33m ([m[1;31morigin/feature/cu02-retirar-item[m[33m, [m[1;32mfeature/cu02-retirar-item[m[33m)[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 14:39:14 2026 -0500
+
+    CU02: extrae iniciarRetiro() y alinea diagrama de secuencia con diagrama de actividades
+
+[33mcommit 2733162361740eae30e9ff24caf9390ae7f6cab9[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 14:28:44 2026 -0500
+
+    INC1: tabla de trazabilidad diagramas de clases, robustez y secuencia CU01/CU02 con el codigo
+
+[33mcommit a55ed237de4a27d2945cd1a60b48525416ee7b2b[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 14:28:44 2026 -0500
+
+    BASE: inicializa JPA al desplegar y entidades Serializable para la sesion de Tomcat
+
+[33mcommit ef77820705d0b8944976e69e947478befbad1246[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 14:28:44 2026 -0500
+
+    CU02: pruebas JUnit de cambiarEstado, eliminarPlato, eliminarProducto y caso Seco de Pollo
+
+[33mcommit e05118d462366bd022ac6c781e932ad68e963f14[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 14:28:44 2026 -0500
+
+    CU02: implementa RetirarItemMenuServlet y retirarItem.jsp segun diagrama de secuencia (manejo de OptimisticLockException)
+
+[33mcommit 85c83a1a456cb75059c3fa14a2192264fc55b8d6[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 14:28:43 2026 -0500
+
+    CU02: agrega diagrama de secuencia Retirar plato y/o producto (mensajes 1-19)
+
+[33mcommit fc4430fe5c14cac94c161d7059056e73f3303fdf[m
+Merge: 326ff13 9b79425
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 13:57:19 2026 -0500
+
+    Merge feature/cu01-crear-menu en develop
+
+[33mcommit 9b7942537f7957057f974fd240bc464d0ed10b1b[m[33m ([m[1;31morigin/feature/cu01-crear-menu[m[33m, [m[1;32mfeature/cu01-crear-menu[m[33m)[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 13:57:17 2026 -0500
+
+    CU01: implementa Crear Menu segun diagrama de secuencia (iniciarCreacion, agregarItem, publicar), login del personal y plantilla visual
+
+[33mcommit 326ff13b397f2d4b1df3bbc1295646028f6b5c3e[m
+Merge: 60a01b2 8ed0f6f
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 13:49:21 2026 -0500
+
+    Merge feature/base-proyecto en develop
+
+[33mcommit 8ed0f6f7e6c52220a860eedcc83205c6b8bf8029[m[33m ([m[1;31morigin/feature/base-proyecto[m[33m, [m[1;32mfeature/base-proyecto[m[33m)[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 13:49:13 2026 -0500
+
+    BASE: proyecto Maven para Tomcat 9 (javax, Hibernate 5.6, SQL Server), JPAUtil, GenericDAO y entidades del diagrama de clases (Fig. 7)
+
+[33mcommit 60a01b2967b5324e8945b67fc13b9355cbfbabed[m
+Author: Oscar <oscar.gualotuna@epn.edu.ec>
+Date:   Sun Oct 4 13:33:23 2026 -0500
+
+    Proyecto base: plantilla web Maven, plan de trabajo y diagramas de la iteracion 1
