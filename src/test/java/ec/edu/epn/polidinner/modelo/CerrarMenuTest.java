@@ -1,8 +1,5 @@
 package ec.edu.epn.polidinner.modelo;
 
-import ec.edu.epn.polidinner.modelo.Menu;
-import ec.edu.epn.polidinner.modelo.PersonalComedor;
-import ec.edu.epn.polidinner.modelo.Plato;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
