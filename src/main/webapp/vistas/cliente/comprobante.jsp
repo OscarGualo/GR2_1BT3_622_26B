@@ -17,3 +17,5 @@
         <dd>$<fmt:formatNumber value="${saldo}" pattern="0.00"/></dd>
     </div>
 </dl>
+<%-- CU 06: desde el comprobante el cliente puede ir a "Mis pedidos" para cancelar --%>
+<p><a href="${pageContext.request.contextPath}/cliente/cancelar">Ver mis pedidos o cancelar este pedido</a></p>
