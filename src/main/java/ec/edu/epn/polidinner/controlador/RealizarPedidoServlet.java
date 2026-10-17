@@ -177,12 +177,18 @@ public class RealizarPedidoServlet extends HttpServlet {
     /**
      * Trazabilidad: Secuencia "Realizar Pedido y Pagar" - confirmarPago() → debitar(monto) → <<create>> CodigoEntrega
      * (Comprobante) → instancia de CodigoEntrega al cliente. Todo en una transacción: si el pago falla, no se guarda nada.
+     * Validación del CU 05: si el personal ya cerró la venta del día, no se paga un carrito armado antes del cierre.
      */
     private String confirmar(HttpSession sesion) {
         Pedido pedido = (Pedido) sesion.getAttribute(PEDIDO);
         if (pedido == null || pedido.getDetalles().isEmpty()) {
             sesion.setAttribute("flashError", "Su pedido está vacío. Agregue al menos un plato o producto.");
             return "";
+        }
+        Menu menuHoy = menuDAO.buscarMenuDelDia();
+        if (menuHoy == null || !Menu.PUBLICADO.equals(menuHoy.getEstado())) {
+            sesion.setAttribute("flashError", "El comedor ya cerró la venta de hoy.");
+            return "?vista=carrito";
         }
         try (Transaccion tx = Transaccion.iniciar()) {
             pedidoDAO.adjuntar(pedido, tx);
