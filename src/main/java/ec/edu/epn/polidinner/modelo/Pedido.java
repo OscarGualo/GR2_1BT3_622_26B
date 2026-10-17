@@ -132,14 +132,14 @@ public class Pedido implements Serializable {
 
     /**
      * Trazabilidad: Secuencia "Realizar Pedido y Pagar" - confirmarPago() → debitar(monto) → true (saldo descontado)
-     * → <<create>> CodigoEntrega (Comprobante). Verifica stock con hayStock() y lo descuenta con reducirStock().
+     * → <<create>> CodigoEntrega (Comprobante). Verifica stock con hayStock() y lo descuenta con reducirStockDeItems().
      */
     public boolean confirmarPago() {
         if (!"Creado".equals(estado) || detalles.isEmpty()) {return false;}
         calcularTotal();
         if (!hayStockDeTodosLosItems()) return false;
         if (!policuenta.debitar(total)) {return false;}
-        reducirStock();
+        reducirStockDeItems();
         estado = "Pagado";
         generarCodigoEntrega();
         return true;
@@ -149,7 +149,7 @@ public class Pedido implements Serializable {
      * Refactorización: Extract Method (desde confirmarPago()).
      * Descuenta del stock de cada ítem la cantidad pedida en su detalle; se invoca después del débito exitoso.
      */
-    private void reducirStock() {
+    private void reducirStockDeItems() {
         for (DetallePedido detalle : detalles) {
             detalle.getItem().reducirStock(detalle.getCantidad());
         }
