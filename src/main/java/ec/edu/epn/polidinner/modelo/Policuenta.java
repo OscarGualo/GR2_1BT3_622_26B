@@ -52,23 +52,28 @@ public class Policuenta implements Serializable {
      * Si el saldo alcanza, descuenta el monto y devuelve true; si no, no cambia nada y devuelve false.
      */
     public boolean debitar(double monto) {
-        if (!(monto > 0)) {
-            throw new IllegalArgumentException("El monto a debitar debe ser mayor que 0");
+        if (monto <= 0) {
+            throw new IllegalArgumentException("El monto a debitar debe ser mayor a 0");
         }
-        // Tolerancia de medio centavo por la representación de double
-        if (saldo + 0.005 < monto) {
+        if (monto > saldo) {
             return false;
         }
-        saldo = Math.round((saldo - monto) * 100) / 100.0;
+        saldo -= monto;
+        saldo = redondear(saldo);
         return true;
     }
 
-    public String getNumero() {
-        return numero;
+    private static double redondear(double valor) {
+        return Math.round(valor * 100) / 100.0;
     }
 
     public void acreditar(double monto) {
         saldo += monto;
+        saldo = redondear(saldo); // Usamos el método extraído
+    }
+
+    public String getNumero() {
+        return numero;
     }
 
     public int getVersion() {
