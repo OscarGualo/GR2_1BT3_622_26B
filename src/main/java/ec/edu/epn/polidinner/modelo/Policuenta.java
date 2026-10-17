@@ -67,6 +67,10 @@ public class Policuenta implements Serializable {
         return numero;
     }
 
+    public void acreditar(double monto) {
+        // Método vacío a propósito para el paso RED
+    }
+
     public int getVersion() {
         return version;
     }
