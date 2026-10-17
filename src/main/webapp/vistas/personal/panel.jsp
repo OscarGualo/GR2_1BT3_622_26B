@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%-- Frontera "Interfaz del sistema de comida" (Diagrama de robustez): punto de entrada a los casos de uso
      del personal del comedor (Diagramas de casos de uso: Crear Menú, Retirar plato y/o producto del menú
-     y, en el incremento 2, Habilitar entrega de comida). --%>
+     y, en el incremento 2, Habilitar entrega de comida; en el incremento 3, Cerrar menú y reporte de ventas). --%>
 <c:set var="titulo" value="Panel del personal" scope="request"/>
 <jsp:include page="/vistas/comun/encabezado.jsp"/>
 <main class="contenido" id="contenido">
@@ -29,6 +29,18 @@
             <h2>Habilitar entrega</h2>
             <p>Valide el código de retiro del comprobante y autorice el despacho del pedido.</p>
             <span class="opcion__accion">Validar código &rarr;</span>
+        </a>
+        <a class="opcion opcion--peligro" href="${pageContext.request.contextPath}/personal/cerrar-menu">
+            <span class="opcion__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-salir"/></svg></span>
+            <h2>Cerrar venta del día</h2>
+            <p>Cierre el menú publicado para que los estudiantes ya no puedan pagar pedidos.</p>
+            <span class="opcion__accion">Ir a cerrar venta &rarr;</span>
+        </a>
+        <a class="opcion" href="${pageContext.request.contextPath}/personal/reporte">
+            <span class="opcion__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-billetera"/></svg></span>
+            <h2>Reporte de ventas</h2>
+            <p>Consulte el total vendido del día y la lista de pedidos con su estado.</p>
+            <span class="opcion__accion">Ver reporte &rarr;</span>
         </a>
     </div>
 </main>
