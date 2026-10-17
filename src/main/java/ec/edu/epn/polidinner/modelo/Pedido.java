@@ -28,7 +28,8 @@ import javax.persistence.TemporalType;
  * Asociaciones: "realiza" (0..* Pedido - 1 ClienteUniversitario), "contiene" (1 Pedido ◆ 1..* DetallePedido),
  * "utiliza para pagar" (0..* Pedido - 1 Policuenta), "genera" (1 Pedido - 1 Comprobante) y
  * "entrega" (0..* Pedido - 1 PersonalComedor).
- * Estados: "Creado" → "Pagado" → "Entregado".
+ * Estados: "Creado" → "Pagado" → "Entregado" / "Cancelado".
+
  */
 @Entity
 public class Pedido implements Serializable {
@@ -231,6 +232,22 @@ public class Pedido implements Serializable {
             }
         }
         return null;
+    }
+
+    /**
+     * Trazabilidad: Diagrama de clases Inc. 3 - Pedido.cancelar(): boolean.
+     * Diagrama de secuencia CU06 - mensaje cancelar(): cambia a "Cancelado" y anula el comprobante.
+     * Origen TDD: PedidoCancelarTest (T4).
+     */
+    public boolean cancelar() {
+        if (!"Pagado".equals(estado)) {
+            return false;
+        }
+        estado = "Cancelado";
+        if (comprobante != null) {
+            comprobante.marcarCodigoUsado();
+        }
+        return true;
     }
 
     public int getId() {
