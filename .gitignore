@@ -4,10 +4,11 @@ target/
 !**/src/test/**/target/
 .kotlin
 
-### Tests: solo se versiona CerrarMenuTest (T1, CU 05) ###
+### Tests: solo se versionan CerrarMenuTest (T1, CU 05) y PolicuentaAcreditarTest (T5) ###
 /src/test/**
 !/src/test/**/
 !/src/test/**/CerrarMenuTest.java
+!/src/test/**/PolicuentaAcreditarTest.java
 
 ### IntelliJ IDEA ###
 .idea/misc.xml
