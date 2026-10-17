@@ -96,8 +96,12 @@ public class Menu implements Serializable {
      * Trazabilidad: Diagrama de clases (Fig. 7) - Menu.cerrarParaVenta().
      * El estado cambia a "Cerrado".
      */
-    public void cerrarParaVenta() {
+    public boolean cerrarParaVenta() {
+        if (!"Publicado".equals(estado)) {
+            return false;
+        }
         this.estado = "Cerrado";
+        return true;
     }
 
     /** Trazabilidad: Secuencia "Crear Menú" - mensajes 8-9 agregarItem(nuevoPlato) / confirma adición. */
