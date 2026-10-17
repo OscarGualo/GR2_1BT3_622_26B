@@ -1,7 +1,8 @@
 package ec.edu.epn.polidinner.modelo;
 
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.UUID;
 
@@ -109,10 +110,16 @@ public class Comprobante implements Serializable {
         this.personalValida = personal;
     }
 
-    /** Soporte de validarCodigoEntrega() y de los mensajes de rechazo: ¿se generó en la fecha actual? */
+    /**
+     * Soporte de validarCodigoEntrega() y de los mensajes de rechazo: ¿se generó en la fecha actual?
+     * Refactorización: Substitute Algorithm (compara días con LocalDate en lugar de textos).
+     */
     public boolean esDeHoy() {
-        SimpleDateFormat dia = new SimpleDateFormat("yyyyMMdd");
-        return fechaGeneracion != null && dia.format(fechaGeneracion).equals(dia.format(new Date()));
+        return fechaGeneracion != null
+                && fechaGeneracion.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .equals(LocalDate.now());
     }
 
     public String getIdComprobante() {

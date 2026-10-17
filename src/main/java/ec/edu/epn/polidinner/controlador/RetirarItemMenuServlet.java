@@ -102,7 +102,7 @@ public class RetirarItemMenuServlet extends HttpServlet {
      */
     private void retirarItem(HttpSession sesion, PersonalComedor personal, int idItem, Integer versionVista) {
         Menu menuHoy = menuDAO.buscarMenuDelDia();
-        if (menuHoy == null || !perteneceAlMenu(menuHoy, idItem)) {
+        if (menuHoy == null || !menuHoy.perteneceAlMenu(idItem)) {
             sesion.setAttribute("flashError", "El ítem no pertenece al menú de hoy.");
             return;
         }
@@ -140,16 +140,6 @@ public class RetirarItemMenuServlet extends HttpServlet {
             // Mensaje 18
             sesion.setAttribute("flashError", MENSAJE_CONCURRENCIA);
         }
-    }
-
-    /** Validación técnica no modelada: el ítem debe estar en menuHoy.obtenerItems(). */
-    private static boolean perteneceAlMenu(Menu menu, int idItem) {
-        for (ItemMenu item : menu.obtenerItems()) {
-            if (item.getId() == idItem) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /** Hibernate puede envolver el conflicto de versión en RollbackException o PersistenceException. */

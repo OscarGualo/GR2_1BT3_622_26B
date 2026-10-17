@@ -113,6 +113,19 @@ public class Menu implements Serializable {
     }
 
     /**
+     * Soporte técnico NO modelado por refactorización Move Method.
+     * Verifica si un ítem pertenece a este menú.
+     */
+    public boolean perteneceAlMenu(int idItem) {
+        for (ItemMenu item : items) {
+            if (item.getId() == idItem) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Trazabilidad: Diagrama de clases (Fig. 15) - Menu.obtenerItems() (obtenerItem() en la Fig. 7).
      * Diagrama de secuencia CU02 - mensajes 5 y 6: obtenerItems() / lista de ítems.
      * Diagrama de secuencia CU03 - mensajes 9 y 10: obtenerItems() / lista de ItemMenu.
