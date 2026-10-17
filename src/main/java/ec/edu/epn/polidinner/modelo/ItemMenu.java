@@ -97,6 +97,22 @@ public abstract class ItemMenu implements Serializable {
         }
     }
 
+    /**
+     * Trazabilidad: Diagrama de clases Inc. 3 - ItemMenu.reponerStock(cantidad: int).
+     * Diagrama de secuencia CU06 - loop reponerStock(cantidad) al cancelar un pedido pagado.
+     * Origen TDD: ItemMenuReponerStockTest (T3).
+     */
+    public void reponerStock(int cantidad) {
+        if (cantidad < 1) {
+            throw new IllegalArgumentException("La cantidad a reponer debe ser al menos 1");
+        }
+        boolean agotadoPorStock = stockActual == 0 && "Agotado".equals(estado);
+        stockActual += cantidad;
+        if (agotadoPorStock) {
+            cambiarEstado("Disponible");
+        }
+    }
+
     public int getId() {
         return id;
     }
