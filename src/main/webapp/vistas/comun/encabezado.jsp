@@ -50,6 +50,11 @@
                     <c:out value="${sessionScope.cliente.nombres} ${sessionScope.cliente.apellidos}"/>
                     <span class="rol">PoliCuenta <c:out value="${sessionScope.cliente.policuenta.numero}"/></span>
                 </span>
+                <%-- CU 06: acceso a la frontera "Mis pedidos" --%>
+                <a class="btn btn-secundario btn-chico" href="${pageContext.request.contextPath}/cliente/cancelar">
+                    <svg class="icono" aria-hidden="true"><use href="#i-ticket"/></svg>
+                    Mis pedidos
+                </a>
                 <form method="post" action="${pageContext.request.contextPath}/cliente/logout">
                     <button type="submit" class="btn btn-secundario btn-chico btn-salir">
                         <svg class="icono" aria-hidden="true"><use href="#i-salir"/></svg>

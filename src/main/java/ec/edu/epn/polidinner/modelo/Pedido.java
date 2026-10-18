@@ -243,11 +243,23 @@ public class Pedido implements Serializable {
         if (!"Pagado".equals(estado)) {
             return false;
         }
+        policuenta.acreditar(total);
+        reponerStockDeItems();
         estado = "Cancelado";
         if (comprobante != null) {
             comprobante.marcarCodigoUsado();
         }
         return true;
+    }
+
+    /**
+     * Refactorización: Extract Method (desde cancelar()), simétrico a reducirStockDeItems() de confirmarPago().
+     * Devuelve al stock de cada ítem la cantidad pedida en su detalle (Diagrama de secuencia CU06 - loop 13).
+     */
+    private void reponerStockDeItems() {
+        for (DetallePedido detalle : detalles) {
+            detalle.getItem().reponerStock(detalle.getCantidad());
+        }
     }
 
     public int getId() {

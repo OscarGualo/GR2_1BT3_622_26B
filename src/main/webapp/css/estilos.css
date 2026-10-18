@@ -712,6 +712,7 @@ textarea.entrada { min-height: 88px; resize: vertical; }
 .estado-creado { background: var(--color-acento-suave); color: var(--color-acento); }
 .estado-pagado { background: var(--color-info-suave); color: var(--color-secundario); }
 .estado-entregado { background: var(--color-exito-suave); color: var(--color-exito); }
+.estado-cancelado { background: var(--color-peligro-suave); color: var(--color-peligro); }
 /* Títulos que reciben el foco por programa (tabindex="-1"): el lector de pantalla los anuncia; sin contorno */
 [tabindex="-1"]:focus { outline: none; }
 .salida h2 { margin-top: var(--esp-5); }
