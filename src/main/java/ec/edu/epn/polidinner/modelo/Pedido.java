@@ -243,6 +243,10 @@ public class Pedido implements Serializable {
         if (!"Pagado".equals(estado)) {
             return false;
         }
+        policuenta.acreditar(total);
+        for (DetallePedido detalle : detalles) {
+            detalle.getItem().reponerStock(detalle.getCantidad());
+        }
         estado = "Cancelado";
         if (comprobante != null) {
             comprobante.marcarCodigoUsado();
