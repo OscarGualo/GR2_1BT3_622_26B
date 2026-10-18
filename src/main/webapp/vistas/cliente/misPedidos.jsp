@@ -45,6 +45,7 @@
                             <th scope="col">Código</th>
                             <th scope="col" class="numero">Total</th>
                             <th scope="col">Estado</th>
+                            <th scope="col" class="acciones"><span class="solo-lector">Acción</span></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -57,6 +58,20 @@
                                 <td data-etiqueta="Total" class="numero">$<fmt:formatNumber value="${pedido.total}" pattern="0.00"/></td>
                                 <td data-etiqueta="Estado">
                                     <span class="estado estado-${pedido.estado.toLowerCase()}"><c:out value="${pedido.estado}"/></span>
+                                </td>
+                                <td class="acciones">
+                                    <%-- Mensajes 6-7: solo un pedido "Pagado" (no entregado) se puede cancelar --%>
+                                    <c:if test="${pedido.estado == 'Pagado'}">
+                                        <form method="post" action="${pageContext.request.contextPath}/cliente/cancelar"
+                                              onsubmit="return confirm('¿Cancelar este pedido? Se devolverá el total a su PoliCuenta y el código de retiro dejará de valer.');">
+                                            <input type="hidden" name="accion" value="cancelar">
+                                            <input type="hidden" name="idPedido" value="${pedido.id}">
+                                            <button type="submit" class="btn btn-secundario btn-chico">
+                                                <svg class="icono" aria-hidden="true"><use href="#i-retirar"/></svg>
+                                                Cancelar<span class="solo-lector"> pedido <c:out value="${pedido.comprobante.codigo}"/></span>
+                                            </button>
+                                        </form>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>
