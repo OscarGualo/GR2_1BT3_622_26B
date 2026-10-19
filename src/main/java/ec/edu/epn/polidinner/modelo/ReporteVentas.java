@@ -4,9 +4,22 @@ import java.util.Date;
 import java.util.List;
 
 public class ReporteVentas {
-    public ReporteVentas(Date fecha, List<Pedido> pedidos) { }
+
+    private final Date fecha;
+    private final List<Pedido> pedidos;
+
+    public ReporteVentas(Date fecha, List<Pedido> pedidos) {
+        this.fecha = fecha;
+        this.pedidos = pedidos;
+    }
 
     public double calcularTotalVendido() {
-        return 0;
+        double suma = 0;
+        for (Pedido pedido : pedidos) {
+            if ("Pagado".equals(pedido.getEstado()) || "Entregado".equals(pedido.getEstado())) {
+                suma += pedido.getTotal();
+            }
+        }
+        return suma;
     }
 }
