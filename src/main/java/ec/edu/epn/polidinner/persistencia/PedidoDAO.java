@@ -1,7 +1,10 @@
 package ec.edu.epn.polidinner.persistencia;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.TemporalType;
 import ec.edu.epn.polidinner.modelo.DetallePedido;
 import ec.edu.epn.polidinner.modelo.ItemMenu;
 import ec.edu.epn.polidinner.modelo.Pedido;
@@ -64,5 +67,32 @@ public class PedidoDAO extends GenericDAO<Pedido, Integer> {
         }
     }
 
+    /**
+     * Trazabilidad: Diagrama de robustez CU05 - consulta de los pedidos del día para el reporte de ventas
+     * (ReporteVentas(fecha, pedidos) del diagrama de clases Inc. 3).
+     * Pedido.fecha guarda fecha y hora, por eso se busca en el rango [00:00 del día, 00:00 del día siguiente).
+     * Orden ascendente por id, que es el orden en que se pagaron.
+     */
+    public List<Pedido> buscarPorFecha(Date dia) {
+        Calendar inicio = Calendar.getInstance();
+        inicio.setTime(dia);
+        inicio.set(Calendar.HOUR_OF_DAY, 0);
+        inicio.set(Calendar.MINUTE, 0);
+        inicio.set(Calendar.SECOND, 0);
+        inicio.set(Calendar.MILLISECOND, 0);
+        Calendar fin = (Calendar) inicio.clone();
+        fin.add(Calendar.DAY_OF_MONTH, 1);
 
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery(
+                            "SELECT p FROM Pedido p WHERE p.fecha >= :inicio AND p.fecha < :fin ORDER BY p.id",
+                            Pedido.class)
+                    .setParameter("inicio", inicio.getTime(), TemporalType.TIMESTAMP)
+                    .setParameter("fin", fin.getTime(), TemporalType.TIMESTAMP)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
 }

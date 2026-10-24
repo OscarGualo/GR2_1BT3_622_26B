@@ -5,6 +5,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Trazabilidad: Diagrama de clases Inc. 3 - clase ReporteVentas (no es entidad JPA, no se guarda).
+ * Diagrama de secuencia CU05 - reporte del día que se muestra tras cerrar la venta (ReporteVentasServlet).
+ * Origen TDD: ReporteVentasTest (T2).
+ */
 public class ReporteVentas {
 
     private static final String PAGADO = "Pagado";

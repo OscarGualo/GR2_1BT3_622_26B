@@ -37,4 +37,25 @@ public class MenuDAO extends GenericDAO<Menu, Integer> {
             em.close();
         }
     }
+
+    /**
+     * Trazabilidad: Diagrama de secuencia CU05 - soporte técnico del cierre de la venta.
+     * Menú "Cerrado" de la fecha indicada, o null si ese día la venta no se cerró.
+     * Lo usan el cierre (para no cerrar dos veces), el reporte (venta cerrada o abierta)
+     * y la creación del menú (para no reabrir la venta de un día ya cerrado).
+     */
+    public Menu buscarMenuCerrado(Date dia) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            List<Menu> menus = em.createQuery(
+                            "SELECT m FROM Menu m WHERE m.fecha = :dia AND m.estado = 'Cerrado' ORDER BY m.id DESC",
+                            Menu.class)
+                    .setParameter("dia", dia, TemporalType.DATE)
+                    .setMaxResults(1)
+                    .getResultList();
+            return menus.isEmpty() ? null : menus.get(0);
+        } finally {
+            em.close();
+        }
+    }
 }
