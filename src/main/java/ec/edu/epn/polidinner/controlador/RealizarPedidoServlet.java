@@ -191,6 +191,13 @@ public class RealizarPedidoServlet extends HttpServlet {
             return "?vista=carrito";
         }
         try (Transaccion tx = Transaccion.iniciar()) {
+            // CU05: se vuelve a leer el menú dentro de la transacción por si el personal cerró la venta
+            // mientras el cliente confirmaba; sin confirmar(), close() hace rollback
+            Menu menuEnTransaccion = menuDAO.buscarPorId(menuHoy.getId(), tx);
+            if (menuEnTransaccion == null || !Menu.PUBLICADO.equals(menuEnTransaccion.getEstado())) {
+                sesion.setAttribute("flashError", "El comedor ya cerró la venta de hoy.");
+                return "?vista=carrito";
+            }
             pedidoDAO.adjuntar(pedido, tx);
             if (!pedido.confirmarPago()) {
                 // Mensaje 50: rollback (se cierra la transacción sin confirmar) y motivo del rechazo
