@@ -16,4 +16,18 @@
     <session-config>
         <session-timeout>30</session-timeout>
     </session-config>
+
+    <!-- Errores no controlados: mensaje amigable sin stack trace (el detalle queda en el log de Tomcat) -->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/vistas/comun/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/vistas/comun/error.jsp</location>
+    </error-page>
+    <error-page>
+        <exception-type>java.lang.Throwable</exception-type>
+        <location>/vistas/comun/error.jsp</location>
+    </error-page>
 </web-app>
