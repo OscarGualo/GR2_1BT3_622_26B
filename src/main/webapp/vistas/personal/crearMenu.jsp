@@ -19,6 +19,18 @@
     <jsp:include page="/vistas/comun/mensajes.jsp"/>
 
     <c:choose>
+        <%-- CU05: la venta de hoy ya se cerró; crear otro menú la reabriría --%>
+        <c:when test="${empty menuHoy and ventaCerrada}">
+            <section class="tarjeta vacio">
+                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-ok"/></svg>
+                <h2>La venta de hoy ya se cerró</h2>
+                <p>No se puede crear otro menú para hoy. El próximo menú se crea mañana.</p>
+                <a class="btn btn-primario" href="${pageContext.request.contextPath}/personal/reporte">
+                    <svg class="icono" aria-hidden="true"><use href="#i-billetera"/></svg>
+                    Ver reporte de ventas
+                </a>
+            </section>
+        </c:when>
         <%-- Mensaje 1: el personal inicia el proceso de creación del menú --%>
         <c:when test="${empty menuHoy}">
             <section class="tarjeta vacio">

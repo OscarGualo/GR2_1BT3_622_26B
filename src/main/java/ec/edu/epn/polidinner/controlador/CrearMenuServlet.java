@@ -39,7 +39,12 @@ public class CrearMenuServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute(MENU_HOY, obtenerMenuHoy(request.getSession()));
+        Menu menuHoy = obtenerMenuHoy(request.getSession());
+        request.setAttribute(MENU_HOY, menuHoy);
+        if (menuHoy == null) {
+            // CU05: si la venta de hoy ya se cerró, la vista no ofrece iniciar otro menú
+            request.setAttribute("ventaCerrada", menuDAO.buscarMenuCerrado(new Date()) != null);
+        }
         request.getRequestDispatcher(VISTA).forward(request, response);
     }
 
@@ -52,7 +57,11 @@ public class CrearMenuServlet extends HttpServlet {
         if ("iniciar".equals(accion)) {
             PersonalComedor personal = (PersonalComedor) sesion.getAttribute("personal");
             Menu menuHoy = iniciarCreacion(personal);
-            sesion.setAttribute(MENU_HOY, menuHoy.getId());
+            if (menuHoy == null) {
+                sesion.setAttribute("flashError", "La venta de hoy ya se cerró. El próximo menú se crea mañana.");
+            } else {
+                sesion.setAttribute(MENU_HOY, menuHoy.getId());
+            }
             redirigir(request, response);
             return;
         }
@@ -83,11 +92,16 @@ public class CrearMenuServlet extends HttpServlet {
  * Trazabilidad: Secuencia "Crear Menú" - mensaje 1 (el personal inicia el proceso de creación de menú),
             * mensaje 2 crearMenuDiario(), mensajes 3-4 <<create>> Menu(Fecha=hoy, Estado="Borrador") / retorna menuHoy.
             * Validación técnica no modelada: si ya existe el menú del día, se reutiliza en lugar de crear otro.
+            * Validación del CU 05: si la venta de hoy ya se cerró, no se crea otro menú (devuelve null),
+            * porque publicarlo reabriría la venta.
  */
     private Menu iniciarCreacion(PersonalComedor personal) {
         Menu existente = menuDAO.buscarMenuDelDia();
         if (existente != null) {
             return existente;
+        }
+        if (menuDAO.buscarMenuCerrado(new Date()) != null) {
+            return null;
         }
         Menu menuHoy = personal.crearMenuDiario();
         menuDAO.guardar(menuHoy);
