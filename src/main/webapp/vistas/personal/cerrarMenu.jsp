@@ -19,11 +19,23 @@
     <jsp:include page="/vistas/comun/mensajes.jsp"/>
 
     <c:choose>
+        <c:when test="${empty menuHoy and not empty menuCerrado}">
+            <%-- La venta de hoy ya se cerró: no se ofrece crear otro menú (reabriría la venta) --%>
+            <section class="tarjeta vacio">
+                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-ok"/></svg>
+                <h2>La venta de hoy ya se cerró</h2>
+                <p>Los estudiantes ya no pueden pagar pedidos. Los pedidos pagados se siguen entregando con su código.</p>
+                <a class="btn btn-primario" href="${pageContext.request.contextPath}/personal/reporte">
+                    <svg class="icono" aria-hidden="true"><use href="#i-billetera"/></svg>
+                    Ver reporte de ventas
+                </a>
+            </section>
+        </c:when>
         <c:when test="${empty menuHoy}">
             <section class="tarjeta vacio">
                 <svg class="icono icono-lg" aria-hidden="true"><use href="#i-menu"/></svg>
                 <h2>No hay un menú abierto hoy</h2>
-                <p>Todavía no se ha creado el menú del día o su venta ya fue cerrada.</p>
+                <p>Todavía no se ha creado el menú del día.</p>
                 <a class="btn btn-primario" href="${pageContext.request.contextPath}/personal/crear-menu">
                     <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
                     Ir a crear menú
