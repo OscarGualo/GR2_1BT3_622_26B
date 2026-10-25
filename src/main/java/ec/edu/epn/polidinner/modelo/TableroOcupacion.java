@@ -44,9 +44,13 @@ public class TableroOcupacion {
     }
 
     /**
-     * Trazabilidad: Diagrama de actividades HU-03 - "Contar las mesas libres por franja". HU-03 / Escenario 2.2.
-     * Se cuentan las celdas libres de la franja, así el conteo siempre coincide con lo que muestra el tablero.
+     * Trazabilidad: HU-03, escenario 2.2. Tarea T3.3.
+     * Prueba PU-05.
+     *
+     * Cuenta las mesas clasificadas como libres utilizando
+     * el mismo criterio de disponibilidad que obtenerEstado().
      */
+
     public int contarMesasLibres(Franja franja) {
         return (int) mesas.stream()
                 .filter(mesa -> LIBRE.equals(obtenerEstado(mesa.getNumero(), franja)))
