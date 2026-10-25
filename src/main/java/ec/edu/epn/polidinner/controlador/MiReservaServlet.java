@@ -1,7 +1,6 @@
 package ec.edu.epn.polidinner.controlador;
 
 import java.io.IOException;
-import java.time.LocalDate;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -33,7 +32,8 @@ public class MiReservaServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         ClienteUniversitario cliente = (ClienteUniversitario) request.getSession().getAttribute("cliente");
-        request.setAttribute("reserva", reservaDAO.buscarActivaDelCliente(cliente.getCedula(), LocalDate.now()));
+        request.setAttribute("reserva", reservaDAO.buscarActivaDelCliente(cliente.getCedula(), RelojAplicacion.fechaActual()));
+        RelojAplicacion.exponer(request);
         request.getRequestDispatcher(VISTA).forward(request, response);
     }
 

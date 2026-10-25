@@ -1,7 +1,6 @@
 package ec.edu.epn.polidinner.controlador;
 
 import java.io.IOException;
-import java.time.LocalDate;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -30,7 +29,7 @@ public class TableroOcupacionServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        request.setAttribute("tablero", new TableroOcupacion(LocalDate.now(), mesaDAO, reservaDAO));
+        request.setAttribute("tablero", new TableroOcupacion(RelojAplicacion.fechaActual(), mesaDAO, reservaDAO));
         request.setAttribute("franjas", Franja.values());
         request.getRequestDispatcher(VISTA).forward(request, response);
     }
