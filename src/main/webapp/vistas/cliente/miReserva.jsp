@@ -42,5 +42,8 @@
             </section>
         </c:otherwise>
     </c:choose>
+    <jsp:include page="/vistas/comun/horaDemostracion.jsp">
+        <jsp:param name="volver" value="/cliente/mi-reserva"/>
+    </jsp:include>
 </main>
 <jsp:include page="/vistas/comun/pie.jsp"/>

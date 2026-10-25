@@ -44,6 +44,7 @@ public class ReservarMesaServlet extends HttpServlet {
             throws ServletException, IOException {
         request.setAttribute("franjas", Franja.noComenzadas(RelojAplicacion.horaActual()));
         request.setAttribute("mesas", mesaDAO.listarTodos());
+        RelojAplicacion.exponer(request);
         request.getRequestDispatcher(VISTA).forward(request, response);
     }
 
@@ -63,7 +64,7 @@ public class ReservarMesaServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/cliente/reservar");
             return;
         }
-        LocalDate hoy = LocalDate.now();
+        LocalDate hoy = RelojAplicacion.fechaActual();
         AgendaReservas agenda = new AgendaReservas(hoy, reservaDAO.buscarPorFecha(hoy));
         try {
             Reserva reserva = agenda.reservar(cliente, mesa, franja, RelojAplicacion.horaActual());
