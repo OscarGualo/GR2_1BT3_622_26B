@@ -1,6 +1,7 @@
 package ec.edu.epn.polidinner.modelo;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,6 +42,20 @@ public class AgendaReservas {
         Reserva reserva = new Reserva(cliente, mesa, fecha, franja);
         reservas.add(reserva);
         return reserva;
+    }
+
+    /**
+     * Trazabilidad: Diagrama de actividades HU-01 - "Mostrar las mesas y los horarios disponibles" (T1.2).
+     * HU-01 / Escenarios 2.1 y 2.2: solo se reservan franjas que aún no han comenzado.
+     * Es la operación que usa el controlador, con la hora actual.
+     *
+     * @throws ReservaRechazadaException con el mensaje que se muestra al cliente
+     */
+    public Reserva reservar(ClienteUniversitario cliente, Mesa mesa, Franja franja, LocalTime horaActual) {
+        if (franja.yaComenzo(horaActual)) {
+            throw new ReservaRechazadaException("No puede reservar una franja que ya comenzó");
+        }
+        return reservar(cliente, mesa, franja);
     }
 
     public LocalDate getFecha() {
