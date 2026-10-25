@@ -39,3 +39,8 @@ BEGIN
     VALUES (N'Jugo de naranja', 0.75, 'Disponible', N'Vaso de 300 ml', 30, 0, @menu);
     INSERT INTO Producto (id, fechaCaducidad) VALUES (SCOPE_IDENTITY(), DATEADD(day, 7, @hoy));
 END
+
+-- Incremento de reservas (HU-01 a HU-03): mesas del comedor
+IF NOT EXISTS (SELECT 1 FROM Mesa WHERE numero = 1) INSERT INTO Mesa (numero) VALUES (1);
+IF NOT EXISTS (SELECT 1 FROM Mesa WHERE numero = 2) INSERT INTO Mesa (numero) VALUES (2);
+IF NOT EXISTS (SELECT 1 FROM Mesa WHERE numero = 3) INSERT INTO Mesa (numero) VALUES (3);
