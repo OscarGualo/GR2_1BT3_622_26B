@@ -68,12 +68,28 @@ public class Reserva implements Serializable {
      * decisión "¿Faltan ≥ 15 min?", "Marcar reserva como cancelada" y "Anotar restricción de reservas por el día".
      * HU-02 / Escenarios 1.1, 1.2 y 1.3 (prueba PU-06). La hora llega como parámetro para poder probarla.
      */
+    /**
+     * Trazabilidad: HU-02, escenarios 1.1, 1.2, 1.3 y 2.3.
+     * Tareas T2.2 y T2.3.
+     *
+     * Cancela una reserva activa y determina la consecuencia
+     * de hacerlo con menos de 15 minutos de anticipación.
+     * Si ya estaba cancelada, conserva su estado y restricción.
+     *
+     * @return true si se realiza la cancelación;
+     *         false si la reserva ya no está activa.
+     */
     public boolean cancelar(LocalTime horaActual) {
+        if (!estaActiva()) {
+            return false;
+        }
+
         if (minutosAntesDelInicio(horaActual) >= 15) {
             estado = CANCELADA;
         } else {
             estado = CANCELADA_FUERA_DE_PLAZO;
         }
+
         return true;
     }
 
@@ -82,7 +98,11 @@ public class Reserva implements Serializable {
         return Duration.between(horaActual, franja.getInicio()).toMinutes();
     }
 
-    /** HU-02 / Escenario 1.3: una cancelación fuera de plazo impide al cliente reservar ese día. */
+    /**
+     * Indica si esta reserva fue cancelada fuera de plazo.
+     * Esta condición se utiliza al comprobar si el cliente
+     * puede realizar otra reserva en la fecha correspondiente.
+     */
     public boolean restringeReservasDelDia() {
         return CANCELADA_FUERA_DE_PLAZO.equals(estado);
     }

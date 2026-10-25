@@ -8,9 +8,19 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * HU-02 Cancelar mi reserva.
+ * Prueba convencional PU-04.
+ * Tareas T2.2, T2.3 y T2.4.
+ */
 
 class CancelarReservaTardiaTest {
 
+    /**
+     * HU-02, escenarios 1.3 y 2.1:
+     * una cancelación tardía libera la mesa para otro cliente
+     * e impide al cliente que canceló volver a reservar ese día.
+     */
 
     @Test
     void cancelarTardeLiberaLaMesaPeroImpideAlClienteReservarDeNuevoHoy() {
