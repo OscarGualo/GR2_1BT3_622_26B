@@ -1,6 +1,7 @@
 package ec.edu.epn.polidinner.modelo;
 
 import java.time.LocalTime;
+import java.time.Duration;
 
 /**
  * Trazabilidad: HU-01, HU-02 y HU-03 - franjas horarias en las que se reserva una mesa (T1.1).
@@ -26,6 +27,15 @@ public enum Franja {
 
     public LocalTime getFin() {
         return fin;
+    }
+
+    /**
+     * Trazabilidad: Diagrama de actividades HU-02 - "Revisar hora actual y franja de la reserva".
+     * Minutos que faltan, desde horaActual, para que empiece esta franja.
+     * Trasladado desde Reserva (refactorización Move Method).
+     */
+    public long minutosHastaInicio(LocalTime horaActual) {
+        return Duration.between(horaActual, inicio).toMinutes();
     }
 
     /** Texto para las vistas, por ejemplo "12:30–13:00". */
