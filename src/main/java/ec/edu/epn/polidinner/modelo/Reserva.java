@@ -2,7 +2,6 @@ package ec.edu.epn.polidinner.modelo;
 
 import java.io.Serializable;
 import java.time.LocalTime;
-import java.time.Duration;
 import java.time.LocalDate;
 
 import javax.persistence.Column;
@@ -95,7 +94,7 @@ public class Reserva implements Serializable {
 
     /** Minutos que faltan, desde horaActual, para que empiece la franja reservada. */
     private long minutosAntesDelInicio(LocalTime horaActual) {
-        return Duration.between(horaActual, franja.getInicio()).toMinutes();
+        return franja.minutosHastaInicio(horaActual);
     }
 
     /**
