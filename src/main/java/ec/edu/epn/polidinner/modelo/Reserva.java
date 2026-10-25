@@ -1,6 +1,8 @@
 package ec.edu.epn.polidinner.modelo;
 
 import java.io.Serializable;
+import java.time.LocalTime;
+import java.time.Duration;
 import java.time.LocalDate;
 
 import javax.persistence.Column;
@@ -13,6 +15,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+
 
 /**
  * Trazabilidad: Diagramas de robustez HU-01, HU-02 y HU-03 - entidad Reserva (T1.1).
@@ -58,6 +61,30 @@ public class Reserva implements Serializable {
         this.fecha = fecha;
         this.franja = franja;
         this.estado = ACTIVA;
+    }
+
+    /**
+     * Trazabilidad: Diagrama de actividades HU-02 - "Revisar hora actual y franja de la reserva",
+     * decisión "¿Faltan ≥ 15 min?", "Marcar reserva como cancelada" y "Anotar restricción de reservas por el día".
+     * HU-02 / Escenarios 1.1, 1.2 y 1.3 (prueba PU-06). La hora llega como parámetro para poder probarla.
+     */
+    public boolean cancelar(LocalTime horaActual) {
+        if (minutosAntesDelInicio(horaActual) >= 15) {
+            estado = CANCELADA;
+        } else {
+            estado = CANCELADA_FUERA_DE_PLAZO;
+        }
+        return true;
+    }
+
+    /** Minutos que faltan, desde horaActual, para que empiece la franja reservada. */
+    private long minutosAntesDelInicio(LocalTime horaActual) {
+        return Duration.between(horaActual, franja.getInicio()).toMinutes();
+    }
+
+    /** HU-02 / Escenario 1.3: una cancelación fuera de plazo impide al cliente reservar ese día. */
+    public boolean restringeReservasDelDia() {
+        return CANCELADA_FUERA_DE_PLAZO.equals(estado);
     }
 
     public boolean estaActiva() {
