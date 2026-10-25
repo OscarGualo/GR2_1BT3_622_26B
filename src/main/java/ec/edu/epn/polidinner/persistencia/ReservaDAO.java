@@ -48,4 +48,37 @@ public class ReservaDAO extends GenericDAO<Reserva, Integer> {
             em.close();
         }
     }
+    /**
+     * T2.1 - Diagrama de actividades HU-02 "Buscar reserva del cliente en el registro":
+     * la reserva activa del cliente en la fecha, o null si no tiene ("No tiene reservas activas para hoy").
+     */
+    public Reserva buscarActivaDelCliente(String cedula, LocalDate fecha) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            List<Reserva> reservas = em.createQuery(
+                            "SELECT r FROM Reserva r WHERE r.cliente.cedula = :cedula"
+                                    + " AND r.fecha = :fecha AND r.estado = :estado", Reserva.class)
+                    .setParameter("cedula", cedula)
+                    .setParameter("fecha", fecha)
+                    .setParameter("estado", Reserva.ACTIVA)
+                    .getResultList();
+            return reservas.isEmpty() ? null : reservas.get(0);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * T2.2 - Guarda la cancelación solo si la reserva sigue "Activa" en la base, en una sola sentencia.
+     * Si dos peticiones cancelan la misma reserva a la vez, solo una la actualiza y la otra recibe false
+     * (HU-02 / Escenario 2.3: "La reserva ya fue cancelada").
+     */
+    public boolean guardarCancelacion(Reserva reserva) {
+        return enTransaccion(em -> em.createQuery(
+                        "UPDATE Reserva r SET r.estado = :nuevoEstado WHERE r.id = :id AND r.estado = :activa")
+                .setParameter("nuevoEstado", reserva.getEstado())
+                .setParameter("id", reserva.getId())
+                .setParameter("activa", Reserva.ACTIVA)
+                .executeUpdate() == 1);
+    }
 }
