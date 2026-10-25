@@ -50,6 +50,11 @@
                     <c:out value="${sessionScope.cliente.nombres} ${sessionScope.cliente.apellidos}"/>
                     <span class="rol">PoliCuenta <c:out value="${sessionScope.cliente.policuenta.numero}"/></span>
                 </span>
+                    <%-- HU-01: acceso a la frontera "Reservar mesa" --%>
+                <a class="btn btn-secundario btn-chico" href="${pageContext.request.contextPath}/cliente/reservar">
+                    <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
+                    Reservar mesa
+                </a>
                 <%-- CU 06: acceso a la frontera "Mis pedidos" --%>
                 <a class="btn btn-secundario btn-chico" href="${pageContext.request.contextPath}/cliente/cancelar">
                     <svg class="icono" aria-hidden="true"><use href="#i-ticket"/></svg>
