@@ -412,6 +412,7 @@ textarea.entrada { min-height: 88px; resize: vertical; }
 .estado-agotado { background: var(--color-peligro-suave); color: var(--color-peligro); }
 .estado-publicado { background: var(--color-info-suave); color: var(--color-secundario); }
 .estado-borrador { background: var(--color-acento-suave); color: var(--color-acento); }
+.estado-cerrado { background: var(--color-peligro-suave); color: var(--color-peligro); }
 
 .tipo { font-size: .85rem; color: var(--color-texto-suave); }
 .tipo__etiqueta { display: inline-flex; align-items: center; gap: var(--esp-1); }
@@ -708,6 +709,8 @@ textarea.entrada { min-height: 88px; resize: vertical; }
 }
 .login__ayuda { margin-top: var(--esp-4); }
 .acciones-pie--inicio { justify-content: flex-start; }
+/* Reporte de ventas: botones a la altura del campo de fecha */
+.filtro-fecha__acciones { align-self: end; margin: 0 0 var(--esp-4); }
 .alerta--compacta { margin: var(--esp-4) 0 0; }
 .estado-creado { background: var(--color-acento-suave); color: var(--color-acento); }
 .estado-pagado { background: var(--color-info-suave); color: var(--color-secundario); }
