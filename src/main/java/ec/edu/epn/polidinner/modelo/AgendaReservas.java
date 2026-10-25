@@ -5,11 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Trazabilidad: Diagrama de robustez HU-01 - control "Realizar reserva" (tarea T1.4).
- * No es entidad JPA: se arma con las reservas del día (ReservaDAO.buscarPorFecha) y valida
- * cada nueva reserva contra ellas antes de guardarla. Origen: prueba PU-01.
- */
+
 public class AgendaReservas {
 
     private final LocalDate fecha;
@@ -28,26 +24,38 @@ public class AgendaReservas {
      */
     public Reserva reservar(ClienteUniversitario cliente, Mesa mesa, Franja franja) {
         validarMesaLibre(mesa, franja);
+        validarClienteNoRestringido(cliente);
         validarClienteSinReservaActiva(cliente);
         Reserva reserva = new Reserva(cliente, mesa, fecha, franja);
         reservas.add(reserva);
         return reserva;
     }
 
-    /** HU-01 / Escenario 1.2: la mesa no puede estar reservada en esa franja (prueba PU-02). */
+
     private void validarMesaLibre(Mesa mesa, Franja franja) {
         for (Reserva r : reservas) {
-            if (r.getMesa().getNumero() == mesa.getNumero() && r.getFranja() == franja) {
+            final boolean esLaMismaMesa = r.getMesa().getNumero() == mesa.getNumero();
+            final boolean esLaMismaFranja = r.getFranja() == franja;
+            final boolean ocupaLaMesa = r.estaActiva();
+            if (esLaMismaMesa && esLaMismaFranja && ocupaLaMesa) {
                 throw new ReservaRechazadaException("La mesa " + mesa.getNumero() + " ya está reservada en esa franja");
             }
         }
     }
 
-    /** HU-01 / Escenario 1.3: el cliente no puede tener otra reserva activa hoy (prueba PU-03). */
     private void validarClienteSinReservaActiva(ClienteUniversitario cliente) {
         for (Reserva r : reservas) {
-            if (r.getCliente().getCedula().equals(cliente.getCedula())) {
+            if (r.getCliente().getCedula().equals(cliente.getCedula()) && r.estaActiva()) {
                 throw new ReservaRechazadaException("Ya tiene una reserva activa para hoy");
+            }
+        }
+    }
+
+
+    private void validarClienteNoRestringido(ClienteUniversitario cliente) {
+        for (Reserva r : reservas) {
+            if (r.getCliente().getCedula().equals(cliente.getCedula()) && r.restringeReservasDelDia()) {
+                throw new ReservaRechazadaException("Canceló una reserva fuera de plazo; no puede reservar otra mesa hoy");
             }
         }
     }
