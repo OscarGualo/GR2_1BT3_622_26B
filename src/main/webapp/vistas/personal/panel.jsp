@@ -43,5 +43,11 @@
             <span class="opcion__accion">Ver reporte &rarr;</span>
         </a>
     </div>
+            <a class="opcion" href="${pageContext.request.contextPath}/personal/tablero">
+                <span class="opcion__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-menu"/></svg></span>
+                <h2>Ocupación de mesas</h2>
+                <p>Vea qué mesas están reservadas o libres en cada franja de hoy.</p>
+                <span class="opcion__accion">Ver tablero &rarr;</span>
+            </a>
 </main>
 <jsp:include page="/vistas/comun/pie.jsp"/>
