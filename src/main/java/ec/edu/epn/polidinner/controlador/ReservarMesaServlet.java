@@ -30,7 +30,7 @@ public class ReservarMesaServlet extends HttpServlet {
     private static final String VISTA = "/vistas/cliente/reservarMesa.jsp";
 
     /** Destino después de reservar. En HU-02 pasa a "/cliente/mi-reserva", cuando esa pantalla ya exista. */
-    private static final String DESTINO_TRAS_RESERVAR = "/cliente/reservar";
+    private static final String DESTINO_TRAS_RESERVAR = "/cliente/mi-reserva";
 
     private final MesaDAO mesaDAO = new MesaDAO();
     private final ReservaDAO reservaDAO = new ReservaDAO();
