@@ -57,6 +57,16 @@ public class TableroOcupacion {
                 .count();
     }
 
+    /** HU-03 / Escenario 2.1: si no hay reservas activas hoy, la vista muestra "No hay reservas para hoy". */
+    public boolean hayReservas() {
+        return !reservas.isEmpty();
+    }
+
+    /** HU-03 / Escenario 2.3: una franja sin mesas libres se marca como "Completa". */
+    public boolean estaCompleta(Franja franja) {
+        return contarMesasLibres(franja) == 0;
+    }
+
     public LocalDate getFecha() {
         return fecha;
     }
