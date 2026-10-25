@@ -44,3 +44,17 @@ END
 IF NOT EXISTS (SELECT 1 FROM Mesa WHERE numero = 1) INSERT INTO Mesa (numero) VALUES (1);
 IF NOT EXISTS (SELECT 1 FROM Mesa WHERE numero = 2) INSERT INTO Mesa (numero) VALUES (2);
 IF NOT EXISTS (SELECT 1 FROM Mesa WHERE numero = 3) INSERT INTO Mesa (numero) VALUES (3);
+
+   -- Incremento de reservas: clientes Luis Torres y Carla Ruiz para demostrar HU-01 a HU-03
+-- (inicio de sesión: cédulas 1750000002 y 1750000003, clave cliente123)
+IF NOT EXISTS (SELECT 1 FROM Policuenta WHERE numero = '2024-0201')
+    INSERT INTO Policuenta (numero, saldo, version) VALUES ('2024-0201', 8.00, 0);
+IF NOT EXISTS (SELECT 1 FROM ClienteUniversitario WHERE cedula = '1750000002')
+    INSERT INTO ClienteUniversitario (cedula, nombres, apellidos, clave, policuenta_numero)
+    VALUES ('1750000002', N'Luis', N'Torres', 'cliente123', '2024-0201');
+
+IF NOT EXISTS (SELECT 1 FROM Policuenta WHERE numero = '2024-0318')
+    INSERT INTO Policuenta (numero, saldo, version) VALUES ('2024-0318', 5.00, 0);
+IF NOT EXISTS (SELECT 1 FROM ClienteUniversitario WHERE cedula = '1750000003')
+    INSERT INTO ClienteUniversitario (cedula, nombres, apellidos, clave, policuenta_numero)
+    VALUES ('1750000003', N'Carla', N'Ruiz', 'cliente123', '2024-0318');
