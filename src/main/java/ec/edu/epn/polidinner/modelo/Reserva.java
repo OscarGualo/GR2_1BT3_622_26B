@@ -62,6 +62,19 @@ public class Reserva implements Serializable {
         this.estado = ACTIVA;
     }
 
+    /**
+     * Trazabilidad: Diagrama de actividades HU-02 - "Revisar hora actual y franja de la reserva",
+     * decisión "¿Faltan ≥ 15 min?", "Marcar reserva como cancelada" y "Anotar restricción de reservas por el día".
+     * HU-02, escenarios 1.1, 1.2, 1.3 (prueba PU-06) y 2.3 (regresiones de CancelarReservaRepetidaTest).
+     * Tareas T2.2 y T2.3.
+     *
+     * Cancela una reserva activa y determina la consecuencia de hacerlo con menos de 15 minutos
+     * de anticipación. Si ya estaba cancelada, conserva su estado y restricción.
+     *
+     * @return true si se realiza la cancelación; false si la reserva ya no está activa.
+     */
+
+
     public boolean cancelar(LocalTime horaActual) {
         if (!estaActiva()) {
             return false;
