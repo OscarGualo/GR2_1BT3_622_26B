@@ -50,4 +50,32 @@ class ReservarMesaTest {
         assertEquals(Franja.F12_30, reserva.getFranja());
         assertTrue(agenda.getReservas().contains(reserva));
     }
+
+    /** PU-02 (HU-01 / Escenario 1.2): no se puede reservar una mesa ya reservada en la misma franja. */
+    @Test
+    void reservarUnaMesaYaReservadaEnLaMismaFranjaSeRechaza() {
+        agenda.reservar(luis, mesa1, Franja.F12_30);
+
+        ReservaRechazadaException error = assertThrows(ReservaRechazadaException.class,
+                () -> agenda.reservar(andrea, mesa1, Franja.F12_30));
+
+        assertEquals("La mesa 1 ya está reservada en esa franja", error.getMessage());
+        assertEquals(1, agenda.getReservas().size());
+
+        // Triangulación: la misma mesa en otra franja, u otra mesa en la misma franja, sí se pueden reservar
+        assertNotNull(agenda.reservar(andrea, mesa1, Franja.F13_00));
+        assertNotNull(agenda.reservar(carla, mesa2, Franja.F12_30));
+    }
+
+    /** PU-03 (HU-01 / Escenario 1.3): un cliente con una reserva activa hoy no puede reservar otra mesa. */
+    @Test
+    void reservarConUnaReservaActivaHoySeRechaza() {
+        agenda.reservar(andrea, mesa1, Franja.F12_30);
+
+        ReservaRechazadaException error = assertThrows(ReservaRechazadaException.class,
+                () -> agenda.reservar(andrea, mesa3, Franja.F13_00));
+
+        assertEquals("Ya tiene una reserva activa para hoy", error.getMessage());
+        assertEquals(1, agenda.getReservas().size());
+    }
 }
