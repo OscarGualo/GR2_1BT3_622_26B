@@ -55,6 +55,11 @@
                     <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
                     Reservar mesa
                 </a>
+                 <%-- HU-02: acceso a la frontera "Mi reserva" --%>
+                 <a class="btn btn-secundario btn-chico" href="${pageContext.request.contextPath}/cliente/mi-reserva">
+                     <svg class="icono" aria-hidden="true"><use href="#i-ticket"/></svg>
+                     Mi reserva
+                 </a>
                 <%-- CU 06: acceso a la frontera "Mis pedidos" --%>
                 <a class="btn btn-secundario btn-chico" href="${pageContext.request.contextPath}/cliente/cancelar">
                     <svg class="icono" aria-hidden="true"><use href="#i-ticket"/></svg>
