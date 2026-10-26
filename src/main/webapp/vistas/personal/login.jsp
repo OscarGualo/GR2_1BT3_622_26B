@@ -27,6 +27,10 @@
             </div>
             <button type="submit" class="btn btn-primario btn-bloque">Ingresar</button>
         </form>
+        <p class="ayuda login__ayuda">
+            ¿Es estudiante? <a href="${pageContext.request.contextPath}/cliente/login">Ingreso de estudiantes</a>
+            · <a href="${pageContext.request.contextPath}/">Volver al inicio</a>
+        </p>
     </div>
 </main>
 <jsp:include page="/vistas/comun/pie.jsp"/>
