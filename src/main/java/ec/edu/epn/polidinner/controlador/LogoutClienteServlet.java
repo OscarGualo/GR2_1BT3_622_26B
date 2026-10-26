@@ -11,6 +11,7 @@ import javax.servlet.http.HttpSession;
 /**
  * Controlador técnico de cierre de sesión del cliente universitario (no modelado en el diagrama de robustez).
  * Un pedido en armado (no pagado) vive en la sesión y se descarta al salir.
+ * Redirige al portal de inicio para que el usuario vuelva a elegir su perfil.
  */
 @WebServlet("/cliente/logout")
 public class LogoutClienteServlet extends HttpServlet {
@@ -21,6 +22,6 @@ public class LogoutClienteServlet extends HttpServlet {
         if (sesion != null) {
             sesion.invalidate();
         }
-        response.sendRedirect(request.getContextPath() + "/cliente/login");
+        response.sendRedirect(request.getContextPath() + "/");
     }
 }

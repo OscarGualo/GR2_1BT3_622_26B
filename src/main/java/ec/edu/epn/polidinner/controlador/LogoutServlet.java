@@ -10,6 +10,7 @@ import javax.servlet.http.HttpSession;
 
 /**
  * Controlador técnico de cierre de sesión del personal (no modelado en el diagrama de robustez).
+ * Redirige al portal de inicio para que el usuario vuelva a elegir su perfil.
  */
 @WebServlet("/personal/logout")
 public class LogoutServlet extends HttpServlet {
@@ -20,6 +21,6 @@ public class LogoutServlet extends HttpServlet {
         if (sesion != null) {
             sesion.invalidate();
         }
-        response.sendRedirect(request.getContextPath() + "/personal/login");
+        response.sendRedirect(request.getContextPath() + "/");
     }
 }

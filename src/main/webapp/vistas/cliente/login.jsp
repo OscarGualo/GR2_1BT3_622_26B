@@ -30,6 +30,7 @@
         </form>
         <p class="ayuda login__ayuda">
             ¿Trabaja en el comedor? <a href="${pageContext.request.contextPath}/personal/login">Ingreso del personal</a>
+            · <a href="${pageContext.request.contextPath}/">Volver al inicio</a>
         </p>
     </div>
 </main>
