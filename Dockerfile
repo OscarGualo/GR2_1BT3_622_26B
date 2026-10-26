@@ -7,6 +7,8 @@
 # ---------- Etapa 1: compilar el .war con Maven (no queda en la imagen final) ----------
 # El .war es igual para cualquier procesador: se compila una sola vez en la arquitectura de la máquina
 FROM --platform=$BUILDPLATFORM maven:3.9-eclipse-temurin-17 AS build
+# Docker Desktop en Windows a veces no tiene ruta IPv6: forzar IPv4 para descargar de Maven Central
+ENV MAVEN_OPTS="-Djava.net.preferIPv4Stack=true -Djava.net.preferIPv4Addresses=true"
 WORKDIR /app
 COPY pom.xml .
 RUN mvn -B -q dependency:go-offline
@@ -19,8 +21,6 @@ FROM tomcat:9.0-jre17-temurin
 
 # Base H2 embebida dentro del contenedor: Hibernate crea las tablas y la app carga los datos iniciales sola
 ENV POLIDINNER_DB_URL="jdbc:h2:file:/data/polidinner" \
-    POLIDINNER_DB_USER="polidinner" \
-    POLIDINNER_DB_PASSWORD="polidinner" \
     POLIDINNER_DATOS_INICIALES="datos_iniciales_h2.sql" \
     CATALINA_OPTS="-Duser.timezone=America/Guayaquil -Xms128m -Xmx384m"
 
