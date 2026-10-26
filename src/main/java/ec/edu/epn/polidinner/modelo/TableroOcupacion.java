@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import ec.edu.epn.polidinner.persistencia.MesaDAO;
 import ec.edu.epn.polidinner.persistencia.ReservaDAO;
@@ -35,12 +36,22 @@ public class TableroOcupacion {
      * "Anotar: Reserva / Libre". HU-03 / Escenario 1.1.
      */
     public String obtenerEstado(int numeroMesa, Franja franja) {
-        for (Reserva r : reservas) {
-            if (r.getMesa().getNumero() == numeroMesa && r.getFranja() == franja) {
-                return "Reservada · " + r.getCliente().getNombres() + " " + r.getCliente().getApellidos();
+        return buscarReserva(numeroMesa, franja)
+                .map(r -> "Reservada · " + r.getCliente().getNombres() + " " + r.getCliente().getApellidos())
+                .orElse(LIBRE);
+    }
+
+    /**
+     * Busca la reserva activa de la mesa en la franja indicada.
+     * Extraído de obtenerEstado() con la refactorización Extract Method.
+     */
+    private Optional<Reserva> buscarReserva(int numeroMesa, Franja franja) {
+        for (Reserva reserva : reservas) {
+            if (reserva.getMesa().getNumero() == numeroMesa && reserva.getFranja() == franja) {
+                return Optional.of(reserva);
             }
         }
-        return LIBRE;
+        return Optional.empty();
     }
 
     /**
@@ -55,6 +66,16 @@ public class TableroOcupacion {
         return (int) mesas.stream()
                 .filter(mesa -> LIBRE.equals(obtenerEstado(mesa.getNumero(), franja)))
                 .count();
+    }
+
+    /** HU-03 / Escenario 2.1: si no hay reservas activas hoy, la vista muestra "No hay reservas para hoy". */
+    public boolean hayReservas() {
+        return !reservas.isEmpty();
+    }
+
+    /** HU-03 / Escenario 2.3: una franja sin mesas libres se marca como "Completa". */
+    public boolean estaCompleta(Franja franja) {
+        return contarMesasLibres(franja) == 0;
     }
 
     public LocalDate getFecha() {
