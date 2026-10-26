@@ -52,6 +52,12 @@
             <artifactId>mssql-jdbc</artifactId>
             <version>12.8.1.jre11</version>
         </dependency>
+        <!-- Base H2 embebida: la usa el contenedor Docker (POLIDINNER_DB_URL=jdbc:h2:...). Desarrollo sigue con SQL Server -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.2.224</version>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
