@@ -1,5 +1,7 @@
 package ec.edu.epn.polidinner.persistencia;
 
+import java.io.IOException;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -25,6 +27,20 @@ public class CierreJPAListener implements ServletContextListener {
             evento.getServletContext().log("PoliDinner: NO se pudo conectar a SQL Server. Revise que el servicio"
                     + " esté activo en localhost:1433, que exista la base PoliDinner y las variables de entorno"
                     + " POLIDINNER_DB_USER / POLIDINNER_DB_PASSWORD (reinicie IntelliJ tras crearlas).", e);
+            return;
+        }
+        cargarDatosIniciales(evento);
+    }
+
+    /** En Docker (POLIDINNER_DATOS_INICIALES) deja la base con datos de prueba sin ejecutar scripts a mano. */
+    private void cargarDatosIniciales(ServletContextEvent evento) {
+        try {
+            int sentencias = CargaDatosIniciales.cargarSiCorresponde();
+            if (sentencias > 0) {
+                evento.getServletContext().log("PoliDinner: datos iniciales cargados (" + sentencias + " sentencias).");
+            }
+        } catch (IOException | RuntimeException e) {
+            evento.getServletContext().log("PoliDinner: NO se pudieron cargar los datos iniciales.", e);
         }
     }
 
