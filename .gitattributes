@@ -1,0 +1,4 @@
+# Saltos de línea de Unix para archivos que se ejecutan dentro de contenedores Linux
+*.sh text eol=lf
+Dockerfile text eol=lf
+Jenkinsfile text eol=lf
