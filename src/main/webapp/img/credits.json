@@ -1,0 +1,72 @@
+[
+  {
+    "file": "src/main/webapp/img/edificio-cec-epn.jpg",
+    "media": "image",
+    "ref": "commons:34569100",
+    "title": "CEC EPN Classroom Building at Escuela Politécnica Nacional Quito, Ecuador.",
+    "creator": "Aracely Morales",
+    "creatorUrl": null,
+    "date": "2013-08-06",
+    "license": "CC BY-SA 4.0",
+    "licenseCode": "by-sa",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "creditRequired": true,
+    "page": "https://commons.wikimedia.org/wiki/File:CEC_EPN_Classroom_Building_at_Escuela_Polit%C3%A9cnica_Nacional_Quito,_Ecuador..JPG",
+    "via": "Wikimedia Commons",
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a8/CEC_EPN_Classroom_Building_at_Escuela_Polit%C3%A9cnica_Nacional_Quito%2C_Ecuador..JPG/1280px-CEC_EPN_Classroom_Building_at_Escuela_Polit%C3%A9cnica_Nacional_Quito%2C_Ecuador..JPG",
+    "width": 1280,
+    "height": 960,
+    "bytes": 290654,
+    "credit": "\"CEC EPN Classroom Building at Escuela Politécnica Nacional Quito, Ecuador.\" by Aracely Morales, CC BY-SA 4.0, via Wikimedia Commons",
+    "notes": [
+      "Share-alike: an altered version (recoloured, combined with other pictures) must be shared under the same licence."
+    ],
+    "saved": "2026-11-01T15:33:33.339Z"
+  },
+  {
+    "file": "src/main/webapp/img/observatorio-astronomico-epn.jpg",
+    "media": "image",
+    "ref": "commons:770091",
+    "title": "Quito Observatory",
+    "creator": "Marc Figueras Oersted (let's talk)",
+    "creatorUrl": null,
+    "date": "2005-09-15",
+    "license": "CC BY 2.5",
+    "licenseCode": "by",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+    "creditRequired": true,
+    "page": "https://commons.wikimedia.org/wiki/File:Quito_Observatory.JPG",
+    "via": "Wikimedia Commons",
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6d/Quito_Observatory.JPG/1280px-Quito_Observatory.JPG",
+    "width": 1280,
+    "height": 960,
+    "bytes": 450068,
+    "credit": "\"Quito Observatory\" by Marc Figueras Oersted (let's talk), CC BY 2.5, via Wikimedia Commons",
+    "notes": [],
+    "saved": "2026-11-01T15:33:35.129Z"
+  },
+  {
+    "file": "src/main/webapp/img/facultad-electrica-epn.jpg",
+    "media": "image",
+    "ref": "commons:34569093",
+    "title": "Facultad de Ingeniería Eléctrica, Escuela Politécnica Nacional Quito, Ecuador.",
+    "creator": "Aracely Morales",
+    "creatorUrl": null,
+    "date": "2013-08-06",
+    "license": "CC BY-SA 4.0",
+    "licenseCode": "by-sa",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "creditRequired": true,
+    "page": "https://commons.wikimedia.org/wiki/File:Facultad_de_Ingenier%C3%ADa_El%C3%A9ctrica,_Escuela_Polit%C3%A9cnica_Nacional_Quito,_Ecuador..JPG",
+    "via": "Wikimedia Commons",
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Facultad_de_Ingenier%C3%ADa_El%C3%A9ctrica%2C_Escuela_Polit%C3%A9cnica_Nacional_Quito%2C_Ecuador..JPG/1280px-Facultad_de_Ingenier%C3%ADa_El%C3%A9ctrica%2C_Escuela_Polit%C3%A9cnica_Nacional_Quito%2C_Ecuador..JPG",
+    "width": 1280,
+    "height": 960,
+    "bytes": 204291,
+    "credit": "\"Facultad de Ingeniería Eléctrica, Escuela Politécnica Nacional Quito, Ecuador.\" by Aracely Morales, CC BY-SA 4.0, via Wikimedia Commons",
+    "notes": [
+      "Share-alike: an altered version (recoloured, combined with other pictures) must be shared under the same licence."
+    ],
+    "saved": "2026-11-01T15:52:15.208Z"
+  }
+]

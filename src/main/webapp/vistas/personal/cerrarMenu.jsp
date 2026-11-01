@@ -22,7 +22,6 @@
         <c:when test="${empty menuHoy and not empty menuCerrado}">
             <%-- La venta de hoy ya se cerró: no se ofrece crear otro menú (reabriría la venta) --%>
             <section class="tarjeta vacio">
-                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-ok"/></svg>
                 <h2>La venta de hoy ya se cerró</h2>
                 <p>Los estudiantes ya no pueden pagar pedidos. Los pedidos pagados se siguen entregando con su código.</p>
                 <a class="btn btn-primario" href="${pageContext.request.contextPath}/personal/reporte">
@@ -33,7 +32,6 @@
         </c:when>
         <c:when test="${empty menuHoy}">
             <section class="tarjeta vacio">
-                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-menu"/></svg>
                 <h2>No hay un menú abierto hoy</h2>
                 <p>Todavía no se ha creado el menú del día.</p>
                 <a class="btn btn-primario" href="${pageContext.request.contextPath}/personal/crear-menu">
@@ -45,7 +43,6 @@
         <c:when test="${menuHoy.estado == 'Borrador'}">
             <%-- Regla de Menu.cerrarParaVenta(): un menú en Borrador nunca estuvo a la venta y no se cierra --%>
             <section class="tarjeta vacio">
-                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-alerta"/></svg>
                 <h2>El menú de hoy todavía no se publicó</h2>
                 <p>Solo se puede cerrar la venta de un menú publicado. Publíquelo primero desde "Crear menú".</p>
                 <a class="btn btn-primario" href="${pageContext.request.contextPath}/personal/crear-menu">
@@ -65,36 +62,24 @@
                     <span>Fecha: <strong><fmt:formatDate value="${menuHoy.fecha}" pattern="dd/MM/yyyy"/></strong></span>
                     <span>Ítems: <strong>${menuHoy.obtenerItems().size()}</strong></span>
                 </div>
-                <div class="tabla-contenedor">
-                    <table class="tabla">
-                        <caption class="solo-lector">Platos y productos del menú de hoy</caption>
-                        <thead>
-                        <tr>
-                            <th scope="col">Nombre</th>
-                            <th scope="col">Tipo</th>
-                            <th scope="col" class="numero">Precio</th>
-                            <th scope="col">Estado</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <c:forEach var="item" items="${menuHoy.obtenerItems()}">
-                            <tr>
-                                <td data-etiqueta="Nombre"><strong><c:out value="${item.nombre}"/></strong></td>
-                                <td data-etiqueta="Tipo" class="tipo">
-                                    <span class="tipo__etiqueta">
-                                        <svg class="icono" aria-hidden="true"><use href="${item.tipo == 'Producto' ? '#i-producto' : '#i-plato'}"/></svg>
-                                        <c:out value="${item.tipo}"/>
-                                    </span>
-                                </td>
-                                <td data-etiqueta="Precio" class="numero">$<fmt:formatNumber value="${item.precio}" pattern="0.00"/></td>
-                                <td data-etiqueta="Estado"><span class="estado estado-${item.estado.toLowerCase()}"><c:out value="${item.estado}"/></span></td>
-                            </tr>
-                        </c:forEach>
-                        </tbody>
-                    </table>
-                </div>
+                <%-- Resumen del menú como Carta (sin acciones por ítem) --%>
+                <ul class="carta carta--doble carta--resumen">
+                    <c:forEach var="item" items="${menuHoy.obtenerItems()}">
+                        <li class="carta__item">
+                            <div class="carta__linea">
+                                <h3 class="carta__nombre"><c:out value="${item.nombre}"/></h3>
+                                <span class="carta__guia" aria-hidden="true"></span>
+                                <span class="carta__precio">$<fmt:formatNumber value="${item.precio}" pattern="0.00"/></span>
+                            </div>
+                            <p class="carta__meta">
+                                <c:out value="${item.tipo}"/>
+                                <span class="estado estado-${item.estado.toLowerCase()}"><c:out value="${item.estado}"/></span>
+                            </p>
+                        </li>
+                    </c:forEach>
+                </ul>
                 <%-- Mensajes 6-7: el personal confirma el cierre → cerrar() --%>
-                <form method="post" action="${pageContext.request.contextPath}/personal/cerrar-menu" id="form-cerrar">
+                <form method="post" action="${pageContext.request.contextPath}/personal/cerrar-menu" id="form-cerrar" class="acciones-pie acciones-pie--inicio">
                     <input type="hidden" name="accion" value="cerrar">
                     <button type="submit" class="btn btn-peligro">
                         <svg class="icono" aria-hidden="true"><use href="#i-salir"/></svg>

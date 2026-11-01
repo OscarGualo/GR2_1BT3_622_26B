@@ -11,43 +11,78 @@
         <p>Elija qué desea hacer con el menú del día del comedor.</p>
     </div>
     <jsp:include page="/vistas/comun/mensajes.jsp"/>
-    <div class="opciones">
-        <a class="opcion" href="${pageContext.request.contextPath}/personal/crear-menu">
-            <span class="opcion__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-menu"/></svg></span>
-            <h2>Crear menú</h2>
-            <p>Arme el menú del día con platos y productos y publíquelo para la venta.</p>
-            <span class="opcion__accion">Ir a crear menú &rarr;</span>
-        </a>
-        <a class="opcion opcion--peligro" href="${pageContext.request.contextPath}/personal/retirar">
-            <span class="opcion__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-retirar"/></svg></span>
-            <h2>Retirar plato y/o producto</h2>
-            <p>Marque como agotado un plato o producto cuyas porciones se terminaron.</p>
-            <span class="opcion__accion">Ir a retirar ítems &rarr;</span>
-        </a>
-        <a class="opcion" href="${pageContext.request.contextPath}/personal/entrega">
-            <span class="opcion__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-entrega"/></svg></span>
-            <h2>Habilitar entrega</h2>
-            <p>Valide el código de retiro del comprobante y autorice el despacho del pedido.</p>
-            <span class="opcion__accion">Validar código &rarr;</span>
-        </a>
-        <a class="opcion opcion--peligro" href="${pageContext.request.contextPath}/personal/cerrar-menu">
-            <span class="opcion__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-salir"/></svg></span>
-            <h2>Cerrar venta del día</h2>
-            <p>Cierre el menú publicado para que los estudiantes ya no puedan pagar pedidos.</p>
-            <span class="opcion__accion">Ir a cerrar venta &rarr;</span>
-        </a>
-        <a class="opcion" href="${pageContext.request.contextPath}/personal/reporte">
-            <span class="opcion__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-billetera"/></svg></span>
-            <h2>Reporte de ventas</h2>
-            <p>Consulte el total vendido del día y la lista de pedidos con su estado.</p>
-            <span class="opcion__accion">Ver reporte &rarr;</span>
-        </a>
-        <a class="opcion" href="${pageContext.request.contextPath}/personal/tablero">
-            <span class="opcion__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-menu"/></svg></span>
-            <h2>Ocupación de mesas</h2>
-            <p>Vea qué mesas están reservadas o libres en cada franja de hoy.</p>
-            <span class="opcion__accion">Ver tablero &rarr;</span>
-        </a>
+    <%-- Tareas agrupadas por momento del día: preparar el menú, atender el servicio y consultar --%>
+    <div class="grupos-acciones">
+        <section class="grupo-acciones" aria-labelledby="grupo-menu">
+            <h2 id="grupo-menu">Menú del día</h2>
+            <ul class="lista-acciones">
+                <li>
+                    <a class="accion-fila" href="${pageContext.request.contextPath}/personal/crear-menu">
+                        <svg class="icono" aria-hidden="true"><use href="#i-menu"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Crear menú</strong>
+                            <span>Arme el menú del día con platos y productos y publíquelo para la venta.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>
+                <li>
+                    <a class="accion-fila accion-fila--peligro" href="${pageContext.request.contextPath}/personal/retirar">
+                        <svg class="icono" aria-hidden="true"><use href="#i-retirar"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Retirar plato y/o producto</strong>
+                            <span>Marque como agotado un plato o producto cuyas porciones se terminaron.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>
+                <li>
+                    <a class="accion-fila accion-fila--peligro" href="${pageContext.request.contextPath}/personal/cerrar-menu">
+                        <svg class="icono" aria-hidden="true"><use href="#i-salir"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Cerrar venta del día</strong>
+                            <span>Cierre el menú publicado para que los estudiantes ya no puedan pagar pedidos.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>
+            </ul>
+        </section>
+        <section class="grupo-acciones" aria-labelledby="grupo-servicio">
+            <h2 id="grupo-servicio">Servicio y ventas</h2>
+            <ul class="lista-acciones">
+                <li>
+                    <a class="accion-fila" href="${pageContext.request.contextPath}/personal/entrega">
+                        <svg class="icono" aria-hidden="true"><use href="#i-entrega"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Habilitar entrega</strong>
+                            <span>Valide el código de retiro del comprobante y autorice el despacho del pedido.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>
+                <li>
+                    <a class="accion-fila" href="${pageContext.request.contextPath}/personal/reporte">
+                        <svg class="icono" aria-hidden="true"><use href="#i-billetera"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Reporte de ventas</strong>
+                            <span>Consulte el total vendido del día y la lista de pedidos con su estado.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>
+                <li>
+                    <a class="accion-fila" href="${pageContext.request.contextPath}/personal/tablero">
+                        <svg class="icono" aria-hidden="true"><use href="#i-menu"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Ocupación de mesas</strong>
+                            <span>Vea qué mesas están reservadas o libres en cada franja de hoy.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>
+            </ul>
+        </section>
     </div>
 </main>
 <jsp:include page="/vistas/comun/pie.jsp"/>

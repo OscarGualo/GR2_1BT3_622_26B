@@ -2,8 +2,16 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%-- Frontera "Interfaz del sistema de comida": inicio de sesión del personal del comedor --%>
 <c:set var="titulo" value="Iniciar sesión" scope="request"/>
+<c:set var="fotosUsadas" value="observatorio" scope="request"/>
 <jsp:include page="/vistas/comun/encabezado.jsp"/>
-<main class="login" id="contenido">
+<main class="login login--foto" id="contenido">
+    <figure class="foto-lateral foto-lateral--observatorio">
+        <img src="${pageContext.request.contextPath}/img/observatorio-astronomico-epn.jpg" width="1280" height="960"
+             alt="Fachada amarilla del Observatorio Astronómico de Quito, con su cúpula central, en el parque La Alameda"
+             decoding="async" fetchpriority="high">
+        <figcaption>Observatorio Astronómico de Quito, de la EPN (1873)</figcaption>
+    </figure>
+    <div class="login__panel">
     <div class="tarjeta login__tarjeta">
         <div class="login__marca">
             <svg class="icono icono-lg" aria-hidden="true"><use href="#i-plato"/></svg>
@@ -31,6 +39,7 @@
             ¿Es estudiante? <a href="${pageContext.request.contextPath}/cliente/login">Ingreso de estudiantes</a>
             · <a href="${pageContext.request.contextPath}/">Volver al inicio</a>
         </p>
+    </div>
     </div>
 </main>
 <jsp:include page="/vistas/comun/pie.jsp"/>

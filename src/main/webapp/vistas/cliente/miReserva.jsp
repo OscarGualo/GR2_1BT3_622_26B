@@ -18,15 +18,14 @@
     <c:choose>
         <c:when test="${empty reserva}">
             <section class="tarjeta vacio">
-                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-ticket"/></svg>
                 <h2 id="sin-reserva">No tiene reservas activas para hoy</h2>
                 <a class="btn btn-primario" href="${pageContext.request.contextPath}/cliente/reservar">Reservar mesa</a>
             </section>
         </c:when>
         <c:otherwise>
-            <section class="tarjeta" aria-labelledby="titulo-reserva">
+            <section class="tarjeta formulario-angosto" aria-labelledby="titulo-reserva">
                 <h2 id="titulo-reserva">Reserva de hoy</h2>
-                <dl class="resumen-pago">
+                <dl class="resumen-pago reserva__datos">
                     <div><dt>Mesa</dt><dd id="reserva-mesa"><c:out value="${reserva.mesa.numero}"/></dd></div>
                     <div><dt>Franja</dt><dd id="reserva-franja"><c:out value="${reserva.franja.etiqueta}"/></dd></div>
                     <div><dt>Estado</dt><dd><span class="estado estado-pagado"><c:out value="${reserva.estado}"/></span></dd></div>
@@ -34,7 +33,7 @@
                 <form method="post" action="${pageContext.request.contextPath}/cliente/mi-reserva"
                       onsubmit="return confirm('¿Cancelar su reserva de la mesa ${reserva.mesa.numero}?');">
                     <input type="hidden" name="idReserva" value="${reserva.id}">
-                    <button type="submit" class="btn btn-secundario">
+                    <button type="submit" class="btn btn-secundario btn-borde-peligro">
                         <svg class="icono" aria-hidden="true"><use href="#i-retirar"/></svg>
                         Cancelar reserva
                     </button>

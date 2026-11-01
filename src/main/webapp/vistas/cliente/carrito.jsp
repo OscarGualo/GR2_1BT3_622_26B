@@ -20,7 +20,6 @@
     <c:choose>
         <c:when test="${empty pedido.detalles}">
             <section class="tarjeta vacio">
-                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-carrito"/></svg>
                 <h2>Su pedido está vacío</h2>
                 <p>Agregue platos o productos desde el menú de hoy.</p>
                 <a class="btn btn-primario" href="${pageContext.request.contextPath}/cliente/pedido">Ver menú de hoy</a>
@@ -73,24 +72,22 @@
                 </section>
 
                 <%-- Mensaje 31: total del pedido y saldo de PoliCuenta --%>
-                <section class="tarjeta" aria-labelledby="titulo-pago">
+                <section class="pago" aria-labelledby="titulo-pago">
                     <h2 id="titulo-pago">Pago con PoliCuenta</h2>
-                    <dl class="resumen-pago">
-                        <div>
-                            <dt>PoliCuenta</dt>
-                            <dd><c:out value="${sessionScope.cliente.policuenta.numero}"/></dd>
+                    <p class="pago__cuenta">Cuenta <c:out value="${sessionScope.cliente.policuenta.numero}"/></p>
+                    <%-- pages/carrito.md: Total a pagar es la cifra principal; los saldos, cifras secundarias --%>
+                    <dl class="cifras cifras--pago">
+                        <div class="cifra cifra--principal">
+                            <dt>Total a pagar</dt>
+                            <dd id="total-pedido">$<fmt:formatNumber value="${total}" pattern="0.00"/></dd>
                         </div>
-                        <div>
+                        <div class="cifra cifra--secundaria">
                             <dt>Saldo disponible</dt>
                             <dd>$<fmt:formatNumber value="${saldo}" pattern="0.00"/></dd>
                         </div>
-                        <div>
+                        <div class="cifra cifra--secundaria${saldoSuficiente ? '' : ' cifra--negativa'}">
                             <dt>Saldo después del pago</dt>
                             <dd>${saldoSuficiente ? '' : '−'}$<fmt:formatNumber value="${saldoSuficiente ? saldo - total : total - saldo}" pattern="0.00"/></dd>
-                        </div>
-                        <div class="resumen-pago__total">
-                            <dt>Total a pagar</dt>
-                            <dd id="total-pedido">$<fmt:formatNumber value="${total}" pattern="0.00"/></dd>
                         </div>
                     </dl>
                     <c:if test="${not saldoSuficiente}">

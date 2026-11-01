@@ -3,8 +3,16 @@
 <%-- Frontera "Interfaz de pedidos de comida": inicio de sesión del cliente universitario
      (precondición "login" del Diagrama de secuencia CU03) --%>
 <c:set var="titulo" value="Iniciar sesión" scope="request"/>
+<c:set var="fotosUsadas" value="cec" scope="request"/>
 <jsp:include page="/vistas/comun/encabezado.jsp"/>
-<main class="login" id="contenido">
+<main class="login login--foto" id="contenido">
+    <figure class="foto-lateral foto-lateral--cec">
+        <img src="${pageContext.request.contextPath}/img/edificio-cec-epn.jpg" width="1280" height="960"
+             alt="Edificio de aulas del CEC en el campus de la Escuela Politécnica Nacional, con estudiantes bajo la pasarela cubierta"
+             decoding="async" fetchpriority="high">
+        <figcaption>Edificio de aulas CEC-EPN, campus de la Escuela Politécnica Nacional</figcaption>
+    </figure>
+    <div class="login__panel">
     <div class="tarjeta login__tarjeta">
         <div class="login__marca">
             <svg class="icono icono-lg" aria-hidden="true"><use href="#i-estudiante"/></svg>
@@ -32,6 +40,7 @@
             ¿Trabaja en el comedor? <a href="${pageContext.request.contextPath}/personal/login">Ingreso del personal</a>
             · <a href="${pageContext.request.contextPath}/">Volver al inicio</a>
         </p>
+    </div>
     </div>
 </main>
 <jsp:include page="/vistas/comun/pie.jsp"/>
