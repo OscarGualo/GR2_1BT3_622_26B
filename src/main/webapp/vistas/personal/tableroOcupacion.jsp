@@ -109,6 +109,8 @@
             });
             if (enfocar) pestana.focus();
         }
+        // Fase 6: la transición entre franjas solo se activa cuando el personal cambia de pestaña, no al cargar
+        function animar() { document.querySelector('.tablero').classList.add('tablero--vivo'); }
         lista.hidden = false;
         paneles.forEach(function (panel) {
             var pestana = document.querySelector('[aria-controls="' + panel.id + '"]');
@@ -116,14 +118,14 @@
             panel.tabIndex = 0;
         });
         pestanas.forEach(function (p, i) {
-            p.addEventListener('click', function () { mostrar(p, false); });
+            p.addEventListener('click', function () { animar(); mostrar(p, false); });
             p.addEventListener('keydown', function (e) {
                 var destino = null;
                 if (e.key === 'ArrowRight') destino = pestanas[(i + 1) % pestanas.length];
                 if (e.key === 'ArrowLeft') destino = pestanas[(i - 1 + pestanas.length) % pestanas.length];
                 if (e.key === 'Home') destino = pestanas[0];
                 if (e.key === 'End') destino = pestanas[pestanas.length - 1];
-                if (destino) { e.preventDefault(); mostrar(destino, true); }
+                if (destino) { e.preventDefault(); animar(); mostrar(destino, true); }
             });
         });
         mostrar(pestanas[0], false);

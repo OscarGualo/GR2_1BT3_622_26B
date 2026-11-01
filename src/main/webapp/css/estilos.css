@@ -194,6 +194,9 @@ a {
     .barra__nav::-webkit-scrollbar { display: none; }
 }
 @media (max-width: 480px) {
+    /* Fase 7: en el teléfono la navegación no se desplaza de lado (escondía «Mis pedidos»);
+       los enlaces pasan a una segunda fila y todos quedan a la vista */
+    .barra__nav { flex-wrap: wrap; overflow: visible; row-gap: 0; }
     .barra__usuario > span, .marca small { display: none; }
     .btn-salir { width: 44px; padding: 0; }
     .btn-salir__texto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
@@ -274,6 +277,8 @@ a {
 .btn-peligro { background: var(--peligro); color: var(--sobre-peligro); }
 .btn-borde-peligro { color: var(--peligro); border-color: var(--peligro); }
 .btn-chico { min-height: 36px; padding: var(--e-1) var(--e-3); font-size: var(--t-detalle); }
+/* Fase 7: en pantallas táctiles todo control llega a 44 px (MASTER §9); con ratón se mantiene compacto */
+@media (pointer: coarse) { .btn-chico, .barra .btn-salir { min-height: 44px; } }
 .btn-bloque { width: 100%; }
 .btn[disabled], .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
 @media (hover: hover) and (pointer: fine) {
@@ -446,8 +451,9 @@ select.entrada { cursor: pointer; }
     background: var(--superficie); color: var(--tinta);
     padding: var(--e-6) var(--e-5) var(--e-5);
     margin: var(--e-4) 0;
-    -webkit-mask: radial-gradient(circle 7px at 50% 0, #0000 98%, #000) 50% 0 / 18px 100% repeat-x;
-            mask: radial-gradient(circle 7px at 50% 0, #0000 98%, #000) 50% 0 / 18px 100% repeat-x;
+    /* taste-skill-ignore: no es un relleno; la máscara recorta el perforado del ticket (MASTER §5) */
+    -webkit-mask: radial-gradient(circle 7px at 50% 0, #0000 98%, #000) 50% 0 / 18px 100% repeat-x; /* taste-skill-ignore */
+            mask: radial-gradient(circle 7px at 50% 0, #0000 98%, #000) 50% 0 / 18px 100% repeat-x; /* taste-skill-ignore */
 }
 .ticket__etiqueta { margin: 0; color: var(--tinta-suave); font-size: var(--t-detalle); font-weight: 500; }
 .ticket__codigo {
@@ -535,6 +541,8 @@ ul.tickets { list-style: none; padding: 0; }
 @media (hover: hover) and (pointer: fine) { .franjas__pestana:hover { color: var(--tinta); background: var(--hundido); } }
 
 .plano__panel + .plano__panel { margin-top: var(--e-7); }
+.tablero--vivo .plano__panel:not([hidden]) { animation: panel-entra var(--dur-base) var(--curva-salida); }
+@keyframes panel-entra { from { opacity: 0; transform: translateY(4px); } }
 .plano__panel:focus-visible { outline-offset: 6px; }
 .plano__cabecera { display: flex; align-items: flex-end; justify-content: flex-start; gap: var(--e-3) var(--e-8); flex-wrap: wrap; margin-bottom: var(--e-5); }
 .plano__cabecera h3 { margin: 0; font-size: var(--t-seccion); font-stretch: var(--ancho-marca); display: flex; align-items: center; gap: var(--e-3); flex-wrap: wrap; }
@@ -609,12 +617,11 @@ ul.tickets { list-style: none; padding: 0; }
     padding: var(--e-1) var(--e-3); background: var(--scrim); color: #FFFFFF;
     font-size: var(--t-detalle); font-weight: 500;
 }
-.foto-lateral--cec img { object-position: 38% 50%; }
-.foto-lateral--observatorio img { object-position: 50% 45%; }
 .foto-lateral--electrica img { object-position: 36% 40%; }
+.foto-lateral--comedor img { object-position: 45% 60%; }
+.foto-lateral--sistemas img { object-position: 52% 50%; }
 @media (max-width: 1023px) {
     .login--foto .foto-lateral { min-height: 320px; }
-    .foto-lateral--observatorio img { object-position: 50% 30%; }
 }
 
 .portal__marca { display: flex; align-items: center; gap: var(--e-3); margin-bottom: var(--e-2); }
@@ -668,6 +675,12 @@ ul.tickets { list-style: none; padding: 0; }
 .salida h1 { margin-top: var(--e-3); }
 .salida > p[role="status"] { color: var(--tinta-suave); font-size: 1.0625rem; }
 .salida h2 { margin-top: var(--e-6); }
+/* Fase 6 (deleite, una vez por pedido): el ticket se imprime de arriba abajo */
+.salida .ticket { animation: ticket-imprime 480ms var(--curva-salida) both; }
+@keyframes ticket-imprime {
+    from { clip-path: inset(0 0 100% 0); transform: translateY(-12px); }
+    to { clip-path: inset(0 0 0 0); transform: none; }
+}
 .salida .acciones-pie { justify-content: flex-start; margin-top: var(--e-6); }
 .salida__estado { margin: 0; }
 
@@ -679,11 +692,25 @@ ul.tickets { list-style: none; padding: 0; }
     box-shadow: var(--sombra-flotante);
 }
 .dialogo:has(.dialogo__icono--info) { border-top-color: var(--accion); }
-.dialogo::backdrop { background: rgba(17, 20, 24, .55); }
-.dialogo[open] { animation: dialogo-entra var(--dur-entrada) var(--curva-salida); }
-.dialogo[open]::backdrop { animation: aparece-fondo var(--dur-entrada) var(--curva-salida); }
-@keyframes dialogo-entra { from { opacity: 0; transform: translateY(8px) scale(.97); } }
-@keyframes aparece-fondo { from { opacity: 0; } }
+/* Fase 6: entra en 220 ms y sale por el mismo camino en 120 ms (salida más rápida que la entrada).
+   @starting-style + allow-discrete animan también el cierre; sin soporte, simplemente aparece y desaparece. */
+.dialogo {
+    opacity: 0; transform: translateY(8px) scale(.97);
+    transition: opacity var(--dur-rapida) var(--curva-salida), transform var(--dur-rapida) var(--curva-salida),
+                overlay var(--dur-rapida) allow-discrete, display var(--dur-rapida) allow-discrete;
+}
+.dialogo[open] {
+    opacity: 1; transform: none;
+    transition-duration: var(--dur-entrada); transition-timing-function: var(--curva-salida);
+}
+@starting-style { .dialogo[open] { opacity: 0; transform: translateY(8px) scale(.97); } }
+.dialogo::backdrop {
+    background: rgba(17, 20, 24, 0);
+    transition: background-color var(--dur-rapida) var(--curva-salida),
+                overlay var(--dur-rapida) allow-discrete, display var(--dur-rapida) allow-discrete;
+}
+.dialogo[open]::backdrop { background: rgba(17, 20, 24, .55); transition-duration: var(--dur-entrada); }
+@starting-style { .dialogo[open]::backdrop { background: rgba(17, 20, 24, 0); } }
 .dialogo__icono { display: none; }
 .dialogo h2 { font-size: 1.5rem; overflow-wrap: anywhere; }
 .dialogo p { color: var(--tinta-suave); }
@@ -719,8 +746,23 @@ ul.tickets { list-style: none; padding: 0; }
 /* =====================================================================
    14. Movimiento reducido e impresión
    ===================================================================== */
+/* Fase 6: navegación entre páginas. La barra queda quieta; el contenido hace un fundido corto
+   (140 ms, casi imperceptible porque se navega decenas de veces al día). */
+@view-transition { navigation: auto; }
+.barra { view-transition-name: barra; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 140ms; }
+
+/* Movimiento reducido: sin desplazamientos ni escalas; los cambios de color y opacidad se conservan */
+@keyframes solo-opacidad { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { transition: none !important; animation: none !important; }
+    @view-transition { navigation: none; }
+    .alerta, .salida .ticket, .tablero--vivo .plano__panel:not([hidden]), .portada__foto img {
+        animation-name: solo-opacidad !important;
+    }
+    .salida .ticket { clip-path: none; }
+    .dialogo, .dialogo[open] { transform: none !important; }
+    .btn:active:not([disabled]), .cantidad button:active:not(:disabled) .icono,
+    .accion-fila:hover .accion-fila__flecha { transform: none !important; }
 }
 @media print {
     .barra, .pie, .acciones-pie, .saltar-contenido, .barra-carrito { display: none !important; }

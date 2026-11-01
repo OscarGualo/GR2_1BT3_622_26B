@@ -3,14 +3,14 @@
 <%-- Frontera "Interfaz de pedidos de comida": inicio de sesión del cliente universitario
      (precondición "login" del Diagrama de secuencia CU03) --%>
 <c:set var="titulo" value="Iniciar sesión" scope="request"/>
-<c:set var="fotosUsadas" value="cec" scope="request"/>
+<c:set var="fotosUsadas" value="comedor" scope="request"/>
 <jsp:include page="/vistas/comun/encabezado.jsp"/>
 <main class="login login--foto" id="contenido">
-    <figure class="foto-lateral foto-lateral--cec">
-        <img src="${pageContext.request.contextPath}/img/edificio-cec-epn.jpg" width="1280" height="960"
-             alt="Edificio de aulas del CEC en el campus de la Escuela Politécnica Nacional, con estudiantes bajo la pasarela cubierta"
+    <figure class="foto-lateral foto-lateral--comedor">
+        <img src="${pageContext.request.contextPath}/img/comedor-fis-epn.jpg" width="640" height="480"
+             alt="Estudiantes en las mesas metálicas del comedor, bajo los portales azules de la Facultad de Ingeniería de Sistemas de la EPN"
              decoding="async" fetchpriority="high">
-        <figcaption>Edificio de aulas CEC-EPN, campus de la Escuela Politécnica Nacional</figcaption>
+        <figcaption>Comedor junto a la Facultad de Ingeniería de Sistemas, EPN</figcaption>
     </figure>
     <div class="login__panel">
     <div class="tarjeta login__tarjeta">

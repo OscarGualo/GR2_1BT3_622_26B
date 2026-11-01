@@ -12,12 +12,15 @@
         <h1>Menú de hoy</h1>
         <%-- Línea de contexto (pages/menu-dia.md): fecha larga en español; el precio sigue en en_US (punto decimal) --%>
         <p>
-            <c:if test="${not empty menuHoy}">
-                <fmt:setLocale value="es_EC"/>
-                <span class="fecha-larga"><fmt:formatDate value="${menuHoy.fecha}" pattern="EEEE d 'de' MMMM"/></span> ·
-                <fmt:setLocale value="en_US"/>
-            </c:if>
-            se paga con PoliCuenta
+            <c:choose>
+                <c:when test="${not empty menuHoy}">
+                    <fmt:setLocale value="es_EC"/>
+                    <span class="fecha-larga"><fmt:formatDate value="${menuHoy.fecha}" pattern="EEEE d 'de' MMMM"/></span> ·
+                    <fmt:setLocale value="en_US"/>
+                    se paga con PoliCuenta
+                </c:when>
+                <c:otherwise>Se paga con PoliCuenta</c:otherwise>
+            </c:choose>
         </p>
     </div>
     <jsp:include page="/vistas/comun/mensajes.jsp"/>
@@ -37,8 +40,10 @@
     <c:choose>
         <c:when test="${empty menuHoy or menuHoy.estado != 'Publicado'}">
             <section class="tarjeta vacio">
-                <h2>El menú de hoy todavía no está publicado</h2>
-                <p>Vuelva en unos minutos; el personal del comedor está preparando la cartelera.</p>
+                <%-- Fase 7: texto válido tanto si el menú aún no se publica como si la venta de hoy ya se cerró
+                     (buscarMenuDelDia() no devuelve menús "Cerrado", así que la vista no distingue los dos casos) --%>
+                <h2>No hay menú a la venta en este momento</h2>
+                <p>El personal del comedor publica aquí el menú del día. Si la venta de hoy ya se cerró, no se reciben más pedidos hasta mañana.</p>
             </section>
         </c:when>
         <c:when test="${empty items}">

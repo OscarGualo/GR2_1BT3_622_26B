@@ -2,14 +2,14 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%-- Frontera "Interfaz del sistema de comida": inicio de sesión del personal del comedor --%>
 <c:set var="titulo" value="Iniciar sesión" scope="request"/>
-<c:set var="fotosUsadas" value="observatorio" scope="request"/>
+<c:set var="fotosUsadas" value="sistemas" scope="request"/>
 <jsp:include page="/vistas/comun/encabezado.jsp"/>
 <main class="login login--foto" id="contenido">
-    <figure class="foto-lateral foto-lateral--observatorio">
-        <img src="${pageContext.request.contextPath}/img/observatorio-astronomico-epn.jpg" width="1280" height="960"
-             alt="Fachada amarilla del Observatorio Astronómico de Quito, con su cúpula central, en el parque La Alameda"
+    <figure class="foto-lateral foto-lateral--sistemas">
+        <img src="${pageContext.request.contextPath}/img/facultad-sistemas-epn.jpg" width="824" height="372"
+             alt="Edificio azul y blanco de la Facultad de Ingeniería de Sistemas de la EPN, rodeado de jardines"
              decoding="async" fetchpriority="high">
-        <figcaption>Observatorio Astronómico de Quito, de la EPN (1873)</figcaption>
+        <figcaption>Facultad de Ingeniería de Sistemas, Escuela Politécnica Nacional</figcaption>
     </figure>
     <div class="login__panel">
     <div class="tarjeta login__tarjeta">
