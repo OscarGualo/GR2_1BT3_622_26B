@@ -71,7 +71,9 @@
                         </p>
                         <%-- Mensaje 13: agregarItem(idItem, cantidad) --%>
                         <div class="carta__acciones">
-                            <form method="post" action="${pageContext.request.contextPath}/cliente/pedido">
+                            <%-- novalidate: HU06 Esc. 3.1 y 3.2 - el controlador valida la cantidad (1 a 10 y stock)
+                                 y muestra su propio mensaje en lugar del aviso nativo del navegador --%>
+                            <form method="post" action="${pageContext.request.contextPath}/cliente/pedido" novalidate>
                                 <input type="hidden" name="accion" value="agregar">
                                 <input type="hidden" name="idItem" value="${item.id}">
                                 <div class="cantidad" data-cantidad>
@@ -97,17 +99,21 @@
     </c:choose>
 </main>
 
-<%-- Resumen del pedido en armado (sin total: el total se informa en el carrito, mensajes 23-31) --%>
+<%-- Resumen del pedido en armado: ítems seleccionados y total (HU06 Esc. 1.1 y 2.2).
+     El total suma cantidad × precioUnitario de cada detalle, igual que el subtotal del carrito. --%>
 <c:set var="unidades" value="${0}"/>
+<c:set var="totalPedido" value="${0}"/>
 <c:forEach var="detalle" items="${pedido.detalles}">
     <c:set var="unidades" value="${unidades + detalle.cantidad}"/>
+    <c:set var="totalPedido" value="${totalPedido + detalle.cantidad * detalle.precioUnitario}"/>
 </c:forEach>
 <c:if test="${unidades > 0}">
     <div class="barra-carrito" role="region" aria-label="Su pedido">
         <div class="barra-carrito__contenido">
             <span class="barra-carrito__resumen">
                 <svg class="icono" aria-hidden="true"><use href="#i-carrito"/></svg>
-                ${unidades} ${unidades == 1 ? 'ítem' : 'ítems'} en su pedido
+                ${unidades} ${unidades == 1 ? 'ítem seleccionado' : 'ítems seleccionados'}
+                · Total $<fmt:formatNumber value="${totalPedido}" pattern="0.00"/>
             </span>
             <a class="btn btn-primario" href="${pageContext.request.contextPath}/cliente/pedido?vista=carrito">
                 Ver pedido y pagar
