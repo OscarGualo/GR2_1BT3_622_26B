@@ -180,7 +180,19 @@ public class RealizarPedidoServlet extends HttpServlet {
      * Validación del CU 05: si el personal ya cerró la venta del día, no se paga un carrito armado antes del cierre.
      */
     private String confirmar(HttpSession sesion) {
-        Pedido pedido = (Pedido) sesion.getAttribute(PEDIDO);
+        // HU07 Esc. 3.2: un doble clic en «Pagar ahora» se atiende de a uno por sesión; el segundo ya no
+        // encuentra el pedido (se quitó al pagar) y se lleva al comprobante del pago ya hecho
+        synchronized (sesion.getId().intern()) {
+            Pedido pedido = (Pedido) sesion.getAttribute(PEDIDO);
+            if (pedido == null && sesion.getAttribute(ULTIMO_CODIGO) != null) {
+                return "?vista=comprobante";
+            }
+            return confirmarPedido(sesion, pedido);
+        }
+    }
+
+    /** Cuerpo de confirmar(): valida el menú y paga el pedido en una sola transacción. */
+    private String confirmarPedido(HttpSession sesion, Pedido pedido) {
         if (pedido == null || pedido.getDetalles().isEmpty()) {
             sesion.setAttribute("flashError", "Su pedido está vacío. Agregue al menos un plato o producto.");
             return "";
@@ -243,16 +255,20 @@ public class RealizarPedidoServlet extends HttpServlet {
         request.getRequestDispatcher(VISTA_SALIDA).forward(request, response);
     }
 
-    /** Explica por qué confirmarPago() devolvió false: falta de stock de algún ítem o saldo insuficiente. */
+    /**
+     * Explica por qué confirmarPago() devolvió false: falta de stock de algún ítem o saldo insuficiente.
+     * HU07 Esc. 2.3: primero se revisa el stock, porque si otro estudiante compró la última unidad el ítem
+     * queda "Agotado" por reducirStock(); "retirado del menú" solo aplica si el personal lo retiró con stock.
+     */
     private static String motivoRechazo(Pedido pedido) {
         for (DetallePedido detalle : pedido.getDetalles()) {
             ItemMenu item = detalle.getItem();
+            if (item.getStockActual() < detalle.getCantidad()) {
+                return "\"" + item.getNombre() + "\" ya no tiene stock suficiente."
+                        + " Quítelo o reduzca la cantidad.";
+            }
             if (!"Disponible".equals(item.getEstado())) {
                 return "\"" + item.getNombre() + "\" fue retirado del menú. Quítelo de su pedido para continuar.";
-            }
-            if (!item.hayStock(detalle.getCantidad())) {
-                return "\"" + item.getNombre() + "\" ya no tiene porciones suficientes."
-                        + " Quítelo o reduzca la cantidad.";
             }
         }
         return "Saldo insuficiente en PoliCuenta.";
