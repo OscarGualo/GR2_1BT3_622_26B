@@ -53,10 +53,14 @@ public class HabilitarEntregaServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String codigo = normalizarCodigo(request.getParameter("codigo"));
+        String ingresado = request.getParameter("codigo");
+        String codigo = normalizarCodigo(ingresado);
         if (codigo == null) {
-            request.setAttribute("errores", java.util.Collections.singletonMap("codigo",
-                    "Ingrese el código del comprobante con el formato PD-0000."));
+            // HU10 Esc. 3.1 (campo vacío) y 3.2 (formato inválido): se rechaza sin consultar la base
+            boolean vacio = ingresado == null || ingresado.trim().isEmpty();
+            request.setAttribute("errores", java.util.Collections.singletonMap("codigo", vacio
+                    ? "Ingrese el código del comprobante con el formato PD-0000."
+                    : "Formato inválido. Ingrese el código del comprobante con el formato PD-0000."));
             request.getRequestDispatcher(VISTA).forward(request, response);
             return;
         }

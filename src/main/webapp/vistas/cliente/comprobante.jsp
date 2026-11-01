@@ -12,6 +12,11 @@
     </p>
 </div>
 <dl class="resumen-pago">
+    <%-- HU08 Esc. 1.2: fecha y hora del pago (el comprobante se genera al confirmar el pago) --%>
+    <div>
+        <dt>Fecha y hora del pago</dt>
+        <dd><fmt:formatDate value="${comprobante.fechaGeneracion}" pattern="dd/MM/yyyy HH:mm"/></dd>
+    </div>
     <div>
         <dt>Saldo restante en PoliCuenta <c:out value="${pedido.policuenta.numero}"/></dt>
         <dd>$<fmt:formatNumber value="${saldo}" pattern="0.00"/></dd>
