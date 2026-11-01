@@ -10,80 +10,91 @@
 <main class="contenido" id="contenido">
     <div class="titulo-pagina">
         <h1>Menú de hoy</h1>
+        <%-- Línea de contexto (pages/menu-dia.md): fecha larga en español; el precio sigue en en_US (punto decimal) --%>
         <p>
-            <c:if test="${not empty menuHoy}"><fmt:formatDate value="${menuHoy.fecha}" pattern="dd/MM/yyyy"/> · </c:if>
-            Elija sus platos o productos, revise el total y pague con su PoliCuenta.
+            <c:choose>
+                <c:when test="${not empty menuHoy}">
+                    <fmt:setLocale value="es_EC"/>
+                    <span class="fecha-larga"><fmt:formatDate value="${menuHoy.fecha}" pattern="EEEE d 'de' MMMM"/></span> ·
+                    <fmt:setLocale value="en_US"/>
+                    se paga con PoliCuenta
+                </c:when>
+                <c:otherwise>Se paga con PoliCuenta</c:otherwise>
+            </c:choose>
         </p>
     </div>
     <jsp:include page="/vistas/comun/mensajes.jsp"/>
 
+    <%-- Último código como ticket compacto (componente Ticket del MASTER, no alerta) --%>
     <c:if test="${not empty sessionScope.ultimoCodigo}">
-        <div class="alerta alerta-info" role="note">
-            <svg class="icono" aria-hidden="true"><use href="#i-ticket"/></svg>
-            <span>Su último código de retiro es <strong><c:out value="${sessionScope.ultimoCodigo}"/></strong>.
-                <a href="${pageContext.request.contextPath}/cliente/pedido?vista=comprobante">Ver comprobante</a></span>
-        </div>
+        <aside class="ticket ticket--compacto ticket--aviso" aria-label="Su último código de retiro">
+            <p class="ticket__etiqueta">Su último código de retiro</p>
+            <p class="ticket__codigo"><c:out value="${sessionScope.ultimoCodigo}"/></p>
+            <div class="ticket__pie">
+                <p class="ticket__nota">Preséntelo en la ventanilla del comedor.</p>
+                <a href="${pageContext.request.contextPath}/cliente/pedido?vista=comprobante">Ver comprobante</a>
+            </div>
+        </aside>
     </c:if>
 
     <c:choose>
         <c:when test="${empty menuHoy or menuHoy.estado != 'Publicado'}">
             <section class="tarjeta vacio">
-                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-menu"/></svg>
-                <h2>El menú de hoy todavía no está publicado</h2>
-                <p>Vuelva en unos minutos; el personal del comedor está preparando la cartelera.</p>
+                <%-- Fase 7: texto válido tanto si el menú aún no se publica como si la venta de hoy ya se cerró
+                     (buscarMenuDelDia() no devuelve menús "Cerrado", así que la vista no distingue los dos casos) --%>
+                <h2>No hay menú a la venta en este momento</h2>
+                <p>El personal del comedor publica aquí el menú del día. Si la venta de hoy ya se cerró, no se reciben más pedidos hasta mañana.</p>
             </section>
         </c:when>
         <c:when test="${empty items}">
             <section class="tarjeta vacio">
-                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-plato"/></svg>
                 <h2>Se agotaron los platos de hoy</h2>
                 <p>Todos los platos y productos del menú se terminaron o fueron retirados.</p>
             </section>
         </c:when>
         <c:otherwise>
             <h2 class="solo-lector">Platos y productos disponibles</h2>
-            <div class="catalogo">
+            <%-- Carta del día: nombre · puntos guía · precio; metadatos; fila de acción (MASTER §7) --%>
+            <ul class="carta carta--doble">
                 <c:forEach var="item" items="${items}">
                     <c:set var="maximo" value="${item.stockActual < 10 ? item.stockActual : 10}"/>
-                    <article class="producto-tarjeta" aria-labelledby="item-${item.id}">
-                        <span class="chip-tipo">
-                            <svg class="icono" aria-hidden="true"><use href="${item.tipo == 'Producto' ? '#i-producto' : '#i-plato'}"/></svg>
-                            <c:out value="${item.tipo}"/>
-                        </span>
-                        <h2 id="item-${item.id}"><c:out value="${item.nombre}"/></h2>
-                        <c:if test="${not empty item.descripcion}">
-                            <p class="producto-tarjeta__descripcion"><c:out value="${item.descripcion}"/></p>
-                        </c:if>
-                        <div class="producto-tarjeta__fila">
-                            <span class="precio">$<fmt:formatNumber value="${item.precio}" pattern="0.00"/></span>
-                            <span class="existencias">
-                                Quedan ${item.stockActual} ${item.tipo == 'Producto' ? 'unidades' : 'porciones'}
-                            </span>
+                    <li class="carta__item">
+                        <div class="carta__linea">
+                            <h3 class="carta__nombre" id="item-${item.id}"><c:out value="${item.nombre}"/></h3>
+                            <span class="carta__guia" aria-hidden="true"></span>
+                            <span class="carta__precio">$<fmt:formatNumber value="${item.precio}" pattern="0.00"/></span>
                         </div>
+                        <p class="carta__meta">
+                            <c:out value="${item.tipo}"/>
+                            <c:if test="${not empty item.descripcion}"> · <c:out value="${item.descripcion}"/></c:if>
+                            · quedan ${item.stockActual} ${item.tipo == 'Producto' ? 'unidades' : 'porciones'}
+                        </p>
                         <%-- Mensaje 13: agregarItem(idItem, cantidad) --%>
-                        <%-- novalidate: HU06 Esc. 3.1 y 3.2 - el controlador valida la cantidad (1 a 10 y stock)
-                             y muestra su propio mensaje en lugar del aviso nativo del navegador --%>
-                        <form method="post" action="${pageContext.request.contextPath}/cliente/pedido" novalidate>
-                            <input type="hidden" name="accion" value="agregar">
-                            <input type="hidden" name="idItem" value="${item.id}">
-                            <div class="cantidad" data-cantidad>
-                                <button type="button" data-paso="-1" aria-label="Quitar una unidad de <c:out value='${item.nombre}'/>">
-                                    <svg class="icono" aria-hidden="true"><use href="#i-menos"/></svg>
+                        <div class="carta__acciones">
+                            <%-- novalidate: HU06 Esc. 3.1 y 3.2 - el controlador valida la cantidad (1 a 10 y stock)
+                                 y muestra su propio mensaje en lugar del aviso nativo del navegador --%>
+                            <form method="post" action="${pageContext.request.contextPath}/cliente/pedido" novalidate>
+                                <input type="hidden" name="accion" value="agregar">
+                                <input type="hidden" name="idItem" value="${item.id}">
+                                <div class="cantidad" data-cantidad>
+                                    <button type="button" data-paso="-1" aria-label="Quitar una unidad de <c:out value='${item.nombre}'/>">
+                                        <svg class="icono" aria-hidden="true"><use href="#i-menos"/></svg>
+                                    </button>
+                                    <input type="number" name="cantidad" value="1" min="1" max="${maximo}" step="1"
+                                           inputmode="numeric" aria-label="Cantidad de <c:out value='${item.nombre}'/>">
+                                    <button type="button" data-paso="1" aria-label="Agregar una unidad de <c:out value='${item.nombre}'/>">
+                                        <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
+                                    </button>
+                                </div>
+                                <button type="submit" class="btn btn-secundario" aria-describedby="item-${item.id}">
+                                    <svg class="icono" aria-hidden="true"><use href="#i-carrito"/></svg>
+                                    Agregar al pedido
                                 </button>
-                                <input type="number" name="cantidad" value="1" min="1" max="${maximo}" step="1"
-                                       inputmode="numeric" aria-label="Cantidad de <c:out value='${item.nombre}'/>">
-                                <button type="button" data-paso="1" aria-label="Agregar una unidad de <c:out value='${item.nombre}'/>">
-                                    <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
-                                </button>
-                            </div>
-                            <button type="submit" class="btn btn-primario">
-                                <svg class="icono" aria-hidden="true"><use href="#i-carrito"/></svg>
-                                Agregar
-                            </button>
-                        </form>
-                    </article>
+                            </form>
+                        </div>
+                    </li>
                 </c:forEach>
-            </div>
+            </ul>
         </c:otherwise>
     </c:choose>
 </main>

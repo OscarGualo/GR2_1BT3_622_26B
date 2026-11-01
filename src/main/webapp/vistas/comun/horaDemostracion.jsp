@@ -4,7 +4,7 @@
      Atributos (RelojAplicacion.exponer): horaComedor (LocalTime), horaSimulada (boolean), modoDemo (boolean).
      Parámetro de inclusión: volver (/cliente/reservar o /cliente/mi-reserva). --%>
 <c:if test="${modoDemo}">
-    <section class="tarjeta" aria-labelledby="titulo-demo">
+    <section class="demo" aria-labelledby="titulo-demo">
         <h2 id="titulo-demo">Modo demostración</h2>
         <p>
             Hora del comedor: <strong id="hora-comedor"><c:out value="${horaComedor}"/></strong>
@@ -19,13 +19,13 @@
                 <label for="hora-demo">Fijar hora</label>
                 <input class="entrada" type="time" id="hora-demo" name="hora" value="${horaComedor}" required>
             </div>
-            <div class="acciones">
-                <button type="submit" name="accion" value="fijar" class="btn btn-primario btn-chico">Fijar hora</button>
+            <div class="acciones-pie acciones-pie--inicio">
+                <button type="submit" name="accion" value="fijar" class="btn btn-secundario btn-chico">Fijar hora</button>
             </div>
         </form>
         <form method="post" action="${pageContext.request.contextPath}/cliente/hora-demostracion">
             <input type="hidden" name="volver" value="${param.volver}">
-            <div class="acciones">
+            <div class="acciones-pie acciones-pie--inicio">
                 <%-- Horas de los escenarios de PLANIFICACION_INCREMENTO_RESERVAS.md --%>
                 <button type="submit" name="accion" value="fijar" class="btn btn-secundario btn-chico"
                         formaction="${pageContext.request.contextPath}/cliente/hora-demostracion?hora=11:00"

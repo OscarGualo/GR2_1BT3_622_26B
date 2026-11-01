@@ -2,8 +2,16 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%-- Frontera "Interfaz del sistema de comida": inicio de sesión del personal del comedor --%>
 <c:set var="titulo" value="Iniciar sesión" scope="request"/>
+<c:set var="fotosUsadas" value="sistemas" scope="request"/>
 <jsp:include page="/vistas/comun/encabezado.jsp"/>
-<main class="login" id="contenido">
+<main class="login login--foto" id="contenido">
+    <figure class="foto-lateral foto-lateral--sistemas">
+        <img src="${pageContext.request.contextPath}/img/facultad-sistemas-epn.jpg" width="824" height="372"
+             alt="Edificio azul y blanco de la Facultad de Ingeniería de Sistemas de la EPN, rodeado de jardines"
+             decoding="async" fetchpriority="high">
+        <figcaption>Facultad de Ingeniería de Sistemas, Escuela Politécnica Nacional</figcaption>
+    </figure>
+    <div class="login__panel">
     <div class="tarjeta login__tarjeta">
         <div class="login__marca">
             <svg class="icono icono-lg" aria-hidden="true"><use href="#i-plato"/></svg>
@@ -31,6 +39,7 @@
             ¿Es estudiante? <a href="${pageContext.request.contextPath}/cliente/login">Ingreso de estudiantes</a>
             · <a href="${pageContext.request.contextPath}/">Volver al inicio</a>
         </p>
+    </div>
     </div>
 </main>
 <jsp:include page="/vistas/comun/pie.jsp"/>

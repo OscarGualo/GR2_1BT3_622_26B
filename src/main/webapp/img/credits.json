@@ -1,0 +1,52 @@
+[
+  {
+    "file": "src/main/webapp/img/facultad-electrica-epn.jpg",
+    "media": "image",
+    "ref": "commons:34569093",
+    "title": "Facultad de Ingeniería Eléctrica, Escuela Politécnica Nacional Quito, Ecuador.",
+    "creator": "Aracely Morales",
+    "creatorUrl": null,
+    "date": "2013-08-06",
+    "license": "CC BY-SA 4.0",
+    "licenseCode": "by-sa",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "creditRequired": true,
+    "page": "https://commons.wikimedia.org/wiki/File:Facultad_de_Ingenier%C3%ADa_El%C3%A9ctrica,_Escuela_Polit%C3%A9cnica_Nacional_Quito,_Ecuador..JPG",
+    "via": "Wikimedia Commons",
+    "image": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/Facultad_de_Ingenier%C3%ADa_El%C3%A9ctrica%2C_Escuela_Polit%C3%A9cnica_Nacional_Quito%2C_Ecuador..JPG/1280px-Facultad_de_Ingenier%C3%ADa_El%C3%A9ctrica%2C_Escuela_Polit%C3%A9cnica_Nacional_Quito%2C_Ecuador..JPG",
+    "width": 1280,
+    "height": 960,
+    "bytes": 204291,
+    "credit": "\"Facultad de Ingeniería Eléctrica, Escuela Politécnica Nacional Quito, Ecuador.\" by Aracely Morales, CC BY-SA 4.0, via Wikimedia Commons",
+    "notes": [
+      "Share-alike: an altered version (recoloured, combined with other pictures) must be shared under the same licence."
+    ],
+    "saved": "2026-11-01T15:52:15.208Z"
+  },
+  {
+    "file": "src/main/webapp/img/comedor-fis-epn.jpg",
+    "media": "image",
+    "title": "Comedor junto a la Facultad de Ingeniería de Sistemas, EPN",
+    "creator": "Escuela Politécnica Nacional",
+    "license": "Sin licencia indicada en la fuente (uso académico, con crédito)",
+    "page": "https://webhistorico.epn.edu.ec/debate-inteligencia-artificial/",
+    "width": 640,
+    "height": 480,
+    "credit": "Escuela Politécnica Nacional, webhistorico.epn.edu.ec",
+    "usedIn": "vistas/cliente/login.jsp",
+    "saved": "2026-11-01"
+  },
+  {
+    "file": "src/main/webapp/img/facultad-sistemas-epn.jpg",
+    "media": "image",
+    "title": "Facultad de Ingeniería de Sistemas, EPN",
+    "creator": "Escuela Politécnica Nacional",
+    "license": "Sin licencia indicada en la fuente (uso académico, con crédito)",
+    "page": "https://fis.epn.edu.ec/la-facultad/estructura-organica/",
+    "width": 824,
+    "height": 372,
+    "credit": "Escuela Politécnica Nacional, fis.epn.edu.ec",
+    "usedIn": "vistas/personal/login.jsp",
+    "saved": "2026-11-01"
+  }
+]

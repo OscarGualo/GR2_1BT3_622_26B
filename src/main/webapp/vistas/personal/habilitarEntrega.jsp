@@ -5,7 +5,7 @@
      2 (habilitarEntrega(codigo)). El resultado se muestra en la frontera "Salida". --%>
 <c:set var="titulo" value="Habilitar entrega" scope="request"/>
 <jsp:include page="/vistas/comun/encabezado.jsp"/>
-<main class="contenido" id="contenido">
+<main class="contenido contenido--ventanilla" id="contenido">
     <nav class="migas" aria-label="Ruta">
         <a href="${pageContext.request.contextPath}/vistas/personal/panel.jsp">Panel</a> / Habilitar entrega
     </nav>
@@ -15,8 +15,9 @@
     </div>
     <jsp:include page="/vistas/comun/mensajes.jsp"/>
 
-    <section class="tarjeta login__tarjeta" aria-labelledby="titulo-codigo">
-        <h2 id="titulo-codigo">Código del comprobante</h2>
+    <%-- pages/ventanilla.md: Ventanilla centrada, sin tarjeta; el campo es lo más grande de la pantalla --%>
+    <section class="ventanilla" aria-labelledby="titulo-codigo">
+        <h2 id="titulo-codigo" class="solo-lector">Código del comprobante</h2>
         <form method="post" action="${pageContext.request.contextPath}/personal/entrega" novalidate>
             <div class="campo">
                 <label for="codigo">Código de retiro <span class="requerido" aria-hidden="true">*</span></label>
