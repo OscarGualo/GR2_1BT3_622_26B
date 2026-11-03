@@ -13,27 +13,27 @@
     <nav class="migas" aria-label="Ruta">
         <a href="${pageContext.request.contextPath}/vistas/personal/panel.jsp">Panel</a> / Reporte de ventas
     </nav>
-    <div class="titulo-pagina">
-        <h1>Reporte de ventas</h1>
-        <p>Total vendido del día (pedidos pagados y entregados) y el detalle de todos los pedidos.</p>
-    </div>
-    <jsp:include page="/vistas/comun/mensajes.jsp"/>
-
-    <section class="tarjeta" aria-labelledby="titulo-fecha">
-        <h2 id="titulo-fecha" class="solo-lector">Elegir el día del reporte</h2>
-        <form method="get" action="${pageContext.request.contextPath}/personal/reporte" class="fila-campos">
+    <%-- pages/reporte-ventas.md: filtro de fecha compacto en la línea del título --%>
+    <div class="titulo-con-filtro">
+        <div class="titulo-pagina">
+            <h1>Reporte de ventas</h1>
+            <p>Total vendido del día (pedidos pagados y entregados) y el detalle de todos los pedidos.</p>
+        </div>
+        <form method="get" action="${pageContext.request.contextPath}/personal/reporte" class="filtro-fecha"
+              aria-label="Elegir el día del reporte">
             <div class="campo">
                 <label for="fecha">Día</label>
                 <input class="entrada" type="date" id="fecha" name="fecha" value="<c:out value='${fecha}'/>">
             </div>
-            <div class="acciones-pie acciones-pie--inicio filtro-fecha__acciones">
+            <div class="filtro-fecha__acciones">
                 <button type="submit" class="btn btn-secundario">Ver reporte</button>
                 <c:if test="${not esHoy}">
                     <a class="btn btn-secundario" href="${pageContext.request.contextPath}/personal/reporte">Hoy</a>
                 </c:if>
             </div>
         </form>
-    </section>
+    </div>
+    <jsp:include page="/vistas/comun/mensajes.jsp"/>
 
     <c:if test="${not empty reporte}">
         <section class="tarjeta" aria-labelledby="titulo-resumen">
@@ -44,30 +44,29 @@
                     <c:when test="${esHoy}"><span class="estado estado-publicado">Venta abierta</span></c:when>
                 </c:choose>
             </div>
-            <dl class="resumen-pago">
-                <div>
-                    <dt>Pedidos registrados</dt>
-                    <dd>${reporte.pedidos.size()}</dd>
-                </div>
-                <div>
-                    <dt>Pendientes de entrega</dt>
-                    <dd>${pendientes}</dd>
-                </div>
-                <div class="resumen-pago__total">
+            <%-- Fila de cifras: todas vienen del servlet (calcularTotalVendido(), pedidos y pendientes) --%>
+            <dl class="cifras cifras--reporte">
+                <div class="cifra cifra--principal">
                     <dt>${esHoy and not ventaCerrada ? 'Total vendido hasta ahora' : 'Total vendido'}</dt>
                     <dd id="total-vendido">$<fmt:formatNumber value="${total}" pattern="0.00"/></dd>
                 </div>
+                <div class="cifra">
+                    <dt>Pedidos registrados</dt>
+                    <dd>${reporte.pedidos.size()}</dd>
+                </div>
+                <div class="cifra">
+                    <dt>Pendientes de entrega</dt>
+                    <dd>${pendientes}</dd>
+                </div>
             </dl>
-            <c:if test="${esHoy and not ventaCerrada}">
+            <%-- Un único aviso con las dos frases (venta abierta / pendientes) --%>
+            <c:if test="${(esHoy and not ventaCerrada) or pendientes > 0}">
                 <div class="alerta alerta-info alerta--compacta" role="status">
                     <svg class="icono" aria-hidden="true"><use href="#i-alerta"/></svg>
-                    <span>La venta de hoy sigue abierta: el total puede cambiar. Ciérrela desde "Cerrar venta del día".</span>
-                </div>
-            </c:if>
-            <c:if test="${pendientes > 0}">
-                <div class="alerta alerta-info alerta--compacta" role="status">
-                    <svg class="icono" aria-hidden="true"><use href="#i-entrega"/></svg>
-                    <span>Hay ${pendientes} pedido(s) pagado(s) sin retirar. Se pueden seguir entregando con su código aunque la venta esté cerrada.</span>
+                    <span>
+                        <c:if test="${esHoy and not ventaCerrada}">La venta de hoy sigue abierta: el total puede cambiar. Ciérrela desde "Cerrar venta del día".</c:if>
+                        <c:if test="${pendientes > 0}">Hay ${pendientes} ${pendientes == 1 ? 'pedido pagado' : 'pedidos pagados'} sin retirar; se pueden seguir entregando con su código aunque la venta esté cerrada.</c:if>
+                    </span>
                 </div>
             </c:if>
         </section>
@@ -75,7 +74,6 @@
         <c:choose>
             <c:when test="${empty reporte.pedidos}">
                 <section class="tarjeta vacio">
-                    <svg class="icono icono-lg" aria-hidden="true"><use href="#i-billetera"/></svg>
                     <h2>${esFutura ? 'Ese día todavía no llega' : 'No hubo ventas este día'}</h2>
                     <p>${esFutura ? 'Elija hoy o un día anterior.' : 'No se registró ningún pedido en la fecha elegida.'}</p>
                 </section>
@@ -98,9 +96,7 @@
                             <tbody>
                             <c:forEach var="pedido" items="${reporte.pedidos}">
                                 <tr>
-                                    <td data-etiqueta="Código">
-                                        <strong><c:out value="${empty pedido.comprobante.codigo ? '—' : pedido.comprobante.codigo}"/></strong>
-                                    </td>
+                                    <td data-etiqueta="Código" class="codigo-celda"><c:out value="${empty pedido.comprobante.codigo ? '—' : pedido.comprobante.codigo}"/></td>
                                     <td data-etiqueta="Hora"><fmt:formatDate value="${pedido.fecha}" pattern="HH:mm"/></td>
                                     <td data-etiqueta="Cliente">
                                         <c:out value="${pedido.cliente.nombres} ${pedido.cliente.apellidos}"/>

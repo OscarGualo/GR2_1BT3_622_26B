@@ -22,7 +22,6 @@
         <%-- CU05: la venta de hoy ya se cerró; crear otro menú la reabriría --%>
         <c:when test="${empty menuHoy and ventaCerrada}">
             <section class="tarjeta vacio">
-                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-ok"/></svg>
                 <h2>La venta de hoy ya se cerró</h2>
                 <p>No se puede crear otro menú para hoy. El próximo menú se crea mañana.</p>
                 <a class="btn btn-primario" href="${pageContext.request.contextPath}/personal/reporte">
@@ -34,7 +33,6 @@
         <%-- Mensaje 1: el personal inicia el proceso de creación del menú --%>
         <c:when test="${empty menuHoy}">
             <section class="tarjeta vacio">
-                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-menu"/></svg>
                 <h2>Todavía no ha iniciado el menú de hoy</h2>
                 <p>Antes de empezar, revise los ingredientes y productos disponibles en cocina.</p>
                 <form method="post" action="${pageContext.request.contextPath}/personal/crear-menu">
@@ -125,40 +123,28 @@
                     <c:choose>
                         <c:when test="${empty menuHoy.obtenerItems()}">
                             <div class="vacio">
-                                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-plato"/></svg>
                                 <p>Aún no hay ítems. Use el formulario para agregar el primer plato o producto.</p>
                             </div>
                         </c:when>
                         <c:otherwise>
-                            <div class="tabla-contenedor">
-                                <table class="tabla">
-                                    <caption class="solo-lector">Ítems agregados al menú de hoy</caption>
-                                    <thead>
-                                    <tr>
-                                        <th scope="col">Nombre</th>
-                                        <th scope="col">Tipo</th>
-                                        <th scope="col" class="numero">Precio</th>
-                                        <th scope="col">Estado</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <c:forEach var="item" items="${menuHoy.obtenerItems()}">
-                                        <tr>
-                                            <td data-etiqueta="Nombre">
-                                                <strong><c:out value="${item.nombre}"/></strong>
-                                                <c:if test="${not empty item.descripcion}"><div class="descripcion"><c:out value="${item.descripcion}"/></div></c:if>
-                                            </td>
-                                            <td data-etiqueta="Tipo" class="tipo">
-                                                <c:out value="${item.tipo}"/>
-                                                 · ${item.tipo == 'Producto' ? 'stock' : 'porciones'} ${item.stockActual}
-                                            </td>
-                                            <td data-etiqueta="Precio" class="numero">$<fmt:formatNumber value="${item.precio}" pattern="0.00"/></td>
-                                            <td data-etiqueta="Estado"><span class="estado estado-${item.estado.toLowerCase()}"><c:out value="${item.estado}"/></span></td>
-                                        </tr>
-                                    </c:forEach>
-                                    </tbody>
-                                </table>
-                            </div>
+                            <%-- Carta en construcción: el mismo componente que ve el estudiante (vista previa fiel) --%>
+                            <ul class="carta">
+                                <c:forEach var="item" items="${menuHoy.obtenerItems()}">
+                                    <li class="carta__item">
+                                        <div class="carta__linea">
+                                            <h3 class="carta__nombre"><c:out value="${item.nombre}"/></h3>
+                                            <span class="carta__guia" aria-hidden="true"></span>
+                                            <span class="carta__precio">$<fmt:formatNumber value="${item.precio}" pattern="0.00"/></span>
+                                        </div>
+                                        <p class="carta__meta">
+                                            <c:out value="${item.tipo}"/>
+                                            <c:if test="${not empty item.descripcion}"> · <c:out value="${item.descripcion}"/></c:if>
+                                            · ${item.tipo == 'Producto' ? 'stock' : 'porciones'} ${item.stockActual}
+                                            <span class="estado estado-${item.estado.toLowerCase()}"><c:out value="${item.estado}"/></span>
+                                        </p>
+                                    </li>
+                                </c:forEach>
+                            </ul>
                         </c:otherwise>
                     </c:choose>
                     <form method="post" action="${pageContext.request.contextPath}/personal/crear-menu" class="acciones-pie">

@@ -10,9 +10,14 @@
 <jsp:include page="/vistas/comun/encabezado.jsp"/>
 <main class="contenido" id="contenido">
     <section class="tarjeta salida" aria-labelledby="titulo-salida">
-        <div class="salida__estado ${exitoSalida ? 'salida__estado--exito' : 'salida__estado--error'}">
-            <svg class="icono" aria-hidden="true"><use href="${exitoSalida ? '#i-ok' : '#i-alerta'}"/></svg>
-        </div>
+        <%-- pages/salida-comprobante.md: el resultado se dice con un sello de texto, sin círculo de icono --%>
+        <p class="salida__estado">
+            <c:choose>
+                <c:when test="${tipoSalida == 'entrega' and exitoSalida}"><span class="estado estado--exito">Autorizado</span></c:when>
+                <c:when test="${tipoSalida == 'entrega'}"><span class="estado estado--peligro">Rechazado</span></c:when>
+                <c:otherwise><span class="estado estado-pagado">Pagado</span></c:otherwise>
+            </c:choose>
+        </p>
         <h1 id="titulo-salida" tabindex="-1">
             <c:choose>
                 <c:when test="${tipoSalida == 'entrega' and exitoSalida}">Pedido autorizado para despacho</c:when>

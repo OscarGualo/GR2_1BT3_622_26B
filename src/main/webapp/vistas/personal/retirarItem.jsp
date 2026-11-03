@@ -21,7 +21,6 @@
     <c:choose>
         <c:when test="${empty menuHoy}">
             <section class="tarjeta vacio">
-                <svg class="icono icono-lg" aria-hidden="true"><use href="#i-menu"/></svg>
                 <h2>No hay un menú para hoy</h2>
                 <p>Primero cree el menú del día; luego podrá retirar sus platos y productos.</p>
                 <a class="btn btn-primario" href="${pageContext.request.contextPath}/personal/crear-menu">
@@ -45,57 +44,41 @@
                 <c:choose>
                     <c:when test="${empty items}">
                         <div class="vacio">
-                            <svg class="icono icono-lg" aria-hidden="true"><use href="#i-plato"/></svg>
                             <p>No quedan ítems disponibles en el menú de hoy.</p>
                         </div>
                     </c:when>
                     <c:otherwise>
-                        <div class="tabla-contenedor">
-                            <table class="tabla">
-                                <caption class="solo-lector">Platos y productos disponibles en el menú de hoy</caption>
-                                <thead>
-                                <tr>
-                                    <th scope="col">Nombre</th>
-                                    <th scope="col">Tipo</th>
-                                    <th scope="col" class="numero">Precio</th>
-                                    <th scope="col">Estado</th>
-                                    <th scope="col" class="acciones"><span class="solo-lector">Acción</span></th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <c:forEach var="item" items="${items}">
-                                    <tr>
-                                        <td data-etiqueta="Nombre">
-                                            <strong><c:out value="${item.nombre}"/></strong>
-                                            <c:if test="${not empty item.descripcion}"><div class="descripcion"><c:out value="${item.descripcion}"/></div></c:if>
-                                        </td>
-                                        <td data-etiqueta="Tipo" class="tipo">
-                                            <span class="tipo__etiqueta">
-                                                <svg class="icono" aria-hidden="true"><use href="${item.tipo == 'Producto' ? '#i-producto' : '#i-plato'}"/></svg>
-                                                <c:out value="${item.tipo}"/>
-                                            </span>
-                                             · ${item.tipo == 'Producto' ? 'stock' : 'porciones'} ${item.stockActual}
-                                        </td>
-                                        <td data-etiqueta="Precio" class="numero">$<fmt:formatNumber value="${item.precio}" pattern="0.00"/></td>
-                                        <td data-etiqueta="Estado"><span class="estado estado-${item.estado.toLowerCase()}"><c:out value="${item.estado}"/></span></td>
-                                        <td class="acciones">
-                                            <%-- Mensajes 8-9: selecciona el ítem → retirarItem(idItem) --%>
-                                            <form method="post" action="${pageContext.request.contextPath}/personal/retirar"
-                                                  class="form-retirar" data-nombre="<c:out value='${item.nombre}'/>">
-                                                <input type="hidden" name="accion" value="retirar">
-                                                <input type="hidden" name="idItem" value="${item.id}">
-                                                <input type="hidden" name="version" value="${item.version}">
-                                                <button type="submit" class="btn btn-peligro btn-chico">
-                                                    <svg class="icono" aria-hidden="true"><use href="#i-retirar"/></svg>
-                                                    Retirar<span class="solo-lector"> <c:out value="${item.nombre}"/></span>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                                </tbody>
-                            </table>
-                        </div>
+                        <%-- pages/crear-retirar-cerrar.md: la misma Carta que ve el estudiante, con "Retirar" por fila --%>
+                        <ul class="carta carta--doble">
+                            <c:forEach var="item" items="${items}">
+                                <li class="carta__item">
+                                    <div class="carta__linea">
+                                        <h3 class="carta__nombre" id="item-${item.id}"><c:out value="${item.nombre}"/></h3>
+                                        <span class="carta__guia" aria-hidden="true"></span>
+                                        <span class="carta__precio">$<fmt:formatNumber value="${item.precio}" pattern="0.00"/></span>
+                                    </div>
+                                    <p class="carta__meta">
+                                        <c:out value="${item.tipo}"/>
+                                        <c:if test="${not empty item.descripcion}"> · <c:out value="${item.descripcion}"/></c:if>
+                                        · ${item.tipo == 'Producto' ? 'stock' : 'porciones'} ${item.stockActual}
+                                        <span class="estado estado-${item.estado.toLowerCase()}"><c:out value="${item.estado}"/></span>
+                                    </p>
+                                    <div class="carta__acciones">
+                                        <%-- Mensajes 8-9: selecciona el ítem → retirarItem(idItem) --%>
+                                        <form method="post" action="${pageContext.request.contextPath}/personal/retirar"
+                                              class="form-retirar" data-nombre="<c:out value='${item.nombre}'/>">
+                                            <input type="hidden" name="accion" value="retirar">
+                                            <input type="hidden" name="idItem" value="${item.id}">
+                                            <input type="hidden" name="version" value="${item.version}">
+                                            <button type="submit" class="btn btn-secundario btn-borde-peligro btn-chico">
+                                                <svg class="icono" aria-hidden="true"><use href="#i-retirar"/></svg>
+                                                Retirar<span class="solo-lector"> <c:out value="${item.nombre}"/></span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </li>
+                            </c:forEach>
+                        </ul>
                     </c:otherwise>
                 </c:choose>
             </section>
