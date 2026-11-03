@@ -62,6 +62,26 @@
                     </a>
                 </li>
                 <li>
+                    <a class="accion-fila" href="${pageContext.request.contextPath}/personal/programados">
+                        <svg class="icono" aria-hidden="true"><use href="#i-reloj"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Pedidos programados</strong>
+                            <span>Vea los pedidos de hoy agrupados por franja y el total de cada producto a preparar.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>
+                <li>
+                    <a class="accion-fila" href="${pageContext.request.contextPath}/personal/cupos">
+                        <svg class="icono" aria-hidden="true"><use href="#i-menu"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Cupos de retiro</strong>
+                            <span>Defina cuántos pedidos se retiran en cada franja de 15 minutos y cierre las que no pueda atender.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>
+                <li>
                     <a class="accion-fila" href="${pageContext.request.contextPath}/personal/reporte">
                         <svg class="icono" aria-hidden="true"><use href="#i-billetera"/></svg>
                         <span class="accion-fila__texto">

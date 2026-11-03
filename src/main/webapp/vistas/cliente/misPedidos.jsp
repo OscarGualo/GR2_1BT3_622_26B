@@ -55,12 +55,15 @@
                                         <p class="ticket__nota">
                                             $<fmt:formatNumber value="${pedido.total}" pattern="0.00"/> ·
                                             <fmt:formatDate value="${pedido.fecha}" pattern="dd/MM/yyyy HH:mm"/>
+                                            <c:if test="${not empty pedido.franja}">
+                                                · Retiro <c:out value="${pedido.franja.horaInicio}"/>–<c:out value="${pedido.franja.horaInicio.plusMinutes(15)}"/>
+                                            </c:if>
                                         </p>
                                         <div class="ticket__pie">
                                             <span class="estado estado-pagado">Pagado</span>
                                             <%-- Mensajes 6-7: solo un pedido "Pagado" (no entregado) se puede cancelar --%>
-                                            <form method="post" action="${pageContext.request.contextPath}/cliente/cancelar"
-                                                  onsubmit="return confirm('¿Cancelar este pedido? Se devolverá el total a su PoliCuenta y el código de retiro dejará de valer.');">
+                                            <form method="post" action="${pageContext.request.contextPath}/cliente/cancelar" class="form-cancelar"
+                                                  data-codigo="${pedido.comprobante.codigo}" data-total="<fmt:formatNumber value="${pedido.total}" pattern="0.00"/>">
                                                 <input type="hidden" name="accion" value="cancelar">
                                                 <input type="hidden" name="idPedido" value="${pedido.id}">
                                                 <button type="submit" class="btn btn-secundario btn-borde-peligro btn-chico">
@@ -115,4 +118,5 @@
         </c:otherwise>
     </c:choose>
 </main>
+<jsp:include page="/vistas/comun/dialogoCancelar.jsp"/>
 <jsp:include page="/vistas/comun/pie.jsp"/>
