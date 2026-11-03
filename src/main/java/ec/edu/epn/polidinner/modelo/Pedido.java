@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -19,6 +20,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Version;
 
 /**
  * Trazabilidad: Diagrama de clases (Fig. 15) - clase Pedido.
@@ -71,6 +73,22 @@ public class Pedido implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "personal_entrega_cedula")
     private PersonalComedor personalEntrega;
+
+    /**
+     * Examen 1B (HU12/HU17): control de versión del pedido. Una cancelación y una reprogramación
+     * simultáneas del mismo pedido se resuelven con este campo: solo una de las dos transacciones confirma.
+     */
+    @Version
+    @Column(name = "version", nullable = false, columnDefinition = "int default 0")
+    private int version;
+
+    /**
+     * Examen 1B (HU11, T11.1): franja de retiro del pedido programado. Es null en los pedidos
+     * inmediatos del Release 1, que conservan su compra y cancelación actuales.
+     */
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "franja_retiro_id")
+    private FranjaRetiro franja;
 
     protected Pedido() {
     }
@@ -260,6 +278,25 @@ public class Pedido implements Serializable {
         for (DetallePedido detalle : detalles) {
             detalle.getItem().reponerStock(detalle.getCantidad());
         }
+    }
+
+    /**
+     * Examen 1B (HU11 Esc. 1.1 / HU17): un pedido es programado si tiene hora de retiro.
+     */
+    public boolean esProgramado() {
+        return franja != null;
+    }
+
+    /**
+     * Examen 1B (HU11 T11.1 / HU17 T17.2): asigna o cambia la franja de retiro. El cupo de la franja se
+     * reserva y se libera aparte, con actualizaciones condicionadas de FranjaRetiroDAO (no en esta entidad).
+     */
+    public void asignarFranja(FranjaRetiro franja) {
+        this.franja = franja;
+    }
+
+    public FranjaRetiro getFranja() {
+        return franja;
     }
 
     public int getId() {
