@@ -44,9 +44,13 @@ public class HoraDemostracionServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + destino(request.getParameter("volver")));
     }
 
-    /** Solo vuelve a las pantallas de reservas, para no permitir redirecciones a otros sitios. */
+    /** Pantallas del cliente a las que se puede volver (lista cerrada: no se permiten otras redirecciones). */
+    private static final java.util.Set<String> DESTINOS = java.util.Set.of(
+            "/cliente/mi-reserva", "/cliente/reservar", "/cliente/pedido?vista=carrito",
+            "/cliente/programados", "/cliente/cancelar");
+
     static String destino(String volver) {
-        return "/cliente/mi-reserva".equals(volver) ? "/cliente/mi-reserva" : "/cliente/reservar";
+        return volver != null && DESTINOS.contains(volver) ? volver : "/cliente/reservar";
     }
 
     private static LocalTime leerHora(String valor) {

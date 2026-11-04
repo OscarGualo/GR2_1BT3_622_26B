@@ -29,6 +29,14 @@ public final class Transaccion implements AutoCloseable {
         return em;
     }
 
+    /**
+     * Envía a la base los cambios pendientes sin confirmar la transacción. Hace aflorar antes del commit un
+     * conflicto de versión (OptimisticLockException) para traducirlo a un mensaje al usuario.
+     */
+    public void sincronizar() {
+        em.flush();
+    }
+
     /** Hace commit de todas las operaciones de la transacción. */
     public void confirmar() {
         tx.commit();

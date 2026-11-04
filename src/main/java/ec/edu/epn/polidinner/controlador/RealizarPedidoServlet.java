@@ -1,6 +1,9 @@
 package ec.edu.epn.polidinner.controlador;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +25,9 @@ import ec.edu.epn.polidinner.persistencia.ComprobanteDAO;
 import ec.edu.epn.polidinner.persistencia.MenuDAO;
 import ec.edu.epn.polidinner.persistencia.PedidoDAO;
 import ec.edu.epn.polidinner.persistencia.Transaccion;
+import ec.edu.epn.polidinner.servicio.ReglaPedidoException;
+import ec.edu.epn.polidinner.servicio.ServicioFranjas;
+import ec.edu.epn.polidinner.servicio.ServicioPedidos;
 
 /**
  * Trazabilidad: Diagrama de robustez (incremento 2) - controlador "Realizar pedido de comida".
@@ -46,6 +52,8 @@ public class RealizarPedidoServlet extends HttpServlet {
     private final PedidoDAO pedidoDAO = new PedidoDAO();
     private final ComprobanteDAO comprobanteDAO = new ComprobanteDAO();
     private final ClienteUniversitarioDAO clienteDAO = new ClienteUniversitarioDAO();
+    private final ServicioPedidos servicioPedidos = new ServicioPedidos();
+    private final ServicioFranjas servicioFranjas = new ServicioFranjas();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -53,6 +61,10 @@ public class RealizarPedidoServlet extends HttpServlet {
         String vista = request.getParameter("vista");
         if ("carrito".equals(vista)) {
             calcular(request);
+            // Examen 1B (HU11/HU16): franjas de hoy que todavía no empezaron, con su disponibilidad
+            RelojAplicacion.exponer(request);
+            request.setAttribute("fechaHoy", RelojAplicacion.fechaActual());
+            request.setAttribute("franjas", servicioFranjas.franjasOfrecidas(RelojAplicacion.ahora()));
             request.getRequestDispatcher(VISTA_CARRITO).forward(request, response);
         } else if ("comprobante".equals(vista)) {
             mostrarComprobante(request, response);
@@ -78,7 +90,9 @@ public class RealizarPedidoServlet extends HttpServlet {
             quitarItem(sesion, leerEntero(request.getParameter("idItem")));
             volverA = "?vista=carrito";
         } else if ("confirmar".equals(accion)) {
-            volverA = confirmar(sesion);
+            // Examen 1B (HU11): «Programar y pagar» llega como confirmar con modo=programar
+            volverA = "programar".equals(request.getParameter("modo"))
+                    ? programar(request) : confirmar(sesion);
         } else {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción no reconocida");
             return;
@@ -230,6 +244,67 @@ public class RealizarPedidoServlet extends HttpServlet {
             sesion.setAttribute("flashError", "No se pudo completar el pago porque el menú cambió mientras"
                     + " confirmaba. No se descontó nada de su PoliCuenta; vuelva a armar su pedido.");
             return "";
+        }
+    }
+
+    /**
+     * Trazabilidad: Examen 1B, HU11 «Programar pedido para llevar con hora de retiro» (T11.3 y T11.4).
+     * Mismo flujo de pago que confirmar() (una sola transacción, doble clic atendido de a uno por sesión),
+     * pero reservando antes un lugar en la franja elegida. La franja y la fecha se validan en el servicio,
+     * no en la vista: una solicitud armada a mano recibe los mismos rechazos (Esc. 3.1 a 3.5).
+     */
+    private String programar(HttpServletRequest request) {
+        HttpSession sesion = request.getSession();
+        synchronized (sesion.getId().intern()) {
+            Pedido pedido = (Pedido) sesion.getAttribute(PEDIDO);
+            if (pedido == null && sesion.getAttribute(ULTIMO_CODIGO) != null) {
+                return "?vista=comprobante";
+            }
+            if (pedido == null || pedido.getDetalles().isEmpty()) {
+                sesion.setAttribute("flashError", "Su pedido está vacío. Agregue al menos un plato o producto.");
+                return "";
+            }
+            Menu menuHoy = menuDAO.buscarMenuDelDia();
+            if (menuHoy == null || !Menu.PUBLICADO.equals(menuHoy.getEstado())) {
+                sesion.setAttribute("flashError", "El comedor ya cerró la venta de hoy.");
+                return "?vista=carrito";
+            }
+            try {
+                LocalTime inicio = leerFranja(request.getParameter("franja"));
+                LocalDate fecha = leerFecha(request.getParameter("fecha"));
+                Comprobante comprobante = servicioPedidos.programarYPagar(pedido, fecha, inicio,
+                        RelojAplicacion.ahora());
+                sesion.removeAttribute(PEDIDO);
+                sesion.setAttribute(ULTIMO_CODIGO, comprobante.getCodigo());
+                return "?vista=comprobante";
+            } catch (ReglaPedidoException e) {
+                sesion.setAttribute("flashError", e.getMessage());
+                return "?vista=carrito";
+            }
+        }
+    }
+
+    /** Franja enviada como HH:mm; vacía = no eligió ninguna (HU11 Esc. 3.4). */
+    private static LocalTime leerFranja(String valor) {
+        if (valor == null || valor.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalTime.parse(valor.trim());
+        } catch (DateTimeParseException e) {
+            throw new ReglaPedidoException("La hora de retiro no es válida");
+        }
+    }
+
+    /** Fecha de la franja: la de hoy si no se envía (HU11 Esc. 3.5 prueba una de otro día). */
+    private static LocalDate leerFecha(String valor) {
+        if (valor == null || valor.trim().isEmpty()) {
+            return RelojAplicacion.fechaActual();
+        }
+        try {
+            return LocalDate.parse(valor.trim());
+        } catch (DateTimeParseException e) {
+            throw new ReglaPedidoException("Solo puedes programar pedidos para hoy");
         }
     }
 
