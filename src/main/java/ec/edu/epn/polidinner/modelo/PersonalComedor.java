@@ -4,7 +4,6 @@ import ec.edu.epn.polidinner.persistencia.ComprobanteDAO;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -54,7 +53,12 @@ public class PersonalComedor implements Serializable {
      * mensajes 3-4 <<create>> Menu(Fecha=hoy, Estado="Borrador") / retorna menuHoy.
      */
     public Menu crearMenuDiario() {
-        Menu menuHoy = new Menu(new Date(), Menu.BORRADOR);
+        return crearMenuDiario(DiaComedor.delSistema());
+    }
+
+    /** Corrección Paquete 1a: crearMenuDiario() con la fecha civil del comedor. */
+    public Menu crearMenuDiario(DiaComedor hoy) {
+        Menu menuHoy = new Menu(hoy.comoFechaCivil(), Menu.BORRADOR);
         menuHoy.asignarPersonal(this);
         return menuHoy;
     }
@@ -76,6 +80,15 @@ public class PersonalComedor implements Serializable {
         producto.cambiarEstado("Agotado");
     }
 
+    /**
+     * Corrección de productos persistentes (Paquete 2) - CU02 sobre la oferta del día: el personal retira el
+     * plato o producto del menú de hoy. A diferencia de eliminarProducto(), no cambia el estado global del
+     * producto: sus existencias se conservan y puede volver a ofrecerse en otra jornada.
+     */
+    public void retirarDeOferta(OfertaMenu oferta) {
+        oferta.retirar();
+    }
+
 
     /**
      * Trazabilidad: Diagrama de clases - +validarCodigo(codigo: String): boolean.
@@ -86,8 +99,7 @@ public class PersonalComedor implements Serializable {
         if (codigo == null || codigo.trim().isEmpty()) {
             return false;
         }
-        Comprobante comprobante = new ComprobanteDAO().buscarPorCodigo(codigo.trim());
-        return validarCodigo(codigo, comprobante);
+        return validarCodigoEnElDia(codigo, DiaComedor.delSistema());
     }
 
     /**
@@ -95,11 +107,28 @@ public class PersonalComedor implements Serializable {
      * para poder probarla sin base de datos.
      */
     boolean validarCodigo(String codigo, Comprobante comprobante) {
+        return validarCodigo(codigo, comprobante, DiaComedor.delSistema());
+    }
+
+    /**
+     * Corrección Paquete 1a: validarCodigo(codigo) con el día del comedor. Otro nombre, y no una
+     * sobrecarga, para que validarCodigo(codigo, null) siga sin ambigüedad.
+     */
+    public boolean validarCodigoEnElDia(String codigo, DiaComedor hoy) {
+        if (codigo == null || codigo.trim().isEmpty()) {
+            return false;
+        }
+        Comprobante comprobante = new ComprobanteDAO().buscarPorCodigo(codigo.trim());
+        return validarCodigo(codigo, comprobante, hoy);
+    }
+
+    /** Soporte técnico: regla de validarCodigoEnElDia() sin base de datos, para las pruebas. */
+    boolean validarCodigo(String codigo, Comprobante comprobante, DiaComedor hoy) {
         if (codigo == null || comprobante == null
                 || !comprobante.getCodigo().equalsIgnoreCase(codigo.trim())) {
             return false;
         }
-        return comprobante.validarCodigoEntrega();
+        return comprobante.validarCodigoEntrega(hoy);
     }
 
     /**

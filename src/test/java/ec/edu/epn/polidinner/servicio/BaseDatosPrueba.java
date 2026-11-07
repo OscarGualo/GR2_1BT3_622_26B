@@ -11,9 +11,11 @@ import javax.persistence.EntityManager;
 import ec.edu.epn.polidinner.modelo.ClienteUniversitario;
 import ec.edu.epn.polidinner.modelo.FranjaRetiro;
 import ec.edu.epn.polidinner.modelo.ItemMenu;
+import ec.edu.epn.polidinner.modelo.Menu;
 import ec.edu.epn.polidinner.modelo.Pedido;
 import ec.edu.epn.polidinner.modelo.Plato;
 import ec.edu.epn.polidinner.modelo.Policuenta;
+import ec.edu.epn.polidinner.modelo.Producto;
 import ec.edu.epn.polidinner.persistencia.FranjaRetiroDAO;
 import ec.edu.epn.polidinner.persistencia.JPAUtil;
 
@@ -22,6 +24,9 @@ import ec.edu.epn.polidinner.persistencia.JPAUtil;
  * que los escenarios del Examen 1B no se contaminan entre sí. Datos de los escenarios: Andrea Gómez
  * (PoliCuenta 2024-0153, $10.00), Luis Torres (2024-0201, $8.00), «Arroz con pollo» ($3.50),
  * «Seco de pollo» ($4.00) y «Jugo de naranja» ($0.75).
+ * Corrección de productos persistentes (Paquete 2): el pago revalida que cada ítem esté en la oferta del menú
+ * publicado de hoy, así que los tres se ofrecen en el menú publicado del LUNES. El jugo es un Producto
+ * registrado (existencia que se conserva entre jornadas), no un plato. La intención de las pruebas no cambia.
  */
 abstract class BaseDatosPrueba {
 
@@ -31,7 +36,8 @@ abstract class BaseDatosPrueba {
     ClienteUniversitario luis;
     Plato arroz;
     Plato seco;
-    Plato jugo;
+    Producto jugo;
+    Menu menuDelLunes;
 
     final FranjaRetiroDAO franjas = new FranjaRetiroDAO();
     final ServicioPedidos servicio = new ServicioPedidos();
@@ -43,9 +49,11 @@ abstract class BaseDatosPrueba {
                 "jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000");
         andrea = crearCliente("1750000001", "Andrea", "Gómez", "2024-0153", 10.00);
         luis = crearCliente("1750000002", "Luis", "Torres", "2024-0201", 8.00);
-        arroz = crearPlato("Arroz con pollo", 3.50, 20);
-        seco = crearPlato("Seco de pollo", 4.00, 20);
-        jugo = crearPlato("Jugo de naranja", 0.75, 30);
+        arroz = new Plato("Arroz con pollo", 3.50, "Disponible", "Arroz con pollo", 20);
+        seco = new Plato("Seco de pollo", 4.00, "Disponible", "Seco de pollo", 20);
+        jugo = Producto.registrar("Jugo de naranja", 0.75, "Jugo de naranja", 30,
+                java.sql.Date.valueOf(LUNES.plusDays(30)));
+        menuDelLunes = publicarMenu(LUNES, arroz, seco, jugo);
     }
 
     void cerrarBase() {
@@ -71,6 +79,25 @@ abstract class BaseDatosPrueba {
             em.persist(cliente);
             em.getTransaction().commit();
             return cliente;
+        } finally {
+            em.close();
+        }
+    }
+
+    /** Guarda un menú publicado de la fecha con la oferta de los ítems indicados (los nuevos se guardan también). */
+    Menu publicarMenu(LocalDate fecha, ItemMenu... items) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            Menu menu = new Menu(java.sql.Date.valueOf(fecha), Menu.BORRADOR);
+            for (ItemMenu item : items) {
+                ItemMenu gestionado = item.getId() == 0 ? item : em.find(ItemMenu.class, item.getId());
+                menu.agregarItem(gestionado);
+            }
+            menu.publicarParaVenta();
+            em.persist(menu);
+            em.getTransaction().commit();
+            return menu;
         } finally {
             em.close();
         }

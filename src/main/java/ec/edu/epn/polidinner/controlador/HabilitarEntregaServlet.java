@@ -2,6 +2,7 @@ package ec.edu.epn.polidinner.controlador;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 import javax.persistence.OptimisticLockException;
 import javax.servlet.ServletException;
@@ -14,6 +15,7 @@ import javax.servlet.http.HttpSession;
 import org.hibernate.StaleStateException;
 
 import ec.edu.epn.polidinner.modelo.Comprobante;
+import ec.edu.epn.polidinner.modelo.DiaComedor;
 import ec.edu.epn.polidinner.modelo.PersonalComedor;
 import ec.edu.epn.polidinner.persistencia.ComprobanteDAO;
 import ec.edu.epn.polidinner.persistencia.PersonalComedorDAO;
@@ -79,6 +81,8 @@ public class HabilitarEntregaServlet extends HttpServlet {
      * alt [inexistente]: 14 "El código no existe".
      */
     private ResultadoEntrega habilitarEntrega(String codigo, String cedulaPersonal) {
+        // Corrección Paquete 1a: "del día" es el día del comedor, no el del servidor
+        DiaComedor hoy = RelojAplicacion.diaComedor();
         try (Transaccion tx = Transaccion.iniciar()) {
             Comprobante comprobante = comprobanteDAO.buscarPorCodigo(codigo, tx);
             if (comprobante == null) {
@@ -86,8 +90,8 @@ public class HabilitarEntregaServlet extends HttpServlet {
                         "El código " + codigo + " no existe. Verifique el comprobante que presenta el cliente.");
             }
             PersonalComedor personal = personalDAO.buscarPorId(cedulaPersonal, tx);
-            if (!personal.validarCodigo(codigo)) {
-                return new ResultadoEntrega(false, codigo, motivoRechazo(comprobante));
+            if (!personal.validarCodigoEnElDia(codigo, hoy)) {
+                return new ResultadoEntrega(false, codigo, motivoRechazo(comprobante, hoy));
             }
             // Examen 1B, objetivo 5.1: la hora de validación (hora del comedor) es la hora del retiro
             personal.entregarPedido(comprobante.getPedido(), RelojAplicacion.ahora());
@@ -123,13 +127,15 @@ public class HabilitarEntregaServlet extends HttpServlet {
     }
 
     /** Mensaje 13: motivo por el que validarCodigoEntrega() devolvió false. */
-    private static String motivoRechazo(Comprobante comprobante) {
+    private static String motivoRechazo(Comprobante comprobante, DiaComedor hoy) {
         if (comprobante.isUsado()) {
             return "El código " + comprobante.getCodigo() + " ya fue usado: ese pedido ya se entregó.";
         }
-        if (!comprobante.esDeHoy()) {
+        if (!comprobante.esDeHoy(hoy)) {
+            SimpleDateFormat formato = new SimpleDateFormat("dd/MM/yyyy");
+            formato.setTimeZone(TimeZone.getTimeZone(hoy.getZona()));
             return "El código " + comprobante.getCodigo() + " es del "
-                    + new SimpleDateFormat("dd/MM/yyyy").format(comprobante.getFechaGeneracion())
+                    + formato.format(comprobante.getFechaGeneracion())
                     + "; solo se aceptan comprobantes del día.";
         }
         return "El pedido del código " + comprobante.getCodigo() + " no está pagado.";

@@ -14,7 +14,7 @@
     </nav>
     <div class="titulo-pagina">
         <h1>Crear menú del día</h1>
-        <p>Agregue los platos y productos que se ofrecerán hoy y publique el menú para que los comensales lo vean.</p>
+        <p>Agregue los platos que se prepararán hoy, elija los productos del inventario que se ofrecerán y publique el menú para que los comensales lo vean.</p>
     </div>
     <jsp:include page="/vistas/comun/mensajes.jsp"/>
 
@@ -45,27 +45,14 @@
             </section>
         </c:when>
         <c:otherwise>
-            <c:set var="esProducto" value="${param.tipo == 'Producto'}"/>
             <div class="rejilla-2">
-                <%-- Mensajes 8-10: formulario del ítem (loop "por cada plato o producto a ofrecer") --%>
+                <div>
+                <%-- Mensajes 8-10: formulario del plato (loop "por cada plato a preparar") --%>
                 <section class="tarjeta" aria-labelledby="titulo-formulario">
-                    <h2 id="titulo-formulario">Agregar ítem</h2>
+                    <h2 id="titulo-formulario">Agregar plato</h2>
                     <form method="post" action="${pageContext.request.contextPath}/personal/crear-menu" novalidate>
                         <input type="hidden" name="accion" value="agregar">
-                        <fieldset class="selector-tipo">
-                            <legend>Tipo de ítem</legend>
-                            <div class="selector-tipo__opciones">
-                                <input type="radio" id="tipo-plato" name="tipo" value="Plato" ${esProducto ? '' : 'checked'}>
-                                <label for="tipo-plato">
-                                    <svg class="icono" aria-hidden="true"><use href="#i-plato"/></svg> Plato
-                                </label>
-                                <input type="radio" id="tipo-producto" name="tipo" value="Producto" ${esProducto ? 'checked' : ''}>
-                                <label for="tipo-producto">
-                                    <svg class="icono" aria-hidden="true"><use href="#i-producto"/></svg> Producto
-                                </label>
-                            </div>
-                        </fieldset>
-
+                        <input type="hidden" name="tipo" value="Plato">
                         <div class="campo">
                             <label for="nombre">Nombre <span class="requerido" aria-hidden="true">*</span></label>
                             <input class="entrada" type="text" id="nombre" name="nombre" required maxlength="100"
@@ -89,18 +76,11 @@
                         <div class="fila-campos">
                             <%-- Incremento 2 (Fig. 15): ItemMenu.stockActual; porciones del plato o unidades del producto --%>
                             <div class="campo">
-                                <label for="stock"><span id="etiqueta-stock">${esProducto ? 'Stock' : 'Porciones'}</span> <span class="requerido" aria-hidden="true">*</span></label>
+                                <label for="stock">Porciones <span class="requerido" aria-hidden="true">*</span></label>
                                 <input class="entrada" type="number" id="stock" name="stock" min="1" step="1" inputmode="numeric"
                                        value="<c:out value='${param.stock}'/>"
                                        <c:if test="${not empty errores.stock}">aria-invalid="true" aria-describedby="error-stock"</c:if>>
                                 <c:if test="${not empty errores.stock}"><p class="error-campo" id="error-stock"><c:out value="${errores.stock}"/></p></c:if>
-                            </div>
-                            <div class="campo solo-producto" id="campos-producto" ${esProducto ? '' : 'hidden'}>
-                                <label for="fechaCaducidad">Fecha de caducidad <span class="requerido" aria-hidden="true">*</span></label>
-                                <input class="entrada" type="date" id="fechaCaducidad" name="fechaCaducidad"
-                                       value="<c:out value='${param.fechaCaducidad}'/>"
-                                       <c:if test="${not empty errores.fechaCaducidad}">aria-invalid="true" aria-describedby="error-fechaCaducidad"</c:if>>
-                                <c:if test="${not empty errores.fechaCaducidad}"><p class="error-campo" id="error-fechaCaducidad"><c:out value="${errores.fechaCaducidad}"/></p></c:if>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primario btn-bloque">
@@ -109,6 +89,37 @@
                         </button>
                     </form>
                 </section>
+
+                <%-- Corrección Paquete 2: los productos se registran en «Productos» y aquí se elige cuáles ofrecer hoy,
+                     sin copiar sus existencias (solo vigentes, con stock y que el menú aún no ofrece) --%>
+                <section class="tarjeta" aria-labelledby="titulo-inventario">
+                    <h2 id="titulo-inventario">Agregar producto del inventario</h2>
+                    <c:choose>
+                        <c:when test="${empty productosSeleccionables}">
+                            <p>No hay productos vigentes con unidades para agregar.
+                                <a href="${pageContext.request.contextPath}/personal/productos">Registre uno en Productos</a>.</p>
+                        </c:when>
+                        <c:otherwise>
+                            <form method="post" action="${pageContext.request.contextPath}/personal/crear-menu">
+                                <input type="hidden" name="accion" value="agregarProducto">
+                                <div class="campo">
+                                    <label for="idProducto">Producto</label>
+                                    <select class="entrada" id="idProducto" name="idProducto" required>
+                                        <c:forEach var="producto" items="${productosSeleccionables}">
+                                            <option value="${producto.id}">#${producto.id} · <c:out value="${producto.nombre}"/><c:if test="${not empty producto.descripcion}"> (<c:out value="${producto.descripcion}"/>)</c:if> · caduca <fmt:formatDate value="${producto.fechaCaducidad}" pattern="dd/MM/yyyy"/> · ${producto.stockActual} u.</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-secundario btn-bloque">
+                                    <svg class="icono" aria-hidden="true"><use href="#i-producto"/></svg>
+                                    Agregar producto al menú
+                                </button>
+                            </form>
+                        </c:otherwise>
+                    </c:choose>
+                    <p class="ayuda"><a href="${pageContext.request.contextPath}/personal/productos">Ir a Productos</a> para registrar nuevas existencias.</p>
+                </section>
+                </div>
 
                 <%-- Mensaje 18: lista de ítems agregados; mensajes 19-20: solicitar publicar menú --%>
                 <section class="tarjeta" aria-labelledby="titulo-items">
@@ -129,7 +140,9 @@
                         <c:otherwise>
                             <%-- Carta en construcción: el mismo componente que ve el estudiante (vista previa fiel) --%>
                             <ul class="carta">
-                                <c:forEach var="item" items="${menuHoy.obtenerItems()}">
+                                <c:forEach var="oferta" items="${menuHoy.obtenerOfertas()}">
+                                    <c:set var="item" value="${oferta.item}"/>
+                                    <c:set var="situacion" value="${oferta.estadoEn(hoy)}"/>
                                     <li class="carta__item">
                                         <div class="carta__linea">
                                             <h3 class="carta__nombre"><c:out value="${item.nombre}"/></h3>
@@ -140,7 +153,8 @@
                                             <c:out value="${item.tipo}"/>
                                             <c:if test="${not empty item.descripcion}"> · <c:out value="${item.descripcion}"/></c:if>
                                             · ${item.tipo == 'Producto' ? 'stock' : 'porciones'} ${item.stockActual}
-                                            <span class="estado estado-${item.estado.toLowerCase()}"><c:out value="${item.estado}"/></span>
+                                            <c:if test="${item.tipo == 'Producto'}"> · caduca <fmt:formatDate value="${item.fechaCaducidad}" pattern="dd/MM/yyyy"/></c:if>
+                                            <span class="estado ${situacion == 'Disponible' ? 'estado-disponible' : 'estado-agotado'}"><c:out value="${situacion == 'Retirado' ? 'Retirado hoy' : situacion}"/></span>
                                         </p>
                                     </li>
                                 </c:forEach>
@@ -160,17 +174,7 @@
     </c:choose>
 </main>
 <script>
-    // Fecha de caducidad solo para Producto (alt [tipo = Producto] de la secuencia); la etiqueta del stock cambia
     (function () {
-        var campos = document.getElementById('campos-producto');
-        if (!campos) return;
-        document.querySelectorAll('input[name="tipo"]').forEach(function (radio) {
-            radio.addEventListener('change', function () {
-                var esProducto = document.getElementById('tipo-producto').checked;
-                campos.hidden = !esProducto;
-                document.getElementById('etiqueta-stock').textContent = esProducto ? 'Stock' : 'Porciones';
-            });
-        });
         var resumen = document.getElementById('resumen-errores');
         if (resumen) resumen.focus();
     })();

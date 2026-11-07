@@ -16,15 +16,14 @@ import javax.servlet.http.HttpSession;
 
 import ec.edu.epn.polidinner.modelo.ClienteUniversitario;
 import ec.edu.epn.polidinner.modelo.Comprobante;
-import ec.edu.epn.polidinner.modelo.DetallePedido;
+import ec.edu.epn.polidinner.modelo.DiaComedor;
 import ec.edu.epn.polidinner.modelo.ItemMenu;
 import ec.edu.epn.polidinner.modelo.Menu;
+import ec.edu.epn.polidinner.modelo.OfertaMenu;
 import ec.edu.epn.polidinner.modelo.Pedido;
 import ec.edu.epn.polidinner.persistencia.ClienteUniversitarioDAO;
 import ec.edu.epn.polidinner.persistencia.ComprobanteDAO;
 import ec.edu.epn.polidinner.persistencia.MenuDAO;
-import ec.edu.epn.polidinner.persistencia.PedidoDAO;
-import ec.edu.epn.polidinner.persistencia.Transaccion;
 import ec.edu.epn.polidinner.servicio.ReglaPedidoException;
 import ec.edu.epn.polidinner.servicio.ServicioFranjas;
 import ec.edu.epn.polidinner.servicio.ServicioPedidos;
@@ -49,7 +48,6 @@ public class RealizarPedidoServlet extends HttpServlet {
     private static final int MAXIMO_POR_ITEM = 10;
 
     private final MenuDAO menuDAO = new MenuDAO();
-    private final PedidoDAO pedidoDAO = new PedidoDAO();
     private final ComprobanteDAO comprobanteDAO = new ComprobanteDAO();
     private final ClienteUniversitarioDAO clienteDAO = new ClienteUniversitarioDAO();
     private final ServicioPedidos servicioPedidos = new ServicioPedidos();
@@ -115,14 +113,16 @@ public class RealizarPedidoServlet extends HttpServlet {
      * Trazabilidad: Diagrama de secuencia CU03 - mensajes 7-8 MenuDAO.buscarMenuDelDia() / menuHoy,
      * 9-10 menuHoy.obtenerItems() / lista de ItemMenu y 11 (muestra ítems "Disponible" con stock).
      * Solo se ofrece un menú "Publicado"; un ítem retirado en el CU 02 ya no aparece.
+     * Corrección Paquete 2: se muestran las ofertas comprables hoy (no retiradas, con stock y sin caducar).
      */
     private Menu mostrarItemsDisponibles(HttpServletRequest request) {
-        Menu menuHoy = menuDAO.buscarMenuDelDia();
+        DiaComedor hoy = RelojAplicacion.diaComedor();
+        Menu menuHoy = menuDAO.buscarMenuDelDia(hoy);
         List<ItemMenu> disponibles = new ArrayList<>();
         if (menuHoy != null && "Publicado".equals(menuHoy.getEstado())) {
-            for (ItemMenu item : menuHoy.obtenerItems()) {
-                if (item.hayStock(1)) {
-                    disponibles.add(item);
+            for (OfertaMenu oferta : menuHoy.obtenerOfertas()) {
+                if (oferta.esComprable(1, hoy.getFecha())) {
+                    disponibles.add(oferta.getItem());
                 }
             }
         }
@@ -211,32 +211,22 @@ public class RealizarPedidoServlet extends HttpServlet {
             sesion.setAttribute("flashError", "Su pedido está vacío. Agregue al menos un plato o producto.");
             return "";
         }
-        Menu menuHoy = menuDAO.buscarMenuDelDia();
+        Menu menuHoy = menuDAO.buscarMenuDelDia(RelojAplicacion.diaComedor());
         if (menuHoy == null || !Menu.PUBLICADO.equals(menuHoy.getEstado())) {
             sesion.setAttribute("flashError", "El comedor ya cerró la venta de hoy.");
             return "?vista=carrito";
         }
-        try (Transaccion tx = Transaccion.iniciar()) {
-            // CU05: se vuelve a leer el menú dentro de la transacción por si el personal cerró la venta
-            // mientras el cliente confirmaba; sin confirmar(), close() hace rollback
-            Menu menuEnTransaccion = menuDAO.buscarPorId(menuHoy.getId(), tx);
-            if (menuEnTransaccion == null || !Menu.PUBLICADO.equals(menuEnTransaccion.getEstado())) {
-                sesion.setAttribute("flashError", "El comedor ya cerró la venta de hoy.");
-                return "?vista=carrito";
-            }
-            pedidoDAO.adjuntar(pedido, tx);
-            if (!pedido.confirmarPago()) {
-                // Mensaje 50: rollback (se cierra la transacción sin confirmar) y motivo del rechazo
-                sesion.setAttribute("flashError", motivoRechazo(pedido));
-                return "?vista=carrito";
-            }
-            pedidoDAO.guardarConComprobante(pedido, tx);
-            Comprobante comprobante = pedido.getComprobante();
-            tx.confirmar();
-
+        try {
+            // Una sola transacción en el servicio: vuelve a leer el menú (CU05, por si el personal cerró la venta
+            // mientras el cliente confirmaba), revalida la oferta de cada ítem (Paquete 2) y cobra; si algo falla,
+            // rollback completo. Mensaje 50: motivo del rechazo.
+            Comprobante comprobante = servicioPedidos.pagarAhora(pedido, RelojAplicacion.fechaActual());
             sesion.removeAttribute(PEDIDO);
             sesion.setAttribute(ULTIMO_CODIGO, comprobante.getCodigo());
             return "?vista=comprobante";
+        } catch (ReglaPedidoException e) {
+            sesion.setAttribute("flashError", e.getMessage());
+            return "?vista=carrito";
         } catch (RuntimeException e) {
             // Conflicto de versión (otro pago o un retiro simultáneo) u otro error: rollback completo
             log("Pago no completado; se hizo rollback", e);
@@ -264,7 +254,7 @@ public class RealizarPedidoServlet extends HttpServlet {
                 sesion.setAttribute("flashError", "Su pedido está vacío. Agregue al menos un plato o producto.");
                 return "";
             }
-            Menu menuHoy = menuDAO.buscarMenuDelDia();
+            Menu menuHoy = menuDAO.buscarMenuDelDia(RelojAplicacion.diaComedor());
             if (menuHoy == null || !Menu.PUBLICADO.equals(menuHoy.getEstado())) {
                 sesion.setAttribute("flashError", "El comedor ya cerró la venta de hoy.");
                 return "?vista=carrito";
@@ -330,25 +320,6 @@ public class RealizarPedidoServlet extends HttpServlet {
         request.getRequestDispatcher(VISTA_SALIDA).forward(request, response);
     }
 
-    /**
-     * Explica por qué confirmarPago() devolvió false: falta de stock de algún ítem o saldo insuficiente.
-     * HU07 Esc. 2.3: primero se revisa el stock, porque si otro estudiante compró la última unidad el ítem
-     * queda "Agotado" por reducirStock(); "retirado del menú" solo aplica si el personal lo retiró con stock.
-     */
-    private static String motivoRechazo(Pedido pedido) {
-        for (DetallePedido detalle : pedido.getDetalles()) {
-            ItemMenu item = detalle.getItem();
-            if (item.getStockActual() < detalle.getCantidad()) {
-                return "\"" + item.getNombre() + "\" ya no tiene stock suficiente."
-                        + " Quítelo o reduzca la cantidad.";
-            }
-            if (!"Disponible".equals(item.getEstado())) {
-                return "\"" + item.getNombre() + "\" fue retirado del menú. Quítelo de su pedido para continuar.";
-            }
-        }
-        return "Saldo insuficiente en PoliCuenta.";
-    }
-
     /** Pedido en armado de la sesión; si no existe, se inicia (mensaje 2 iniciar()). */
     private Pedido obtenerPedido(HttpSession sesion) {
         Pedido pedido = (Pedido) sesion.getAttribute(PEDIDO);
@@ -358,18 +329,17 @@ public class RealizarPedidoServlet extends HttpServlet {
     /**
      * Busca el ítem entre los "Disponible" del menú publicado de hoy: evita pedir ítems de otro menú o
      * retirados en el CU 02 manipulando el formulario.
+     * Corrección Paquete 2: el ítem debe tener una oferta comprable hoy en ese menú (V08: un producto
+     * registrado pero no ofrecido no se puede pedir enviando su id). El pago lo vuelve a comprobar.
      */
     private ItemMenu buscarItemOfrecido(int idItem) {
-        Menu menuHoy = menuDAO.buscarMenuDelDia();
+        DiaComedor hoy = RelojAplicacion.diaComedor();
+        Menu menuHoy = menuDAO.buscarMenuDelDia(hoy);
         if (menuHoy == null || !"Publicado".equals(menuHoy.getEstado())) {
             return null;
         }
-        for (ItemMenu item : menuHoy.obtenerItems()) {
-            if (item.getId() == idItem && "Disponible".equals(item.getEstado())) {
-                return item;
-            }
-        }
-        return null;
+        OfertaMenu oferta = menuHoy.buscarOferta(idItem);
+        return oferta != null && oferta.esComprable(1, hoy.getFecha()) ? oferta.getItem() : null;
     }
 
     private static Integer leerEntero(String valor) {

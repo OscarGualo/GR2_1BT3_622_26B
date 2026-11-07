@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ec.edu.epn.polidinner.modelo.DiaComedor;
+
 /**
  * Soporte técnico (no modelado): hora y fecha que usan los controladores de reservas (HU-01, HU-02 y HU-03).
  * Las reglas de negocio (Franja, AgendaReservas, Reserva) reciben esta hora como parámetro y no cambian.
@@ -51,6 +53,14 @@ final class RelojAplicacion {
     /** Fecha de hoy en la zona del comedor (en UTC, después de las 19:00 de Ecuador ya sería "mañana"). */
     static LocalDate fechaActual() {
         return LocalDate.now(zona());
+    }
+
+    /**
+     * Corrección de productos persistentes (Paquete 1a): el día del comedor, resuelto una vez por solicitud,
+     * que reciben el menú, el cierre, el comprobante y el reporte. La hora simulada no cambia la fecha.
+     */
+    static DiaComedor diaComedor() {
+        return new DiaComedor(fechaActual(), zona());
     }
 
     /** Panel "Modo demostración": fija la hora simulada para toda la aplicación hasta que se quite. */

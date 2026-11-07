@@ -1,6 +1,7 @@
 package ec.edu.epn.polidinner.modelo;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -25,6 +26,8 @@ import javax.persistence.TemporalType;
  * Métodos: publicarParaVenta(), cerrarParaVenta(), agregarItem(), obtenerItems()
  * (obtenerItem() en la Fig. 7; renombrado obtenerItems() en el Diagrama de clases del incremento 2, Fig. 15).
  * Asociaciones: "contiene" (1 Menu - * ItemMenu) y "administra" (* Menu - 1 PersonalComedor).
+ * Corrección de productos persistentes (Paquete 2): "contiene" se representa con OfertaMenu, la oferta de un
+ * ítem en el menú de un día. Así un mismo Producto se ofrece en varios menús sin copiar sus existencias.
  */
 @Entity
 public class Menu implements Serializable {
@@ -51,13 +54,15 @@ public class Menu implements Serializable {
     private PersonalComedor personal;
 
     /**
-     * Extremo de la asociación "contiene" (1 Menu contiene * ItemMenu).
-     * Unidireccional: la columna menu_id vive en la tabla ItemMenu, sin añadir atributos a ItemMenu.
+     * Asociación "contiene" (1 Menu - * ItemMenu) a través de la oferta del día.
+     * Única fuente de verdad de los ítems del menú (la antigua columna ItemMenu.menu_id ya no se usa).
+     * Solo se propaga PERSIST: guardar un menú nuevo guarda sus ofertas nuevas. No hay MERGE (un merge del
+     * menú no sobrescribe ofertas ni existencias que otra transacción acaba de vender) ni REMOVE/orphanRemoval
+     * (quitar una oferta nunca borra el producto ni su historial de pedidos).
      */
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "menu_id")
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
     @OrderBy("id")
-    private List<ItemMenu> items = new ArrayList<>();
+    private List<OfertaMenu> ofertas = new ArrayList<>();
 
     protected Menu() {
     }
@@ -71,6 +76,7 @@ public class Menu implements Serializable {
         this.estado = estado;
         this.personal = personal;
     }
+
     /** Trazabilidad: Secuencia "Crear Menú" - mensaje 3 <<create>> Menu(Fecha=hoy, Estado="Borrador"). */
     public Menu(Date fecha, String estado) {
         this.fecha = fecha;
@@ -84,13 +90,11 @@ public class Menu implements Serializable {
 
     /**
      * Trazabilidad: Diagrama de clases (Fig. 7) - Menu.publicarParaVenta().
-     * Diagrama de secuencia CU01 - mensajes 21 (publicarParaVenta()) y 22 (true, confirma publicación).
+     * Diagrama de secuencia CU01 - mensajes 10-11 (21-22) publicarParaVenta() / confirma publicación.
      * El estado cambia a "Publicado". No se publica un menú cerrado ni un menú sin ítems.
      */
-    /** Trazabilidad: Secuencia "Crear Menú" - mensajes 10-11 publicarParaVenta(); el estado cambia a "Publicado". */
-
     public boolean publicarParaVenta() {
-        if (CERRADO.equals(estado) || items.isEmpty()) {
+        if (CERRADO.equals(estado) || ofertas.isEmpty()) {
             return false;
         }
         this.estado = PUBLICADO;
@@ -113,16 +117,20 @@ public class Menu implements Serializable {
         return true;
     }
 
-    /** Trazabilidad: Secuencia "Crear Menú" - mensajes 8-9 agregarItem(nuevoPlato) / confirma adición. */
     /**
      * Trazabilidad: Diagrama de clases (Fig. 7) - Menu.agregarItem().
-     * Diagrama de secuencia CU01 - mensajes 15 (agregarItem(nuevoItem)) y 16 (true, confirma adición).
+     * Diagrama de secuencia CU01 - mensajes 8-9 (15-16) agregarItem(nuevoItem) / confirma adición.
+     * Corrección Paquete 2: crea la oferta del ítem en este menú. Rechaza un ítem nulo, un menú cerrado,
+     * un ítem ya ofrecido en este menú (V07) y un plato preparado para otra jornada (V10).
      */
     public boolean agregarItem(ItemMenu item) {
-        if (item == null || CERRADO.equals(estado) || items.contains(item)) {
+        if (item == null || CERRADO.equals(estado) || buscarOferta(item) != null) {
             return false;
         }
-        return items.add(item);
+        if (item instanceof Plato && !((Plato) item).prepararPara(getFechaCivil())) {
+            return false;
+        }
+        return ofertas.add(new OfertaMenu(this, item));
     }
 
     /**
@@ -130,22 +138,46 @@ public class Menu implements Serializable {
      * Verifica si un ítem pertenece a este menú.
      */
     public boolean perteneceAlMenu(int idItem) {
-        for (ItemMenu item : items) {
-            if (item.getId() == idItem) {
-                return true;
-            }
-        }
-        return false;
+        return buscarOferta(idItem) != null;
     }
 
     /**
      * Trazabilidad: Diagrama de clases (Fig. 15) - Menu.obtenerItems() (obtenerItem() en la Fig. 7).
-     * Diagrama de secuencia CU02 - mensajes 5 y 6: obtenerItems() / lista de ítems.
-     * Diagrama de secuencia CU03 - mensajes 9 y 10: obtenerItems() / lista de ItemMenu.
-     * Devuelve todos los ítems; cada controlador filtra los que necesita (CU02 y CU03: "Disponible").
+     * Diagrama de secuencia CU02 - mensajes 5 y 6 y CU03 - mensajes 9 y 10: obtenerItems() / lista de ítems.
+     * Se deriva de las ofertas, en el orden en que se agregaron; incluye los ítems retirados hoy.
      */
     public List<ItemMenu> obtenerItems() {
+        List<ItemMenu> items = new ArrayList<>();
+        for (OfertaMenu oferta : ofertas) {
+            items.add(oferta.getItem());
+        }
         return Collections.unmodifiableList(items);
+    }
+
+    /** Corrección Paquete 2: ofertas del día (cada una sabe si está retirada, sin stock o caducada). */
+    public List<OfertaMenu> obtenerOfertas() {
+        return Collections.unmodifiableList(ofertas);
+    }
+
+    /** Corrección Paquete 2: oferta del ítem indicado en este menú, o null si el menú no lo ofrece. */
+    public OfertaMenu buscarOferta(int idItem) {
+        for (OfertaMenu oferta : ofertas) {
+            if (oferta.getItem().getId() == idItem) {
+                return oferta;
+            }
+        }
+        return null;
+    }
+
+    /** Busca por identidad (ítems nuevos aún sin id) o por id (ítems ya guardados). */
+    private OfertaMenu buscarOferta(ItemMenu item) {
+        for (OfertaMenu oferta : ofertas) {
+            ItemMenu ofrecido = oferta.getItem();
+            if (ofrecido == item || (item.getId() != 0 && ofrecido.getId() == item.getId())) {
+                return oferta;
+            }
+        }
+        return null;
     }
 
     public int getId() {
@@ -154,6 +186,11 @@ public class Menu implements Serializable {
 
     public Date getFecha() {
         return fecha;
+    }
+
+    /** Fecha del menú como fecha civil (columna DATE), sin depender de la zona de la JVM. */
+    public LocalDate getFechaCivil() {
+        return DiaComedor.fechaCivilDe(fecha);
     }
 
     public String getEstado() {

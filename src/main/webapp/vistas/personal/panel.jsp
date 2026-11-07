@@ -21,7 +21,17 @@
                         <svg class="icono" aria-hidden="true"><use href="#i-menu"/></svg>
                         <span class="accion-fila__texto">
                             <strong>Crear menú</strong>
-                            <span>Arme el menú del día con platos y productos y publíquelo para la venta.</span>
+                            <span>Arme el menú del día con sus platos y los productos del inventario, y publíquelo para la venta.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>
+                <li>
+                    <a class="accion-fila" href="${pageContext.request.contextPath}/personal/productos">
+                        <svg class="icono" aria-hidden="true"><use href="#i-producto"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Productos</strong>
+                            <span>Registre productos con su caducidad; sus unidades se conservan para los menús de otros días.</span>
                         </span>
                         <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
                     </a>
@@ -31,7 +41,7 @@
                         <svg class="icono" aria-hidden="true"><use href="#i-retirar"/></svg>
                         <span class="accion-fila__texto">
                             <strong>Retirar plato y/o producto</strong>
-                            <span>Marque como agotado un plato o producto cuyas porciones se terminaron.</span>
+                            <span>Retire un plato o producto de la oferta de hoy; los productos conservan sus unidades.</span>
                         </span>
                         <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
                     </a>

@@ -1,7 +1,6 @@
 package ec.edu.epn.polidinner.controlador;
 
 import java.io.IOException;
-import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import ec.edu.epn.polidinner.modelo.DiaComedor;
 import ec.edu.epn.polidinner.modelo.Menu;
 import ec.edu.epn.polidinner.persistencia.MenuDAO;
 import ec.edu.epn.polidinner.persistencia.Transaccion;
@@ -42,10 +42,11 @@ public class CerrarMenuServlet extends HttpServlet {
      * ofrezca el reporte en lugar de invitar a crear otro menú.
      */
     private void iniciarCierre(HttpServletRequest request) {
-        Menu menuHoy = menuDAO.buscarMenuDelDia();
+        DiaComedor hoy = RelojAplicacion.diaComedor();
+        Menu menuHoy = menuDAO.buscarMenuDelDia(hoy);
         request.setAttribute("menuHoy", menuHoy);
         if (menuHoy == null) {
-            request.setAttribute("menuCerrado", menuDAO.buscarMenuCerrado(new Date()));
+            request.setAttribute("menuCerrado", menuDAO.buscarMenuCerrado(hoy));
         }
     }
 
@@ -72,9 +73,10 @@ public class CerrarMenuServlet extends HttpServlet {
      * @return ruta a la que se redirige: el reporte si se cerró, o de vuelta a esta pantalla si no
      */
     private String cerrar(HttpSession sesion) {
-        Menu menuHoy = menuDAO.buscarMenuDelDia();
+        DiaComedor hoy = RelojAplicacion.diaComedor();
+        Menu menuHoy = menuDAO.buscarMenuDelDia(hoy);
         if (menuHoy == null) {
-            if (menuDAO.buscarMenuCerrado(new Date()) != null) {
+            if (menuDAO.buscarMenuCerrado(hoy) != null) {
                 sesion.setAttribute("flashExito", "La venta de hoy ya estaba cerrada.");
                 return REPORTE;
             }

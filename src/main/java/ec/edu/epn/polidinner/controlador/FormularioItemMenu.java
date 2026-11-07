@@ -34,7 +34,15 @@ public class FormularioItemMenu {
     }
 
     public static FormularioItemMenu desde(HttpServletRequest request) {
-        String tipo = "Producto".equals(request.getParameter("tipo")) ? "Producto" : "Plato";
+        return desde(request, "Producto".equals(request.getParameter("tipo")) ? "Producto" : "Plato");
+    }
+
+    /**
+     * Corrección de productos persistentes (Paquete 2): el tipo lo fija la pantalla, no el formulario
+     * (Crear menú solo registra platos; Productos solo registra existencias de productos).
+     * Conserva los mismos límites de validación.
+     */
+    public static FormularioItemMenu desde(HttpServletRequest request, String tipo) {
         String nombre = recortar(request.getParameter("nombre"));
         String descripcion = recortar(request.getParameter("descripcion"));
         String textoPrecio = recortar(request.getParameter("precio"));
