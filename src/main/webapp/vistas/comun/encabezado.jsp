@@ -34,6 +34,7 @@
         <symbol id="i-chef" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"/><path d="M6 17h12"/></symbol>
         <symbol id="i-entrega" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 2 2 4-4"/><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/></symbol>
         <symbol id="i-flecha" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+        <symbol id="i-reloj" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
     </defs>
 </svg>
 <a class="saltar-contenido" href="#contenido">Saltar al contenido</a>
@@ -52,6 +53,8 @@
                 <a href="${pageContext.request.contextPath}/cliente/reservar"<c:if test="${rutaActual == '/cliente/reservar'}"> aria-current="page"</c:if>>Reservar mesa</a>
                 <%-- HU-02: acceso a la frontera "Mi reserva" --%>
                 <a href="${pageContext.request.contextPath}/cliente/mi-reserva"<c:if test="${rutaActual == '/cliente/mi-reserva'}"> aria-current="page"</c:if>>Mi reserva</a>
+                <%-- Examen 1B HU14: acceso a «Mis pedidos programados» --%>
+                <a href="${pageContext.request.contextPath}/cliente/programados"<c:if test="${rutaActual == '/cliente/programados'}"> aria-current="page"</c:if>>Pedidos programados</a>
                 <%-- CU 06: acceso a la frontera "Mis pedidos" --%>
                 <a href="${pageContext.request.contextPath}/cliente/cancelar"<c:if test="${rutaActual == '/cliente/cancelar'}"> aria-current="page"</c:if>>Mis pedidos</a>
             </nav>
@@ -80,6 +83,8 @@
             <nav class="barra__nav" aria-label="Principal">
                 <a href="${pageContext.request.contextPath}/vistas/personal/panel.jsp"<c:if test="${rutaActual == '/vistas/personal/panel.jsp'}"> aria-current="page"</c:if>>Panel</a>
                 <a href="${pageContext.request.contextPath}/personal/entrega"<c:if test="${rutaActual == '/personal/entrega'}"> aria-current="page"</c:if>>Habilitar entrega</a>
+                <a href="${pageContext.request.contextPath}/personal/programados"<c:if test="${rutaActual == '/personal/programados'}"> aria-current="page"</c:if>>Pedidos programados</a>
+                <a href="${pageContext.request.contextPath}/personal/cupos"<c:if test="${rutaActual == '/personal/cupos'}"> aria-current="page"</c:if>>Cupos</a>
                 <a href="${pageContext.request.contextPath}/personal/reporte"<c:if test="${rutaActual == '/personal/reporte'}"> aria-current="page"</c:if>>Reporte de ventas</a>
             </nav>
             <div class="barra__usuario">

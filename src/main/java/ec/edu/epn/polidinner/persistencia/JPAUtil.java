@@ -34,10 +34,20 @@ public final class JPAUtil {
             if (clave != null && !clave.isEmpty()) {
                 propiedades.put("javax.persistence.jdbc.password", clave);
             }
-            propiedades.putAll(propiedadesDeUrl(System.getenv("POLIDINNER_DB_URL")));
+            propiedades.putAll(propiedadesDeUrl(urlConfigurada()));
             emf = Persistence.createEntityManagerFactory(UNIDAD_PERSISTENCIA, propiedades);
         }
         return emf;
+    }
+
+    /**
+     * URL de la base: la propiedad de sistema polidinner.db.url (la usan las pruebas para levantar una H2
+     * en memoria, porque las variables de entorno no se pueden fijar desde JUnit) tiene prioridad sobre
+     * la variable de entorno POLIDINNER_DB_URL.
+     */
+    private static String urlConfigurada() {
+        String propiedad = System.getProperty("polidinner.db.url");
+        return propiedad != null && !propiedad.isEmpty() ? propiedad : System.getenv("POLIDINNER_DB_URL");
     }
 
     /**

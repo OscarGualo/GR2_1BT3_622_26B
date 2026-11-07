@@ -40,6 +40,14 @@ final class RelojAplicacion {
         return resolver(horaDelPanel.get(), leerArchivoDeHora(), System.getenv("POLIDINNER_HORA"), zona());
     }
 
+    /**
+     * Examen 1B: fecha y hora del comedor juntas, el valor que reciben los servicios de pedidos programados
+     * (plazo de 30 minutos, franjas posteriores a la hora actual) y que respeta la hora simulada.
+     */
+    static java.time.LocalDateTime ahora() {
+        return java.time.LocalDateTime.of(fechaActual(), horaActual());
+    }
+
     /** Fecha de hoy en la zona del comedor (en UTC, después de las 19:00 de Ecuador ya sería "mañana"). */
     static LocalDate fechaActual() {
         return LocalDate.now(zona());

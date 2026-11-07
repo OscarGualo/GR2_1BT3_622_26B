@@ -67,3 +67,15 @@ SELECT i.id, DATEADD('DAY', 7, CURRENT_DATE) FROM ItemMenu i
 WHERE i.nombre = 'Jugo de naranja'
   AND NOT EXISTS (SELECT 1 FROM Producto p WHERE p.id = i.id)
   AND NOT EXISTS (SELECT 1 FROM Plato p WHERE p.id = i.id);
+
+-- Examen 1B (HU16 Esc. 3.1): "Seco de pollo" ($4.00, plato) para el escenario de Luis Torres
+INSERT INTO ItemMenu (nombre, precio, estado, descripcion, stockActual, version, menu_id)
+SELECT 'Seco de pollo', 4.00, 'Disponible', 'Pollo guisado con arroz y maduro', 20, 0, m.id FROM Menu m
+WHERE m.id = (SELECT MAX(id) FROM Menu WHERE fecha = CURRENT_DATE AND estado <> 'Cerrado')
+  AND NOT EXISTS (SELECT 1 FROM ItemMenu i WHERE i.menu_id = m.id AND i.nombre = 'Seco de pollo');
+
+INSERT INTO Plato (id)
+SELECT i.id FROM ItemMenu i
+WHERE i.nombre = 'Seco de pollo'
+  AND NOT EXISTS (SELECT 1 FROM Plato p WHERE p.id = i.id)
+  AND NOT EXISTS (SELECT 1 FROM Producto p WHERE p.id = i.id);

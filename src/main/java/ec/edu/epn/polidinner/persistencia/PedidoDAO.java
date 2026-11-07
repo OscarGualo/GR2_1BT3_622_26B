@@ -1,5 +1,6 @@
 package ec.edu.epn.polidinner.persistencia;
 
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +49,40 @@ public class PedidoDAO extends GenericDAO<Pedido, Integer> {
         em.persist(pedido);
         em.persist(pedido.getComprobante());
         em.flush();
+    }
+
+    /**
+     * Examen 1B, HU13 (T13.1): pedidos programados Pagados de una fecha, en orden de franja y de pedido.
+     * Excluye los cancelados (Esc. 2.2) y los inmediatos del Release 1 (sin franja).
+     */
+    public List<Pedido> buscarProgramadosDelDia(LocalDate fecha) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery("SELECT p FROM Pedido p WHERE p.franja.fecha = :fecha AND p.estado = 'Pagado'"
+                            + " ORDER BY p.franja.horaInicio, p.id", Pedido.class)
+                    .setParameter("fecha", fecha)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Examen 1B, HU14 (T14.1): pedidos programados pendientes de retiro del estudiante, por hora de retiro.
+     * Solo Pagado: el Cancelado y el Entregado ya no están pendientes (CA2) y los de otros estudiantes
+     * no aparecen (CA3).
+     */
+    public List<Pedido> buscarProgramadosPendientes(String cedula) {
+        EntityManager em = JPAUtil.getEntityManager();
+        try {
+            return em.createQuery("SELECT p FROM Pedido p WHERE p.cliente.cedula = :cedula"
+                            + " AND p.franja IS NOT NULL AND p.estado = 'Pagado'"
+                            + " ORDER BY p.franja.fecha, p.franja.horaInicio, p.id", Pedido.class)
+                    .setParameter("cedula", cedula)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
     }
 
     /**

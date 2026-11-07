@@ -40,6 +40,14 @@ BEGIN
     INSERT INTO Producto (id, fechaCaducidad) VALUES (SCOPE_IDENTITY(), DATEADD(day, 7, @hoy));
 END
 
+-- Examen 1B (HU16 Esc. 3.1): "Seco de pollo" ($4.00, plato) para el escenario de Luis Torres
+IF NOT EXISTS (SELECT 1 FROM ItemMenu WHERE menu_id = @menu AND nombre = N'Seco de pollo')
+BEGIN
+    INSERT INTO ItemMenu (nombre, precio, estado, descripcion, stockActual, version, menu_id)
+    VALUES (N'Seco de pollo', 4.00, 'Disponible', N'Pollo guisado con arroz y maduro', 20, 0, @menu);
+    INSERT INTO Plato (id) VALUES (SCOPE_IDENTITY());
+END
+
 -- Incremento de reservas (HU-01 a HU-03): mesas del comedor
 IF NOT EXISTS (SELECT 1 FROM Mesa WHERE numero = 1) INSERT INTO Mesa (numero) VALUES (1);
 IF NOT EXISTS (SELECT 1 FROM Mesa WHERE numero = 2) INSERT INTO Mesa (numero) VALUES (2);

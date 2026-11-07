@@ -3,7 +3,6 @@ package ec.edu.epn.polidinner.controlador;
 import java.io.IOException;
 import java.util.Locale;
 
-import javax.persistence.PersistenceException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,7 +14,8 @@ import ec.edu.epn.polidinner.modelo.ClienteUniversitario;
 import ec.edu.epn.polidinner.modelo.Pedido;
 import ec.edu.epn.polidinner.persistencia.ClienteUniversitarioDAO;
 import ec.edu.epn.polidinner.persistencia.PedidoDAO;
-import ec.edu.epn.polidinner.persistencia.Transaccion;
+import ec.edu.epn.polidinner.servicio.ReglaPedidoException;
+import ec.edu.epn.polidinner.servicio.ServicioPedidos;
 
 
 /**
@@ -29,6 +29,7 @@ public class CancelarPedidoServlet extends HttpServlet {
     private static final String VISTA_MIS_PEDIDOS = "/vistas/cliente/misPedidos.jsp";
 
     private final PedidoDAO pedidoDAO = new PedidoDAO();
+    private final ServicioPedidos servicioPedidos = new ServicioPedidos();
     private final ClienteUniversitarioDAO clienteDAO = new ClienteUniversitarioDAO();
 
     /**
@@ -63,38 +64,30 @@ public class CancelarPedidoServlet extends HttpServlet {
         } else {
             cancelar(sesion, (ClienteUniversitario) sesion.getAttribute("cliente"), idPedido);
         }
-        response.sendRedirect(request.getContextPath() + "/cliente/cancelar");
+        response.sendRedirect(request.getContextPath() + destino(request.getParameter("origen")));
     }
 
     /**
      * Trazabilidad: Diagrama de secuencia CU06 - mensajes 8 (Transaccion.iniciar()), 9-10
      * (PedidoDAO.buscarPorId(idPedido, tx) / pedido), 11-15 (pedido.cancelar(): acreditar, loop reponerStock,
      * marcarCodigoUsado), 16 (confirmar()) o rollback, y 17 (mensaje al cliente).
-     * El pedido queda gestionado por el EntityManager junto con su PoliCuenta, ítems y comprobante:
-     * el commit guarda todos los cambios juntos. Si el personal entrega el mismo pedido al mismo tiempo,
-     * el @Version de Comprobante hace fallar una de las dos transacciones (OptimisticLockException).
+     * Examen 1B (HU12, T12.1-T12.2): la cancelación vive ahora en ServicioPedidos, que aplica el plazo de
+     * 30 minutos a los pedidos con hora de retiro, libera el cupo de la franja (HU16 CA4) y garantiza un solo
+     * reembolso (Esc. 3.1 y 3.2). Esta ruta del Release 1 no puede omitir esas reglas porque no tiene otra.
      */
     private void cancelar(HttpSession sesion, ClienteUniversitario cliente, int idPedido) {
-        try (Transaccion tx = Transaccion.iniciar()) {
-            Pedido pedido = pedidoDAO.buscarPorId(idPedido, tx);
-            if (pedido == null || !pedido.getCliente().getCedula().equals(cliente.getCedula())) {
-                // Sin confirmar(): close() hace rollback
-                sesion.setAttribute("flashError", "No se encontró ese pedido entre los suyos.");
-                return;
-            }
-            if (!pedido.cancelar()) {
-                sesion.setAttribute("flashError", "Solo se puede cancelar un pedido pagado que aún no se entregó.");
-                return;
-            }
-            tx.confirmar();
+        try {
+            Pedido cancelado = servicioPedidos.cancelar(idPedido, cliente.getCedula(), RelojAplicacion.ahora());
             sesion.setAttribute("flashExito", String.format(Locale.US,
-                    "Pedido cancelado. Se devolvieron $%.2f a su PoliCuenta.", pedido.getTotal()));
-        } catch (PersistenceException e) {
-            // OptimisticLockException / RollbackException: el pedido cambió (p. ej. se entregó) mientras se cancelaba
-            log("Cancelación no completada; se hizo rollback", e);
-            sesion.setAttribute("flashError", "El pedido acaba de ser entregado o modificado; no se pudo cancelar."
-                    + " No se movió dinero de su PoliCuenta.");
+                    "Pedido cancelado. Se devolvieron $%.2f a su PoliCuenta.", cancelado.getTotal()));
+        } catch (ReglaPedidoException e) {
+            sesion.setAttribute("flashError", e.getMessage());
         }
+    }
+
+    /** Vuelve a «Mis pedidos programados» si la cancelación se pidió desde esa lista; si no, a «Mis pedidos». */
+    static String destino(String origen) {
+        return "programados".equals(origen) ? "/cliente/programados" : "/cliente/cancelar";
     }
 
     private static Integer leerEntero(String valor) {

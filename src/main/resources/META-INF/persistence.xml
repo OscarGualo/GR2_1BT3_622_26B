@@ -17,9 +17,11 @@
         <class>ec.edu.epn.polidinner.modelo.Comprobante</class>
         <class>ec.edu.epn.polidinner.modelo.Mesa</class>
         <class>ec.edu.epn.polidinner.modelo.Reserva</class>
+        <class>ec.edu.epn.polidinner.modelo.FranjaRetiro</class>
+        <class>ec.edu.epn.polidinner.modelo.ConfiguracionCupos</class>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=PoliDinner;encrypt=true;trustServerCertificate=true"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=PoliDinner;encrypt=true;trustServerCertificate=true;sendTimeAsDatetime=false"/>
             <!-- Usuario y clave reales: variables de entorno POLIDINNER_DB_USER y POLIDINNER_DB_PASSWORD (ver JPAUtil) -->
             <property name="javax.persistence.jdbc.user" value="polidinner"/>
             <property name="javax.persistence.jdbc.password" value="admin   "/>

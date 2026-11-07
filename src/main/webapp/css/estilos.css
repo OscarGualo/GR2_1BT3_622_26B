@@ -772,3 +772,86 @@ ul.tickets { list-style: none; padding: 0; }
     .plano__panel[hidden] { display: block !important; }
     .butaca { break-inside: avoid; }
 }
+
+/* =====================================================================
+   15. Examen 1B: franjas de retiro, pedidos programados, comanda y cupos
+   Reutiliza solo tokens y componentes del MASTER (listas, no tarjetas; un color, una función).
+   ===================================================================== */
+.pago__form { margin-top: var(--e-5); }
+.pago__form legend, .franjas-retiro legend { padding: 0; margin-bottom: var(--e-2); font-weight: 700; }
+
+/* Selector de franja: lista de filas con botón de opción; la elegida se invierte (tinta sobre papel) */
+.franjas-retiro { border: 0; padding: 0; margin: 0 0 var(--e-5); min-width: 0; }
+.franjas-retiro[hidden] { display: none; }
+.franjas-retiro__ayuda, .franjas-retiro__vacio { margin: 0 0 var(--e-3); color: var(--tinta-suave); font-size: var(--t-detalle); }
+.franjas-retiro__lista { list-style: none; margin: 0; padding: 0; border-top: var(--separador); max-height: 22rem; overflow-y: auto; }
+.franja-fila { position: relative; border-bottom: var(--separador); }
+.franja-fila input { position: absolute; opacity: 0; pointer-events: none; }
+.franja-fila label {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--e-3);
+    min-height: 48px; margin: 0; padding: var(--e-2) var(--e-3); cursor: pointer;
+    transition: background-color var(--dur-base) var(--curva-salida), color var(--dur-base) var(--curva-salida);
+}
+.franja-fila__hora { font-weight: 700; font-stretch: var(--ancho-marca); font-variant-numeric: tabular-nums; }
+.franja-fila__lugares { color: var(--tinta-suave); font-size: var(--t-detalle); font-variant-numeric: tabular-nums; }
+.franja-fila input:checked + label { background: var(--tinta); color: var(--papel); }
+.franja-fila input:checked + label .franja-fila__lugares { color: inherit; }
+.franja-fila input:focus-visible + label { outline: 3px solid var(--anillo); outline-offset: -3px; }
+.franja-fila input:disabled + label { cursor: not-allowed; }
+.franja-fila input:disabled + label .franja-fila__hora { opacity: .55; }
+.franja-fila--actual label::after { content: "Franja actual"; color: var(--tinta-suave); font-size: var(--t-detalle); }
+@media (hover: hover) and (pointer: fine) {
+    .franja-fila input:not(:disabled):not(:checked) + label:hover { background: var(--hundido); }
+}
+.franjas-retiro--dialogo { margin-bottom: 0; }
+.franjas-retiro--dialogo .franjas-retiro__lista { max-height: 16rem; }
+.dialogo--ancho { width: min(520px, calc(100vw - 2 * var(--margen))); }
+.dialogo--ancho .dialogo__acciones { margin-top: var(--e-4); }
+
+/* Mis pedidos programados: lista a todo el ancho, la hora de retiro es el dato mayor */
+.programados { list-style: none; margin: 0; padding: 0; border-top: var(--regla); }
+.programado {
+    display: grid; grid-template-columns: 17rem minmax(0, 1fr) auto;
+    gap: var(--e-4) var(--e-6); align-items: start;
+    padding: var(--e-5) 0; border-bottom: var(--separador);
+}
+.programado__hora { margin: 0; white-space: nowrap; font-size: var(--t-cifra); font-weight: 800; font-stretch: var(--ancho-marca); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.programado__codigo { margin: var(--e-1) 0 0; color: var(--accion); font-weight: 800; font-stretch: var(--ancho-codigo); font-variant-numeric: tabular-nums; }
+.programado__items { list-style: none; margin: 0 0 var(--e-2); padding: 0; font-size: var(--t-plato); font-weight: 600; }
+.programado__total, .programado__plazo { margin: 0; color: var(--tinta-suave); font-size: var(--t-detalle); }
+.programado__total strong { color: var(--tinta); }
+.programado__plazo { margin-top: var(--e-1); }
+.programado__acciones { display: flex; flex-direction: column; gap: var(--e-2); align-items: stretch; }
+.programado__acciones form { margin: 0; }
+.programado__acciones .btn { width: 100%; justify-content: center; }
+
+/* Pedidos programados del personal: una comanda por franja */
+.comanda { margin-bottom: var(--e-7); }
+.comanda__cabecera { display: flex; align-items: baseline; gap: var(--e-4); flex-wrap: wrap; padding-top: var(--e-3); border-top: var(--regla); }
+.comanda__cabecera h2 { margin: 0; font-size: var(--t-cifra); font-weight: 800; font-stretch: var(--ancho-marca); font-variant-numeric: tabular-nums; }
+.comanda__conteo { margin: 0; color: var(--tinta-suave); }
+.comanda__cuerpo { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: var(--e-5) var(--e-7); margin-top: var(--e-4); }
+.comanda__preparar h3 { margin: 0 0 var(--e-2); font-size: var(--t-seccion); }
+.comanda__totales { list-style: none; margin: 0; padding: 0; }
+.comanda__totales li { display: flex; justify-content: space-between; gap: var(--e-3); padding: var(--e-2) 0; border-bottom: 2px dotted var(--linea); font-size: var(--t-plato); }
+.comanda__totales strong { font-variant-numeric: tabular-nums; }
+
+/* Cupos de retiro */
+.cupo-general { margin-bottom: var(--e-7); }
+.cupo-general__form { display: flex; align-items: flex-end; gap: var(--e-4); flex-wrap: wrap; }
+.cupo-general__form .campo { flex: 0 1 340px; margin: 0; }
+.cupos-franjas h2 { margin-bottom: var(--e-3); }
+.tabla-cupos th[scope="row"] { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.cupo-franja { display: flex; align-items: center; gap: var(--e-2); margin: 0; }
+.entrada--corta { width: 7rem; min-width: 0; }
+.acciones form { margin: 0; }
+
+@media (max-width: 767px) {
+    .programado { grid-template-columns: 1fr; }
+    .programado__acciones { flex-direction: row; flex-wrap: wrap; }
+    .programado__acciones .btn { width: auto; }
+    .comanda__cuerpo { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .franja-fila label { transition: none; }
+}
