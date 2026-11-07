@@ -10,8 +10,13 @@ import ec.edu.epn.polidinner.modelo.Comprobante;
 import ec.edu.epn.polidinner.modelo.DetallePedido;
 import ec.edu.epn.polidinner.modelo.FranjaRetiro;
 import ec.edu.epn.polidinner.modelo.ItemMenu;
+import ec.edu.epn.polidinner.modelo.Menu;
+import ec.edu.epn.polidinner.modelo.OfertaMenu;
 import ec.edu.epn.polidinner.modelo.Pedido;
+import ec.edu.epn.polidinner.modelo.Producto;
 import ec.edu.epn.polidinner.persistencia.FranjaRetiroDAO;
+import ec.edu.epn.polidinner.persistencia.MenuDAO;
+import ec.edu.epn.polidinner.persistencia.OfertaMenuDAO;
 import ec.edu.epn.polidinner.persistencia.PedidoDAO;
 import ec.edu.epn.polidinner.persistencia.Transaccion;
 
@@ -28,8 +33,12 @@ public class ServicioPedidos {
     static final String CAMBIO_CONCURRENTE = "El pedido cambió mientras se procesaba su solicitud. No se movió"
             + " dinero, existencias ni cupo; revise su lista de pedidos e inténtelo de nuevo.";
 
+    static final String VENTA_CERRADA = "El comedor ya cerró la venta de hoy.";
+
     private final PedidoDAO pedidoDAO;
     private final FranjaRetiroDAO franjaDAO;
+    private final MenuDAO menuDAO = new MenuDAO();
+    private final OfertaMenuDAO ofertaDAO = new OfertaMenuDAO();
 
     public ServicioPedidos() {
         this(new PedidoDAO(), new FranjaRetiroDAO());
@@ -62,6 +71,8 @@ public class ServicioPedidos {
             int cupoGeneral = franjaDAO.cupoGeneral(tx);
             exigirFranjaConCupo(franja, cupoGeneral);
             pedidoDAO.adjuntar(pedido, tx);
+            // Corrección Paquete 2: la venta sigue abierta y cada ítem sigue en la oferta, antes de cobrar o reservar
+            revisarOfertas(pedido, menuAbierto(fecha, tx), fecha, tx);
             if (!franjaDAO.reservar(franja.getId(), cupoGeneral, tx)) {
                 throw new ReglaPedidoException("La franja se llenó mientras confirmabas");
             }
@@ -76,6 +87,64 @@ public class ServicioPedidos {
         } catch (PersistenceException e) {
             throw new ReglaPedidoException("No se pudo completar el pago porque el menú o la franja cambiaron"
                     + " mientras confirmaba. No se descontó nada de su PoliCuenta; vuelva a intentarlo.");
+        }
+    }
+
+    /**
+     * CU03 «Pagar ahora» (Release 1), movido desde RealizarPedidoServlet para compartir la revalidación con el
+     * pedido programado. En UNA transacción: vuelve a leer el menú (por si se cerró la venta), adjunta los
+     * ítems y la PoliCuenta actuales, revalida la oferta de cada ítem con bloqueo optimista (Paquete 2),
+     * cobra, descuenta stock y guarda el pedido con su comprobante. Cualquier rechazo deshace todo.
+     *
+     * @return el comprobante con el código PD-xxxx
+     * @throws ReglaPedidoException con el motivo del rechazo (venta cerrada, retirado, caducado, stock o saldo)
+     * @throws PersistenceException si otra transacción cambió el menú, el stock o la oferta al mismo tiempo
+     */
+    public Comprobante pagarAhora(Pedido pedido, LocalDate hoy) {
+        try (Transaccion tx = Transaccion.iniciar()) {
+            Menu menu = menuAbierto(hoy, tx);
+            pedidoDAO.adjuntar(pedido, tx);
+            revisarOfertas(pedido, menu, hoy, tx);
+            if (!pedido.confirmarPago()) {
+                throw new ReglaPedidoException(motivoRechazoDePagoInmediato(pedido));
+            }
+            pedidoDAO.guardarConComprobante(pedido, tx);
+            Comprobante comprobante = pedido.getComprobante();
+            tx.confirmar();
+            return comprobante;
+        }
+    }
+
+    /** Menú publicado de la fecha, leído en la transacción; si no lo hay, la venta está cerrada (CU05). */
+    private Menu menuAbierto(LocalDate fecha, Transaccion tx) {
+        Menu menu = menuDAO.buscarMenuDelDia(fecha, tx);
+        if (menu == null || !Menu.PUBLICADO.equals(menu.getEstado())) {
+            throw new ReglaPedidoException(VENTA_CERRADA);
+        }
+        return menu;
+    }
+
+    /**
+     * Corrección Paquete 2: cada ítem del pedido debe seguir ofrecido en el menú de hoy y, si es un producto,
+     * sin caducar. La oferta se lee con LockModeType.OPTIMISTIC: si el personal la retira antes del commit,
+     * el pago falla. No confía en el id enviado por el navegador ni en la copia del pedido en la sesión.
+     */
+    private void revisarOfertas(Pedido pedido, Menu menu, LocalDate hoy, Transaccion tx) {
+        for (DetallePedido detalle : pedido.getDetalles()) {
+            ItemMenu item = detalle.getItem();
+            OfertaMenu oferta = ofertaDAO.buscarParaPago(menu.getId(), item.getId(), tx);
+            if (oferta == null) {
+                throw new ReglaPedidoException("\"" + item.getNombre()
+                        + "\" no está en el menú de hoy. Quítelo de su pedido para continuar.");
+            }
+            if (!oferta.estaOfrecida()) {
+                throw new ReglaPedidoException("\"" + item.getNombre()
+                        + "\" fue retirado del menú. Quítelo de su pedido para continuar.");
+            }
+            if (item instanceof Producto && !((Producto) item).estaVigente(hoy)) {
+                throw new ReglaPedidoException("\"" + item.getNombre()
+                        + "\" caducó. Quítelo de su pedido para continuar.");
+            }
         }
     }
 
@@ -202,5 +271,11 @@ public class ServicioPedidos {
             }
         }
         return "Saldo insuficiente en PoliCuenta";
+    }
+
+    /** Mismo motivo con el texto que ya mostraba «Pagar ahora» (termina en punto). */
+    static String motivoRechazoDePagoInmediato(Pedido pedido) {
+        String motivo = motivoRechazoDePago(pedido);
+        return motivo.endsWith(".") ? motivo : motivo + ".";
     }
 }

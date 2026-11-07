@@ -3,6 +3,8 @@ package ec.edu.epn.polidinner.controlador;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -14,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import ec.edu.epn.polidinner.modelo.DiaComedor;
 import ec.edu.epn.polidinner.modelo.Pedido;
 import ec.edu.epn.polidinner.modelo.ReporteVentas;
 import ec.edu.epn.polidinner.persistencia.MenuDAO;
@@ -42,23 +45,27 @@ public class ReporteVentasServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        Date hoy = inicioDelDia(new Date());
-        Date dia = leerFecha(request.getParameter("fecha"));
-        if (dia == null) {
+        // Corrección Paquete 1a: "hoy" y los límites del día son los del comedor, no los del servidor
+        DiaComedor hoy = RelojAplicacion.diaComedor();
+        String parametro = request.getParameter("fecha");
+        LocalDate fecha = parametro == null || parametro.trim().isEmpty() ? hoy.getFecha() : leerFechaCivil(parametro);
+        if (fecha == null) {
             request.setAttribute("error", "La fecha indicada no es válida. Se muestra el reporte de hoy.");
-            dia = hoy;
+            fecha = hoy.getFecha();
         }
-        request.setAttribute("fecha", new SimpleDateFormat(FORMATO_FECHA).format(dia));
-        request.setAttribute("esHoy", dia.equals(hoy));
+        DiaComedor dia = new DiaComedor(fecha, hoy.getZona());
+        boolean esFutura = fecha.isAfter(hoy.getFecha());
+        request.setAttribute("fecha", fecha.toString());
+        request.setAttribute("esHoy", fecha.equals(hoy.getFecha()));
 
         try {
-            List<Pedido> pedidos = dia.after(hoy) ? Collections.<Pedido>emptyList() : pedidoDAO.buscarPorFecha(dia);
-            ReporteVentas reporte = new ReporteVentas(dia, pedidos);
+            List<Pedido> pedidos = esFutura ? Collections.<Pedido>emptyList() : pedidoDAO.buscarPorFecha(dia);
+            ReporteVentas reporte = new ReporteVentas(dia.comoFechaCivil(), pedidos);
             request.setAttribute("reporte", reporte);
             request.setAttribute("total", reporte.calcularTotalVendido());
             request.setAttribute("pendientes", contarPendientesDeEntrega(pedidos));
             request.setAttribute("ventaCerrada", menuDAO.buscarMenuCerrado(dia) != null);
-            request.setAttribute("esFutura", dia.after(hoy));
+            request.setAttribute("esFutura", esFutura);
         } catch (RuntimeException e) {
             log("No se pudo consultar el reporte de ventas", e);
             request.setAttribute("error", "No se pudo consultar el reporte de ventas. Intente de nuevo en unos minutos.");
@@ -82,6 +89,12 @@ public class ReporteVentasServlet extends HttpServlet {
         } catch (ParseException e) {
             return null;
         }
+    }
+
+    /** Fecha civil del parámetro "fecha" (yyyy-MM-dd, con la misma validación estricta de leerFecha), o null. */
+    static LocalDate leerFechaCivil(String valor) {
+        Date leida = leerFecha(valor);
+        return leida == null ? null : leida.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
     /** Pedidos ya cobrados que todavía no se retiran: se pueden seguir entregando después del cierre (CU 04). */

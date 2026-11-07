@@ -1,9 +1,7 @@
 package ec.edu.epn.polidinner.modelo;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.UUID;
 
@@ -103,7 +101,7 @@ public class Comprobante implements Serializable {
      * (caso de prueba: "el código es correcto, del día y no usado").
      */
     public boolean validarCodigoEntrega() {
-        return !usado && esDeHoy() && pedido != null && "Pagado".equals(pedido.getEstado());
+        return validarCodigoEntrega(DiaComedor.delSistema());
     }
 
     /**
@@ -132,11 +130,17 @@ public class Comprobante implements Serializable {
      * Refactorización: Substitute Algorithm (compara días con LocalDate en lugar de textos).
      */
     public boolean esDeHoy() {
-        return fechaGeneracion != null
-                && fechaGeneracion.toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate()
-                .equals(LocalDate.now());
+        return esDeHoy(DiaComedor.delSistema());
+    }
+
+    /** Corrección Paquete 1a: ¿se generó en el día del comedor indicado (no en el día del servidor)? */
+    public boolean esDeHoy(DiaComedor hoy) {
+        return hoy.contiene(fechaGeneracion);
+    }
+
+    /** Corrección Paquete 1a: validarCodigoEntrega() con el día del comedor (mismas reglas). */
+    public boolean validarCodigoEntrega(DiaComedor hoy) {
+        return !usado && esDeHoy(hoy) && pedido != null && "Pagado".equals(pedido.getEstado());
     }
 
     public String getIdComprobante() {

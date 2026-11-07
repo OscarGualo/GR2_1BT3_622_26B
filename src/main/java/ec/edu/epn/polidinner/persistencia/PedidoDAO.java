@@ -1,12 +1,13 @@
 package ec.edu.epn.polidinner.persistencia;
 
 import java.time.LocalDate;
-import java.util.Calendar;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TemporalType;
 import ec.edu.epn.polidinner.modelo.DetallePedido;
+import ec.edu.epn.polidinner.modelo.DiaComedor;
 import ec.edu.epn.polidinner.modelo.ItemMenu;
 import ec.edu.epn.polidinner.modelo.Pedido;
 import ec.edu.epn.polidinner.modelo.Policuenta;
@@ -109,22 +110,23 @@ public class PedidoDAO extends GenericDAO<Pedido, Integer> {
      * Orden ascendente por id, que es el orden en que se pagaron.
      */
     public List<Pedido> buscarPorFecha(Date dia) {
-        Calendar inicio = Calendar.getInstance();
-        inicio.setTime(dia);
-        inicio.set(Calendar.HOUR_OF_DAY, 0);
-        inicio.set(Calendar.MINUTE, 0);
-        inicio.set(Calendar.SECOND, 0);
-        inicio.set(Calendar.MILLISECOND, 0);
-        Calendar fin = (Calendar) inicio.clone();
-        fin.add(Calendar.DAY_OF_MONTH, 1);
+        ZoneId zona = ZoneId.systemDefault();
+        return buscarPorFecha(new DiaComedor(dia.toInstant().atZone(zona).toLocalDate(), zona));
+    }
 
+    /** Corrección Paquete 1a: pedidos del día del comedor, [00:00, 00:00 del día siguiente) en su zona. */
+    public List<Pedido> buscarPorFecha(DiaComedor dia) {
+        return buscarEntre(dia.inicio(), dia.fin());
+    }
+
+    private List<Pedido> buscarEntre(Date inicio, Date fin) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
             return em.createQuery(
                             "SELECT p FROM Pedido p WHERE p.fecha >= :inicio AND p.fecha < :fin ORDER BY p.id",
                             Pedido.class)
-                    .setParameter("inicio", inicio.getTime(), TemporalType.TIMESTAMP)
-                    .setParameter("fin", fin.getTime(), TemporalType.TIMESTAMP)
+                    .setParameter("inicio", inicio, TemporalType.TIMESTAMP)
+                    .setParameter("fin", fin, TemporalType.TIMESTAMP)
                     .getResultList();
         } finally {
             em.close();

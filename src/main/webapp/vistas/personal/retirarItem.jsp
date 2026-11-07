@@ -14,7 +14,7 @@
     </nav>
     <div class="titulo-pagina">
         <h1>Retirar plato o producto del menú</h1>
-        <p>Marque como agotado un ítem cuyas porciones se terminaron. El ítem deja de ofrecerse a los comensales, pero su registro se conserva.</p>
+        <p>Retire de la oferta de hoy un plato o producto. Deja de ofrecerse a los comensales hoy; el producto conserva sus unidades y se puede volver a ofrecer otro día.</p>
     </div>
     <jsp:include page="/vistas/comun/mensajes.jsp"/>
 
@@ -38,11 +38,11 @@
                 </div>
                 <div class="resumen-menu">
                     <span>Fecha: <strong><fmt:formatDate value="${menuHoy.fecha}" pattern="dd/MM/yyyy"/></strong></span>
-                    <span>Disponibles: <strong>${items.size()}</strong></span>
+                    <span>Disponibles: <strong>${ofertas.size()}</strong></span>
                     <span>Retirados: <strong>${retirados}</strong></span>
                 </div>
                 <c:choose>
-                    <c:when test="${empty items}">
+                    <c:when test="${empty ofertas}">
                         <div class="vacio">
                             <p>No quedan ítems disponibles en el menú de hoy.</p>
                         </div>
@@ -50,7 +50,8 @@
                     <c:otherwise>
                         <%-- pages/crear-retirar-cerrar.md: la misma Carta que ve el estudiante, con "Retirar" por fila --%>
                         <ul class="carta carta--doble">
-                            <c:forEach var="item" items="${items}">
+                            <c:forEach var="oferta" items="${ofertas}">
+                                <c:set var="item" value="${oferta.item}"/>
                                 <li class="carta__item">
                                     <div class="carta__linea">
                                         <h3 class="carta__nombre" id="item-${item.id}"><c:out value="${item.nombre}"/></h3>
@@ -61,7 +62,8 @@
                                         <c:out value="${item.tipo}"/>
                                         <c:if test="${not empty item.descripcion}"> · <c:out value="${item.descripcion}"/></c:if>
                                         · ${item.tipo == 'Producto' ? 'stock' : 'porciones'} ${item.stockActual}
-                                        <span class="estado estado-${item.estado.toLowerCase()}"><c:out value="${item.estado}"/></span>
+                                        <span class="estado estado-disponible">Disponible</span>
+                                        <c:if test="${item.tipo == 'Producto'}"> · caduca <fmt:formatDate value="${item.fechaCaducidad}" pattern="dd/MM/yyyy"/></c:if>
                                     </p>
                                     <div class="carta__acciones">
                                         <%-- Mensajes 8-9: selecciona el ítem → retirarItem(idItem) --%>
@@ -69,7 +71,7 @@
                                               class="form-retirar" data-nombre="<c:out value='${item.nombre}'/>">
                                             <input type="hidden" name="accion" value="retirar">
                                             <input type="hidden" name="idItem" value="${item.id}">
-                                            <input type="hidden" name="version" value="${item.version}">
+                                            <input type="hidden" name="version" value="${oferta.version}">
                                             <button type="submit" class="btn btn-secundario btn-borde-peligro btn-chico">
                                                 <svg class="icono" aria-hidden="true"><use href="#i-retirar"/></svg>
                                                 Retirar<span class="solo-lector"> <c:out value="${item.nombre}"/></span>
@@ -82,6 +84,32 @@
                     </c:otherwise>
                 </c:choose>
             </section>
+            <%-- Corrección Paquete 2: ofertas de hoy que no se pueden retirar, con su situación (retiro diario,
+                 sin unidades o caducidad son condiciones distintas) --%>
+            <c:if test="${not empty noDisponibles}">
+                <section class="tarjeta" aria-labelledby="titulo-no-disponibles">
+                    <h2 id="titulo-no-disponibles">No disponibles hoy</h2>
+                    <ul class="carta">
+                        <c:forEach var="oferta" items="${noDisponibles}">
+                            <c:set var="situacion" value="${oferta.estadoEn(hoy)}"/>
+                            <li class="carta__item">
+                                <div class="carta__linea">
+                                    <h3 class="carta__nombre"><c:out value="${oferta.item.nombre}"/></h3>
+                                    <span class="carta__guia" aria-hidden="true"></span>
+                                    <span class="carta__precio">$<fmt:formatNumber value="${oferta.item.precio}" pattern="0.00"/></span>
+                                </div>
+                                <p class="carta__meta">
+                                    <c:out value="${oferta.item.tipo}"/>
+                                    · ${oferta.item.tipo == 'Producto' ? 'stock' : 'porciones'} ${oferta.item.stockActual}
+                                    <span class="estado ${situacion == 'Retirado' ? 'estado-agotado' : 'estado-borrador'}">
+                                        <c:out value="${situacion == 'Retirado' ? 'Retirado hoy' : situacion}"/>
+                                    </span>
+                                </p>
+                            </li>
+                        </c:forEach>
+                    </ul>
+                </section>
+            </c:if>
         </c:otherwise>
     </c:choose>
 </main>
@@ -90,7 +118,7 @@
 <dialog class="dialogo" id="dialogo-retiro" aria-labelledby="dialogo-titulo" aria-describedby="dialogo-texto">
     <div class="dialogo__icono"><svg class="icono icono-lg" aria-hidden="true"><use href="#i-retirar"/></svg></div>
     <h2 id="dialogo-titulo">¿Retirar <span id="dialogo-nombre"></span> del menú?</h2>
-    <p id="dialogo-texto">El ítem pasará a estado <strong>Agotado</strong> y los comensales ya no podrán pedirlo.</p>
+    <p id="dialogo-texto">El ítem se <strong>retirará de la oferta de hoy</strong> y los comensales ya no podrán pedirlo. Si es un producto, sus unidades se conservan para otro día.</p>
     <div class="dialogo__acciones">
         <button type="button" class="btn btn-secundario" id="dialogo-cancelar">Cancelar</button>
         <button type="button" class="btn btn-peligro" id="dialogo-confirmar">

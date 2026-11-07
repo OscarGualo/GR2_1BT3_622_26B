@@ -1,11 +1,13 @@
 package ec.edu.epn.polidinner.persistencia;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TemporalType;
 
+import ec.edu.epn.polidinner.modelo.DiaComedor;
 import ec.edu.epn.polidinner.modelo.Menu;
 
 /**
@@ -24,12 +26,40 @@ public class MenuDAO extends GenericDAO<Menu, Integer> {
      * o null si todavía no se ha creado.
      */
     public Menu buscarMenuDelDia() {
+        return buscarMenuDelDia(DiaComedor.delSistema());
+    }
+
+    /** Corrección Paquete 1a: menú no cerrado del día del comedor indicado. */
+    public Menu buscarMenuDelDia(DiaComedor hoy) {
+        return buscarUno("SELECT m FROM Menu m WHERE m.fecha = :dia AND m.estado <> 'Cerrado' ORDER BY m.id DESC",
+                hoy.comoFechaCivil());
+    }
+
+    /**
+     * Corrección Paquete 2: menú no cerrado de la fecha, leído dentro de la transacción del pago, para
+     * revalidar que la venta sigue abierta y que cada ítem pertenece a su oferta.
+     */
+    public Menu buscarMenuDelDia(LocalDate fecha, Transaccion tx) {
+        List<Menu> menus = tx.em().createQuery(
+                        "SELECT m FROM Menu m WHERE m.fecha = :dia AND m.estado <> 'Cerrado' ORDER BY m.id DESC",
+                        Menu.class)
+                .setParameter("dia", java.sql.Date.valueOf(fecha), TemporalType.DATE)
+                .setMaxResults(1)
+                .getResultList();
+        return menus.isEmpty() ? null : menus.get(0);
+    }
+
+    /** Corrección Paquete 1a: menú "Cerrado" del día del comedor indicado. */
+    public Menu buscarMenuCerrado(DiaComedor dia) {
+        return buscarMenuCerrado(dia.comoFechaCivil());
+    }
+
+    /** El menú más reciente que cumple la consulta para una fecha civil (columna DATE), o null. */
+    private Menu buscarUno(String jpql, Date dia) {
         EntityManager em = JPAUtil.getEntityManager();
         try {
-            List<Menu> menus = em.createQuery(
-                            "SELECT m FROM Menu m WHERE m.fecha = :hoy AND m.estado <> 'Cerrado' ORDER BY m.id DESC",
-                            Menu.class)
-                    .setParameter("hoy", new Date(), TemporalType.DATE)
+            List<Menu> menus = em.createQuery(jpql, Menu.class)
+                    .setParameter("dia", dia, TemporalType.DATE)
                     .setMaxResults(1)
                     .getResultList();
             return menus.isEmpty() ? null : menus.get(0);
@@ -45,17 +75,6 @@ public class MenuDAO extends GenericDAO<Menu, Integer> {
      * y la creación del menú (para no reabrir la venta de un día ya cerrado).
      */
     public Menu buscarMenuCerrado(Date dia) {
-        EntityManager em = JPAUtil.getEntityManager();
-        try {
-            List<Menu> menus = em.createQuery(
-                            "SELECT m FROM Menu m WHERE m.fecha = :dia AND m.estado = 'Cerrado' ORDER BY m.id DESC",
-                            Menu.class)
-                    .setParameter("dia", dia, TemporalType.DATE)
-                    .setMaxResults(1)
-                    .getResultList();
-            return menus.isEmpty() ? null : menus.get(0);
-        } finally {
-            em.close();
-        }
+        return buscarUno("SELECT m FROM Menu m WHERE m.fecha = :dia AND m.estado = 'Cerrado' ORDER BY m.id DESC", dia);
     }
 }
