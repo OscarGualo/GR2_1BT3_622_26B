@@ -89,7 +89,8 @@ public class HabilitarEntregaServlet extends HttpServlet {
             if (!personal.validarCodigo(codigo)) {
                 return new ResultadoEntrega(false, codigo, motivoRechazo(comprobante));
             }
-            personal.entregarPedido(comprobante.getPedido());
+            // Examen 1B, objetivo 5.1: la hora de validación (hora del comedor) es la hora del retiro
+            personal.entregarPedido(comprobante.getPedido(), RelojAplicacion.ahora());
             comprobante.marcarCodigoUsado();
             comprobanteDAO.actualizar(comprobante, tx);
             tx.confirmar();

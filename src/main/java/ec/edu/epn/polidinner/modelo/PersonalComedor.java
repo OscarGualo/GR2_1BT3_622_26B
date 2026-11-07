@@ -3,6 +3,7 @@ package ec.edu.epn.polidinner.modelo;
 import ec.edu.epn.polidinner.persistencia.ComprobanteDAO;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -106,22 +107,22 @@ public class PersonalComedor implements Serializable {
      * Relación "entrega" (PersonalComedor 1 — 0..* Pedido) y "valida" (PersonalComedor 1 — 0..* Comprobante).
      */
     public void entregarPedido(Pedido pedido) {
+        entregarPedido(pedido, LocalDateTime.now());
+    }
+
+    /**
+     * Soporte técnico NO modelado - Examen 1B, medición del objetivo 5.1: misma operación que
+     * entregarPedido(pedido), recibiendo la hora del comedor en que se valida el código
+     * (HabilitarEntregaServlet le pasa RelojAplicacion.ahora(), la misma referencia de las franjas).
+     */
+    public void entregarPedido(Pedido pedido, LocalDateTime momento) {
         if (!"Pagado".equals(pedido.getEstado())) {
             throw new IllegalStateException("Solo se entrega un pedido pagado");
         }
         pedido.registrarEntrega(this);
         if (pedido.getComprobante() != null) {
-            pedido.getComprobante().registrarValidacion(this);
+            pedido.getComprobante().registrarValidacion(this, momento);
         }
-    }
-
-    /**
-     * Soporte técnico NO modelado - Examen 1B, medición del objetivo 5.1: misma operación que
-     * entregarPedido(pedido), recibiendo la hora del comedor en que se valida el código.
-     * (Esqueleto de la fase RED: todavía no registra la hora.)
-     */
-    public void entregarPedido(Pedido pedido, java.time.LocalDateTime momento) {
-        entregarPedido(pedido);
     }
 
 

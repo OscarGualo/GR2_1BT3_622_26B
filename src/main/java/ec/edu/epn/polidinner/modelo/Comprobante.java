@@ -114,14 +114,17 @@ public class Comprobante implements Serializable {
         this.usado = true;
     }
 
-    /** Registra quién validó el comprobante (asociación "valida"); lo usa PersonalComedor.validarCodigo(). */
-    void registrarValidacion(PersonalComedor personal) {
-        this.personalValida = personal;
-    }
-
-    /** Esqueleto de la fase RED: todavía no guarda la hora ni protege el registro original. */
+    /**
+     * Registra quién validó el comprobante (asociación "valida") y a qué hora; lo usa
+     * PersonalComedor.entregarPedido(). Examen 1B, objetivo 5.1: esa hora es la hora del retiro.
+     * La primera validación queda fija: un segundo intento no sobrescribe la hora ni el personal.
+     */
     void registrarValidacion(PersonalComedor personal, LocalDateTime momento) {
-        registrarValidacion(personal);
+        if (fechaValidacion != null) {
+            return;
+        }
+        this.personalValida = personal;
+        this.fechaValidacion = momento;
     }
 
     /**
