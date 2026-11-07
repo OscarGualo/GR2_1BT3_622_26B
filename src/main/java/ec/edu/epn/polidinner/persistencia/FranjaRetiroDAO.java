@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.PersistenceException;
 
 import ec.edu.epn.polidinner.modelo.ConfiguracionCupos;
@@ -78,9 +79,22 @@ public class FranjaRetiroDAO extends GenericDAO<FranjaRetiro, Integer> {
         return buscarEn(tx.em(), fecha, inicio);
     }
 
+    /** Mantiene el cupo estable hasta confirmar o revertir la reserva o reprogramación. */
     public int cupoGeneral(Transaccion tx) {
-        ConfiguracionCupos configuracion = tx.em().find(ConfiguracionCupos.class, ConfiguracionCupos.ID_UNICO);
-        return configuracion == null ? ConfiguracionCupos.CUPO_GENERAL_INICIAL : configuracion.getCupoGeneral();
+        return bloquearConfiguracion(tx).getCupoGeneral();
+    }
+
+    /** HU15/HU16: lectores que reservan y cambios de cupo toman el mismo bloqueo en la base. */
+    private ConfiguracionCupos bloquearConfiguracion(Transaccion tx) {
+        EntityManager em = tx.em();
+        ConfiguracionCupos configuracion = em.find(ConfiguracionCupos.class,
+                ConfiguracionCupos.ID_UNICO, LockModeType.PESSIMISTIC_WRITE);
+        if (configuracion == null) {
+            configuracion = new ConfiguracionCupos();
+            em.persist(configuracion);
+            em.flush();
+        }
+        return configuracion;
     }
 
     /**
@@ -130,10 +144,7 @@ public class FranjaRetiroDAO extends GenericDAO<FranjaRetiro, Integer> {
      */
     public boolean fijarCupoGeneral(int cupo, Transaccion tx) {
         EntityManager em = tx.em();
-        if (em.find(ConfiguracionCupos.class, ConfiguracionCupos.ID_UNICO) == null) {
-            em.persist(new ConfiguracionCupos());
-            em.flush();
-        }
+        bloquearConfiguracion(tx);
         int filas = em.createQuery("UPDATE ConfiguracionCupos c SET c.cupoGeneral = :cupo WHERE c.id = :id"
                         + " AND NOT EXISTS (SELECT f.id FROM FranjaRetiro f"
                         + " WHERE f.cupoEspecifico IS NULL AND f.asignados > :cupo)")
