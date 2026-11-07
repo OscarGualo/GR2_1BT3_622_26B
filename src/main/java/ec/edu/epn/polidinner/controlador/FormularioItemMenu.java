@@ -62,8 +62,8 @@ public class FormularioItemMenu {
         double precio = 0;
         try {
             precio = Double.parseDouble(textoPrecio.replace(',', '.'));
-            if (!(precio > 0)) {
-                errores.put("precio", "El precio debe ser mayor que 0.");
+            if (!Double.isFinite(precio) || precio <= 0) {
+                errores.put("precio", "Ingrese un precio válido y mayor que 0.");
             }
         } catch (NumberFormatException e) {
             errores.put("precio", "Ingrese un precio numérico, por ejemplo 2.50.");
