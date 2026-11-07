@@ -20,6 +20,11 @@ IF OBJECT_ID('configuracion_cupos', 'U') IS NOT NULL
    AND NOT EXISTS (SELECT 1 FROM configuracion_cupos WHERE id = 1)
     INSERT INTO configuracion_cupos (id, cupo_general) VALUES (1, 15);
 
+-- Objetivo 5.1 (medición): hora de validación del código en el despacho = hora del retiro. Hibernate la crea con
+-- hbm2ddl.auto=update; esto cubre una base creada antes. Los pedidos entregados antes quedan con NULL (sin hora registrada)
+IF OBJECT_ID('Comprobante', 'U') IS NOT NULL AND COL_LENGTH('Comprobante', 'fecha_validacion') IS NULL
+    ALTER TABLE Comprobante ADD fecha_validacion datetime2 NULL;
+
 -- Comprobación de que el contador de cada franja coincide con sus pedidos (debe devolver 0 filas)
 IF OBJECT_ID('franja_retiro', 'U') IS NOT NULL AND COL_LENGTH('Pedido', 'franja_retiro_id') IS NOT NULL
     EXEC sp_executesql N'SELECT f.id, f.fecha, f.hora_inicio, f.asignados, COUNT(p.id) AS pedidos_reales
