@@ -101,7 +101,8 @@
                     </c:if>
                     <%-- Mensajes 32-33: confirma y paga → confirmar(). Con modo=programar, la misma acción reserva
                          además un lugar en la franja elegida (HU11). El servidor decide: si el saldo no alcanza
-                         responde «Saldo insuficiente en PoliCuenta» (HU11 Esc. 2.1), por eso el botón no se bloquea. --%>
+                         responde «Saldo insuficiente en PoliCuenta» (HU11 Esc. 2.1). Solo el pago inmediato
+                         se deshabilita si falta saldo (HU07 Esc. 2.1); el servidor valida ambos modos. --%>
                     <form method="post" action="${pageContext.request.contextPath}/cliente/pedido" id="form-pagar" class="pago__form">
                         <input type="hidden" name="accion" value="confirmar">
                         <fieldset class="selector-tipo">
@@ -148,6 +149,7 @@
 
                         <div class="acciones-pie">
                             <button type="submit" class="btn btn-primario btn-bloque" id="boton-pagar"
+                                    data-saldo-suficiente="${saldoSuficiente}" ${saldoSuficiente ? '' : 'disabled'}
                                     data-total="<fmt:formatNumber value="${total}" pattern="0.00"/>">
                                 <svg class="icono" aria-hidden="true"><use href="#i-billetera"/></svg>
                                 <span id="boton-pagar-texto">Confirmar y pagar $<fmt:formatNumber value="${total}" pattern="0.00"/></span>
@@ -181,6 +183,7 @@
         var boton = document.getElementById('boton-pagar');
         var textoBoton = document.getElementById('boton-pagar-texto');
         var total = boton.getAttribute('data-total');
+        var saldoSuficiente = boton.getAttribute('data-saldo-suficiente') === 'true';
         var franjas = document.getElementById('franjas-retiro');
         var modos = form.querySelectorAll('input[name="modo"]');
         var cuenta = '<c:out value="${sessionScope.cliente.policuenta.numero}"/>';
@@ -192,16 +195,21 @@
         function actualizar() {
             var programar = modo() === 'programar';
             franjas.hidden = !programar;
+            boton.disabled = !programar && !saldoSuficiente;
             textoBoton.textContent = (programar ? 'Programar y pagar $' : 'Confirmar y pagar $') + total;
         }
         for (var i = 0; i < modos.length; i++) modos[i].addEventListener('change', actualizar);
         actualizar();
 
-        if (typeof dialogo.showModal !== 'function') return;
         var confirmar = document.getElementById('dialogo-pago-confirmar');
         var titulo = document.getElementById('dialogo-pago-titulo');
         var texto = document.getElementById('dialogo-pago-texto');
         form.addEventListener('submit', function (evento) {
+            if (modo() !== 'programar' && !saldoSuficiente) {
+                evento.preventDefault();
+                return;
+            }
+            if (typeof dialogo.showModal !== 'function') return;
             // Sin franja elegida no hay nada que confirmar: el servidor pide elegir una (HU11 Esc. 3.4)
             if (modo() === 'programar' && !franjaElegida()) return;
             evento.preventDefault();
