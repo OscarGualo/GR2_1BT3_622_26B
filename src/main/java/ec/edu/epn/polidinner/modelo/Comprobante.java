@@ -2,6 +2,7 @@ package ec.edu.epn.polidinner.modelo;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.UUID;
@@ -42,6 +43,14 @@ public class Comprobante implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "personal_valida_cedula")
     private PersonalComedor personalValida;
+
+    /**
+     * Atributo técnico NO modelado - Examen 1B, medición del objetivo de la Iteración 2 (sección 5.1):
+     * "la hora de validación del código en el despacho se usa como hora del retiro".
+     * Es null mientras el pedido no se entregue (y en los pedidos cancelados).
+     */
+    @Column(name = "fecha_validacion")
+    private LocalDateTime fechaValidacion;
 
     /**
      * Atributo técnico NO modelado (bloqueo optimista de JPA): si dos personas validan el mismo código
@@ -110,6 +119,11 @@ public class Comprobante implements Serializable {
         this.personalValida = personal;
     }
 
+    /** Esqueleto de la fase RED: todavía no guarda la hora ni protege el registro original. */
+    void registrarValidacion(PersonalComedor personal, LocalDateTime momento) {
+        registrarValidacion(personal);
+    }
+
     /**
      * Soporte de validarCodigoEntrega() y de los mensajes de rechazo: ¿se generó en la fecha actual?
      * Refactorización: Substitute Algorithm (compara días con LocalDate en lugar de textos).
@@ -140,6 +154,10 @@ public class Comprobante implements Serializable {
 
     public Pedido getPedido() {
         return pedido;
+    }
+
+    public LocalDateTime getFechaValidacion() {
+        return fechaValidacion;
     }
 
     public PersonalComedor getPersonalValida() {

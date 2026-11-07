@@ -115,6 +115,15 @@ public class PersonalComedor implements Serializable {
         }
     }
 
+    /**
+     * Soporte técnico NO modelado - Examen 1B, medición del objetivo 5.1: misma operación que
+     * entregarPedido(pedido), recibiendo la hora del comedor en que se valida el código.
+     * (Esqueleto de la fase RED: todavía no registra la hora.)
+     */
+    public void entregarPedido(Pedido pedido, java.time.LocalDateTime momento) {
+        entregarPedido(pedido);
+    }
+
 
 
     /** Comprueba la clave ingresada en el inicio de sesión (soporte del login, no modelado). */
