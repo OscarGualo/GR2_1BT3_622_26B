@@ -10,8 +10,12 @@ public class FiltroVentasValidas {
 
     public List<VentaProducto> filtrar(List<VentaProducto> ventas) {
         return ventas.stream()
-                .filter(venta -> "Pagado".equals(venta.getEstadoPedido())
-                        || "Entregado".equals(venta.getEstadoPedido()))
+                .filter(this::esVentaValida)
                 .toList();
+    }
+
+    private boolean esVentaValida(VentaProducto venta) {
+        return "Pagado".equals(venta.getEstadoPedido()) ||
+                "Entregado".equals(venta.getEstadoPedido());
     }
 }
