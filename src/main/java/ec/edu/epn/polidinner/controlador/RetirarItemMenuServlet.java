@@ -14,29 +14,31 @@ import javax.servlet.http.HttpSession;
 
 import org.hibernate.StaleStateException;
 
-import ec.edu.epn.polidinner.modelo.ItemMenu;
+import ec.edu.epn.polidinner.modelo.DiaComedor;
 import ec.edu.epn.polidinner.modelo.Menu;
+import ec.edu.epn.polidinner.modelo.OfertaMenu;
 import ec.edu.epn.polidinner.modelo.PersonalComedor;
-import ec.edu.epn.polidinner.modelo.Plato;
-import ec.edu.epn.polidinner.modelo.Producto;
-import ec.edu.epn.polidinner.persistencia.ItemMenuDAO;
 import ec.edu.epn.polidinner.persistencia.MenuDAO;
+import ec.edu.epn.polidinner.persistencia.OfertaMenuDAO;
+import ec.edu.epn.polidinner.persistencia.Transaccion;
 
 /**
  * Trazabilidad: Diagrama de robustez - controlador "Retirar plato y/o producto del menú".
  * Diagrama de secuencia CU02 - participante "Controlador (Retirar plato y/o producto)".
  * doGet corresponde al mensaje 2 iniciarRetiro() y doPost (accion=retirar) al mensaje 9 retirarItem(idItem).
+ * Corrección de productos persistentes (Paquete 2): se retira la OFERTA del ítem en el menú de hoy. El producto
+ * conserva su estado y sus existencias, y se puede volver a ofrecer en otra jornada; el plato deja de
+ * ofrecerse igual que antes.
  */
 @WebServlet("/personal/retirar")
 public class RetirarItemMenuServlet extends HttpServlet {
 
     private static final String VISTA = "/vistas/personal/retirarItem.jsp";
-    private static final String DISPONIBLE = "Disponible";
     /** Texto del mensaje 18 del diagrama de secuencia CU02. */
     private static final String MENSAJE_CONCURRENCIA = "El ítem está siendo comprado, intente de nuevo.";
 
     private final MenuDAO menuDAO = new MenuDAO();
-    private final ItemMenuDAO itemMenuDAO = new ItemMenuDAO();
+    private final OfertaMenuDAO ofertaDAO = new OfertaMenuDAO();
 
     /** Trazabilidad: Diagrama de secuencia CU02 - mensajes 2 iniciarRetiro() y 7 (muestra ítems). */
     @Override
@@ -48,25 +50,33 @@ public class RetirarItemMenuServlet extends HttpServlet {
 
     /**
      * Trazabilidad: Diagrama de secuencia CU02 - mensaje 2 iniciarRetiro().
-     * Mensajes 3-4: MenuDAO.buscarMenuDelDia() / menuHoy. Mensajes 5-6: menuHoy.obtenerItems() / lista de ítems.
-     * Mensaje 7: deja para la vista solo los ítems con estado "Disponible" (un ítem retirado ya no aparece).
+     * Mensajes 3-4: MenuDAO.buscarMenuDelDia() / menuHoy. Mensajes 5-6: ofertas del menú de hoy.
+     * Mensaje 7: solo las ofertas "Disponible" se pueden retirar; las demás se listan aparte con su situación
+     * (retirado hoy, sin stock o caducado).
      */
     private void iniciarRetiro(HttpServletRequest request) {
-        Menu menuHoy = menuDAO.buscarMenuDelDia();
-        List<ItemMenu> disponibles = new ArrayList<>();
+        DiaComedor hoy = RelojAplicacion.diaComedor();
+        Menu menuHoy = menuDAO.buscarMenuDelDia(hoy);
+        List<OfertaMenu> disponibles = new ArrayList<>();
+        List<OfertaMenu> noDisponibles = new ArrayList<>();
         int retirados = 0;
         if (menuHoy != null) {
-            for (ItemMenu item : menuHoy.obtenerItems()) {
-                if (DISPONIBLE.equals(item.getEstado())) {
-                    disponibles.add(item);
+            for (OfertaMenu oferta : menuHoy.obtenerOfertas()) {
+                if (OfertaMenu.DISPONIBLE.equals(oferta.estadoEn(hoy.getFecha()))) {
+                    disponibles.add(oferta);
                 } else {
+                    noDisponibles.add(oferta);
+                }
+                if (!oferta.estaOfrecida()) {
                     retirados++;
                 }
             }
         }
         request.setAttribute("menuHoy", menuHoy);
-        request.setAttribute("items", disponibles);
+        request.setAttribute("ofertas", disponibles);
+        request.setAttribute("noDisponibles", noDisponibles);
         request.setAttribute("retirados", retirados);
+        request.setAttribute("hoy", hoy.getFecha());
     }
 
     @Override
@@ -92,47 +102,37 @@ public class RetirarItemMenuServlet extends HttpServlet {
 
     /**
      * Trazabilidad: Diagrama de secuencia CU02 - mensaje 9 retirarItem(idItem).
-     * Mensajes 10-11: ItemMenuDAO.buscarPorId(idItem) / item.
-     * Fragmento alt: [Plato] mensajes 12-13 eliminarPlato(plato) → cambiarEstado("Agotado");
-     * [Producto] mensajes 14-15 eliminarProducto(producto) → cambiarEstado("Agotado").
-     * Mensaje 16: ItemMenuDAO.actualizar(item). Fragmento alt: mensaje 17 (éxito) o
-     * 18 [versión desactualizada u OptimisticLockException].
-     * Validación técnica no modelada: antes del mensaje 10 se comprueba que el ítem pertenezca al menú
-     * de hoy (perteneceAlMenu), para rechazar ids manipulados en el formulario.
+     * Corrección Paquete 2: en una transacción se lee la oferta del ítem en el menú de hoy (rechaza ids que no
+     * pertenecen al menú), el personal la retira (retirarDeOferta) y se guarda esa misma fila versionada.
+     * Fragmento alt: mensaje 17 (éxito) o 18 [versión desactualizada u OptimisticLockException].
      */
     private void retirarItem(HttpSession sesion, PersonalComedor personal, int idItem, Integer versionVista) {
-        Menu menuHoy = menuDAO.buscarMenuDelDia();
+        Menu menuHoy = menuDAO.buscarMenuDelDia(RelojAplicacion.diaComedor());
         if (menuHoy == null || !menuHoy.perteneceAlMenu(idItem)) {
             sesion.setAttribute("flashError", "El ítem no pertenece al menú de hoy.");
             return;
         }
-
-        ItemMenu item = itemMenuDAO.buscarPorId(idItem);
-        if (item == null) {
-            sesion.setAttribute("flashError", "El ítem ya no existe.");
-            return;
-        }
-        if (!DISPONIBLE.equals(item.getEstado())) {
-            sesion.setAttribute("flashError", "\"" + item.getNombre() + "\" ya fue retirado del menú.");
-            return;
-        }
-        // Soporte técnico del @Version: si el ítem cambió desde que se mostró la lista, otra
-        // transacción (por ejemplo un pago) lo está modificando.
-        if (versionVista != null && versionVista != item.getVersion()) {
-            sesion.setAttribute("flashError", MENSAJE_CONCURRENCIA);
-            return;
-        }
-
-        if (item instanceof Plato) {
-            personal.eliminarPlato((Plato) item);
-        } else if (item instanceof Producto) {
-            personal.eliminarProducto((Producto) item);
-        }
-
-        try {
-            itemMenuDAO.actualizar(item);
+        try (Transaccion tx = Transaccion.iniciar()) {
+            OfertaMenu oferta = ofertaDAO.buscar(menuHoy.getId(), idItem, tx);
+            if (oferta == null) {
+                sesion.setAttribute("flashError", "El ítem no pertenece al menú de hoy.");
+                return;
+            }
+            String nombre = oferta.getItem().getNombre();
+            if (!oferta.estaOfrecida()) {
+                sesion.setAttribute("flashError", "\"" + nombre + "\" ya fue retirado del menú.");
+                return;
+            }
+            // Soporte técnico del @Version: si la oferta cambió desde que se mostró la lista, otra solicitud
+            // la modificó mientras tanto.
+            if (versionVista != null && versionVista != oferta.getVersion()) {
+                sesion.setAttribute("flashError", MENSAJE_CONCURRENCIA);
+                return;
+            }
+            personal.retirarDeOferta(oferta);
+            tx.confirmar();
             // Mensaje 17
-            sesion.setAttribute("flashExito", "Ítem \"" + item.getNombre() + "\" retirado del menú.");
+            sesion.setAttribute("flashExito", "Ítem \"" + nombre + "\" retirado del menú.");
         } catch (RuntimeException e) {
             if (!esConflictoDeVersion(e)) {
                 throw e;

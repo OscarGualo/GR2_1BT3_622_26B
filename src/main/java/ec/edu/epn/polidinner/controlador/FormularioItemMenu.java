@@ -34,7 +34,15 @@ public class FormularioItemMenu {
     }
 
     public static FormularioItemMenu desde(HttpServletRequest request) {
-        String tipo = "Producto".equals(request.getParameter("tipo")) ? "Producto" : "Plato";
+        return desde(request, "Producto".equals(request.getParameter("tipo")) ? "Producto" : "Plato");
+    }
+
+    /**
+     * Corrección de productos persistentes (Paquete 2): el tipo lo fija la pantalla, no el formulario
+     * (Crear menú solo registra platos; Productos solo registra existencias de productos).
+     * Conserva los mismos límites de validación.
+     */
+    public static FormularioItemMenu desde(HttpServletRequest request, String tipo) {
         String nombre = recortar(request.getParameter("nombre"));
         String descripcion = recortar(request.getParameter("descripcion"));
         String textoPrecio = recortar(request.getParameter("precio"));
@@ -54,8 +62,8 @@ public class FormularioItemMenu {
         double precio = 0;
         try {
             precio = Double.parseDouble(textoPrecio.replace(',', '.'));
-            if (!(precio > 0)) {
-                errores.put("precio", "El precio debe ser mayor que 0.");
+            if (!Double.isFinite(precio) || precio <= 0) {
+                errores.put("precio", "Ingrese un precio válido y mayor que 0.");
             }
         } catch (NumberFormatException e) {
             errores.put("precio", "Ingrese un precio numérico, por ejemplo 2.50.");
