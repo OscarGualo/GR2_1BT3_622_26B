@@ -29,6 +29,16 @@ class ValidadorDescarteTest {
         assertFalse(validador.admiteDescarte(aguaVigente, HOY));
     }
 
+    /** PU08 - Regla 9: solo existencias habilitadas y con stock positivo. */
+    @Test
+    void noAdmiteDescartarUnaExistenciaCaducadaSinStockONoHabilitada() {
+        Producto sinStock = Producto.registrar("Galletas 100 g", 0.75, "Paquete", 0, fecha(HOY.minusDays(1)));
+        Producto historico = new Producto("Jugo 250 ml", 0.80, "Disponible", "Caja", 5, fecha(HOY.minusDays(1)));
+
+        assertFalse(validador.admiteDescarte(sinStock, HOY));
+        assertFalse(validador.admiteDescarte(historico, HOY));
+    }
+
     private static Producto crearYogurCaducado() {
         return Producto.registrar("Yogur 150 g", 0.90, "Vaso", 6, fecha(HOY.minusDays(1)));
     }
