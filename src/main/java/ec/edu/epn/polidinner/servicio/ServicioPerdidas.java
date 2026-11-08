@@ -2,6 +2,7 @@ package ec.edu.epn.polidinner.servicio;
 
 import java.time.LocalDateTime;
 
+import ec.edu.epn.polidinner.modelo.DescarteRechazadoException;
 import ec.edu.epn.polidinner.modelo.PerdidaCaducidad;
 import ec.edu.epn.polidinner.modelo.PersonalComedor;
 import ec.edu.epn.polidinner.modelo.Producto;
@@ -11,9 +12,11 @@ import ec.edu.epn.polidinner.persistencia.ProductoDAO;
 
 /**
  * Soporte técnico NO modelado - HU20 Registrar pérdidas por caducidad (reglas 9 a 11).
- * Contrato de la iteración: aplicarDescarte pendiente de PM02 y registrar pendiente (Christian, HU20).
+ * aplicarDescarte: origen TDD ServicioPerdidasMockTest (PM02). registrar: pendiente (Christian, HU20).
  */
 public class ServicioPerdidas {
+
+    static final String NO_ADMITE_DESCARTE = "Solo se registran pérdidas de existencias caducadas, habilitadas y con stock.";
 
     private final PerdidaCaducidadDAO perdidaDAO;
     private final ProductoDAO productoDAO;
@@ -32,7 +35,12 @@ public class ServicioPerdidas {
     /** Valida el descarte, descuenta las unidades del registro y arma la pérdida (sin guardarla). */
     PerdidaCaducidad aplicarDescarte(Producto producto, int unidades, PersonalComedor responsable,
                                      LocalDateTime momento, String tokenOperacion) {
-        return null;
+        if (!validador.admiteDescarte(producto, momento.toLocalDate())) {
+            throw new DescarteRechazadoException(NO_ADMITE_DESCARTE);
+        }
+        validador.validarCantidad(producto, unidades);
+        producto.setStockActual(producto.getStockActual() - unidades);
+        return new PerdidaCaducidad(producto, unidades, responsable, momento, tokenOperacion);
     }
 
     /**
