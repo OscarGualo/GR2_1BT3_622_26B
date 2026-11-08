@@ -29,9 +29,10 @@ public final class PeriodoVentas {
         return new PeriodoVentas(hoy, hoy);
     }
 
-    /** «Últimos 7 días»: hoy y los seis días anteriores. Contrato: pendiente de PU04 (Mauricio). */
+    /** «Últimos 7 días»: hoy y los seis días anteriores. Origen TDD: PeriodoVentasTest (PU04). */
     public static PeriodoVentas ultimos7Dias(LocalDate hoy) {
-        return null;
+        LocalDate primerDiaDelPeriodo = hoy.minusDays(6);
+        return new PeriodoVentas(primerDiaDelPeriodo, hoy);
     }
 
     /** 00:00 del día inicial en la zona del comedor (incluido). */
