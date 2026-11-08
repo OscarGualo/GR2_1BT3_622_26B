@@ -19,7 +19,7 @@ public class FiltroCaducidad {
     public List<ExistenciaProducto> filtrar(List<ExistenciaProducto> existencias, FranjaCaducidad franja,
                                             LocalDate hoy) {
         return existencias.stream()
-                .filter(existencia -> existencia.isHabilitado() && existencia.getStock() > 0)
+                .filter(this::estaDisponibleParaConsulta)
                 .filter(existencia -> perteneceALaFranja(existencia, franja, hoy))
                 .sorted(Comparator.comparing(ExistenciaProducto::getCaducidad)
                         .thenComparingInt(ExistenciaProducto::getReferencia))
@@ -29,5 +29,9 @@ public class FiltroCaducidad {
     private boolean perteneceALaFranja(ExistenciaProducto existencia, FranjaCaducidad franja, LocalDate hoy) {
         return existencia.getCaducidad() != null
                 && clasificador.clasificar(existencia.getCaducidad(), hoy) == franja;
+    }
+
+    private boolean estaDisponibleParaConsulta(ExistenciaProducto existencia) {
+        return existencia.isHabilitado() && existencia.getStock() > 0;
     }
 }
