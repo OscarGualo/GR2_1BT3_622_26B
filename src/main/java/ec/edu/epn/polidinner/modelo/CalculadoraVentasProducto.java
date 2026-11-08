@@ -1,6 +1,7 @@
 package ec.edu.epn.polidinner.modelo;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +13,10 @@ import java.util.Map;
 public class CalculadoraVentasProducto {
 
     public List<FilaVentaProducto> resumir(List<VentaProducto> ventas) {
-        return new ArrayList<>(acumularUnidadesPorReferencia(ventas).values());
+        List<FilaVentaProducto> resultado = new ArrayList<>(acumularUnidadesPorReferencia(ventas).values());
+        resultado.sort(Comparator.comparingInt(FilaVentaProducto::getUnidades).reversed()
+                .thenComparingInt(FilaVentaProducto::getReferencia));
+        return resultado;
     }
 
     private Map<Integer, FilaVentaProducto> acumularUnidadesPorReferencia(List<VentaProducto> ventas) {
