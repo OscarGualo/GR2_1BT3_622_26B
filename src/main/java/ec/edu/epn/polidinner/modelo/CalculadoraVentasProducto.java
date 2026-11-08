@@ -12,6 +12,10 @@ import java.util.Map;
 public class CalculadoraVentasProducto {
 
     public List<FilaVentaProducto> resumir(List<VentaProducto> ventas) {
+        return new ArrayList<>(acumularUnidadesPorReferencia(ventas).values());
+    }
+
+    private Map<Integer, FilaVentaProducto> acumularUnidadesPorReferencia(List<VentaProducto> ventas) {
         Map<Integer, FilaVentaProducto> filas = new LinkedHashMap<>();
         for (VentaProducto venta : ventas) {
             FilaVentaProducto actual = filas.get(venta.getReferencia());
@@ -19,6 +23,6 @@ public class CalculadoraVentasProducto {
             filas.put(venta.getReferencia(), new FilaVentaProducto(venta.getReferencia(), venta.getNombre(),
                     venta.getFechaCaducidad(), unidades));
         }
-        return new ArrayList<>(filas.values());
+        return filas;
     }
 }
