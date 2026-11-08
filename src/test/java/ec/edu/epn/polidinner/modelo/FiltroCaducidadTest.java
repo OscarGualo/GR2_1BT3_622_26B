@@ -35,4 +35,17 @@ class FiltroCaducidadTest {
 
         assertEquals(List.of(101, 105, 201), referencias(resultado));
     }
+
+    /** PU06 - Escenario 19.3.1: excluye registros agotados e históricos no habilitados. */
+    @Test
+    void excluyeExistenciasSinStockYRegistrosNoHabilitados() {
+        List<ExistenciaProducto> existencias = List.of(
+                new ExistenciaProducto(103, "Galletas 100 g", 0, HOY.plusDays(1), true),
+                new ExistenciaProducto(401, "Jugo 250 ml", 5, HOY.plusDays(1), false),
+                new ExistenciaProducto(101, "Agua 500 ml", 3, HOY.plusDays(1), true));
+
+        List<ExistenciaProducto> resultado = filtro.filtrar(existencias, FranjaCaducidad.PROXIMOS_3_DIAS, HOY);
+
+        assertEquals(List.of(101), referencias(resultado));
+    }
 }
