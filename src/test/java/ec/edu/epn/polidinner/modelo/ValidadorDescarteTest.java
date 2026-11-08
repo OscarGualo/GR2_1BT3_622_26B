@@ -1,12 +1,16 @@
 package ec.edu.epn.polidinner.modelo;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Date;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /** HU20 Registrar pérdidas por caducidad - TDD de ValidadorDescarte (PU07, PU08 y PP02). */
 class ValidadorDescarteTest {
@@ -37,6 +41,23 @@ class ValidadorDescarteTest {
 
         assertFalse(validador.admiteDescarte(sinStock, HOY));
         assertFalse(validador.admiteDescarte(historico, HOY));
+    }
+
+    /** PP02 - Escenario 20.2.2 y regla 10: cantidades inválidas para un registro con 6 unidades. */
+    @ParameterizedTest(name = "{0} unidades -> {1}")
+    @CsvSource({
+            "8,  La cantidad supera las 6 unidades disponibles",
+            "7,  La cantidad supera las 6 unidades disponibles",
+            "0,  La cantidad debe ser mayor que cero",
+            "-1, La cantidad debe ser mayor que cero"
+    })
+    void rechazaCantidadesFueraDelStockDisponible(int cantidad, String mensajeEsperado) {
+        Producto yogurCaducado = Producto.registrar("Yogur 150 g", 0.90, "Vaso", 6, fecha(HOY.minusDays(1)));
+
+        DescarteRechazadoException error = assertThrows(DescarteRechazadoException.class,
+                () -> validador.validarCantidad(yogurCaducado, cantidad));
+
+        assertEquals(mensajeEsperado, error.getMessage());
     }
 
     private static Producto crearYogurCaducado() {
