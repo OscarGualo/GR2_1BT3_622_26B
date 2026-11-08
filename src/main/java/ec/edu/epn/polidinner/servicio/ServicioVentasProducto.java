@@ -32,7 +32,11 @@ public class ServicioVentasProducto {
     }
 
     public List<FilaVentaProducto> consultar(PeriodoVentas periodo, ZoneId zona) {
-        List<VentaProducto> ventas = ventaDAO.buscarPorFechaDePago(periodo.desde(zona), periodo.hastaExclusivo(zona));
+        List<VentaProducto> ventas = buscarVentasDelPeriodo(periodo, zona);
         return calculadora.resumir(filtro.filtrar(ventas));
+    }
+
+    private List<VentaProducto> buscarVentasDelPeriodo(PeriodoVentas periodo, ZoneId zona) {
+        return ventaDAO.buscarPorFechaDePago(periodo.desde(zona), periodo.hastaExclusivo(zona));
     }
 }
