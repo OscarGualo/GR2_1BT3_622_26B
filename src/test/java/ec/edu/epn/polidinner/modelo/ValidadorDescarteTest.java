@@ -22,10 +22,18 @@ class ValidadorDescarteTest {
     /** PU07 - Escenarios 20.1.1 y 20.1.2: se ofrece la existencia caducada y no la vigente. */
     @Test
     void admiteDescartarUnaExistenciaCaducadaYNoUnaVigente() {
-        Producto yogurCaducado = Producto.registrar("Yogur 150 g", 0.90, "Vaso", 6, fecha(HOY.minusDays(1)));
-        Producto aguaVigente = Producto.registrar("Agua 500 ml", 0.50, "Botella", 3, fecha(HOY.plusDays(1)));
+        Producto yogurCaducado = crearYogurCaducado();
+        Producto aguaVigente = crearAguaVigente();
 
         assertTrue(validador.admiteDescarte(yogurCaducado, HOY));
         assertFalse(validador.admiteDescarte(aguaVigente, HOY));
+    }
+
+    private static Producto crearYogurCaducado() {
+        return Producto.registrar("Yogur 150 g", 0.90, "Vaso", 6, fecha(HOY.minusDays(1)));
+    }
+
+    private static Producto crearAguaVigente() {
+        return Producto.registrar("Agua 500 ml", 0.50, "Botella", 3, fecha(HOY.plusDays(1)));
     }
 }
