@@ -111,6 +111,10 @@
                         <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
                     </a>
                 </li>
+                <%-- Iteración HU18-HU20: cada acceso se completa en la integración de su HU --%>
+                <%@ include file="accesos/ventasProductos.jspf" %>
+                <%@ include file="accesos/perdidasCaducidad.jspf" %>
+                <%@ include file="accesos/caducidadProductos.jspf" %>
             </ul>
         </section>
     </div>
