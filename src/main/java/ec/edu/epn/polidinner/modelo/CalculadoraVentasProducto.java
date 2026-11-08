@@ -14,8 +14,7 @@ public class CalculadoraVentasProducto {
 
     public List<FilaVentaProducto> resumir(List<VentaProducto> ventas) {
         List<FilaVentaProducto> resultado = new ArrayList<>(acumularUnidadesPorReferencia(ventas).values());
-        resultado.sort(Comparator.comparingInt(FilaVentaProducto::getUnidades).reversed()
-                .thenComparingInt(FilaVentaProducto::getReferencia));
+        ordenarPorUnidadesYReferencia(resultado);
         return resultado;
     }
 
@@ -28,5 +27,10 @@ public class CalculadoraVentasProducto {
                     venta.getFechaCaducidad(), unidades));
         }
         return filas;
+    }
+
+    private void ordenarPorUnidadesYReferencia(List<FilaVentaProducto> filas) {
+        filas.sort(Comparator.comparingInt(FilaVentaProducto::getUnidades).reversed()
+                .thenComparingInt(FilaVentaProducto::getReferencia));
     }
 }
