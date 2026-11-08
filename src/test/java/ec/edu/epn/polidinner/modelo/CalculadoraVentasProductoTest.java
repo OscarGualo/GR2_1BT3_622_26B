@@ -39,4 +39,17 @@ class CalculadoraVentasProductoTest {
         assertEquals(102, filas.get(1).getReferencia());
         assertEquals(4, filas.get(1).getUnidades());
     }
+
+    /** PU02 - Regla 6: unidades de mayor a menor y, en empate, referencia ascendente. */
+    @Test
+    void ordenaPorUnidadesDescendentesYDesempataPorReferencia() {
+        List<VentaProducto> ventas = List.of(
+                venta(105, "Agua 500 ml", 1),
+                venta(103, "Galletas 100 g", 5),
+                venta(101, "Agua 500 ml", 5));
+
+        List<FilaVentaProducto> filas = calculadora.resumir(ventas);
+
+        assertEquals(List.of(101, 103, 105), filas.stream().map(FilaVentaProducto::getReferencia).toList());
+    }
 }
