@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public class ValidadorDescarte {
 
     public boolean admiteDescarte(Producto producto, LocalDate hoy) {
-        return !producto.estaVigente(hoy);
+        return producto.isHabilitado() && producto.getStockActual() > 0 && !producto.estaVigente(hoy);
     }
 
     public void validarCantidad(Producto producto, int cantidad) {
