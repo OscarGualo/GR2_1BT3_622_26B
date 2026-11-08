@@ -17,7 +17,10 @@ public class ClasificadorCaducidad implements ClasificadorFranja {
         if (caducidad.isEqual(hoy)) {
             return FranjaCaducidad.CADUCAN_HOY;
         }
-        if (!caducidad.isAfter(hoy.plusDays(3))) {
+        LocalDate ultimoDiaDeLosProximosTres = hoy.plusDays(3);
+        boolean caducaEnLosProximosTresDias =
+                !caducidad.isAfter(ultimoDiaDeLosProximosTres);
+        if (caducaEnLosProximosTresDias) {
             return FranjaCaducidad.PROXIMOS_3_DIAS;
         }
         return FranjaCaducidad.MAS_ADELANTE;
