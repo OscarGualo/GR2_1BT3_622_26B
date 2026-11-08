@@ -64,7 +64,8 @@ public class ServicioPerdidas {
             throw new DescarteRechazadoException(SIN_CONFIRMACION);
         }
         try (Transaccion tx = Transaccion.iniciar()) {
-            if (perdidaDAO.existeToken(tokenOperacion, tx)) {
+            boolean confirmacionYaRegistrada = perdidaDAO.existeToken(tokenOperacion, tx);
+            if (confirmacionYaRegistrada) {
                 return false;
             }
             Producto producto = productoDAO.buscarProducto(idProducto, tx);
