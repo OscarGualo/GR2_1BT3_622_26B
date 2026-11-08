@@ -13,12 +13,16 @@ public class ValidadorDescarte {
     }
 
     public void validarCantidad(Producto producto, int cantidad) {
-        if (cantidad <= 0) {
-            throw new DescarteRechazadoException("La cantidad debe ser mayor que cero");
-        }
+        validarCantidadPositiva(cantidad);
         if (cantidad > producto.getStockActual()) {
             throw new DescarteRechazadoException(
                     "La cantidad supera las " + producto.getStockActual() + " unidades disponibles");
+        }
+    }
+
+    private void validarCantidadPositiva(int cantidad) {
+        if (cantidad <= 0) {
+            throw new DescarteRechazadoException("La cantidad debe ser mayor que cero");
         }
     }
 }
