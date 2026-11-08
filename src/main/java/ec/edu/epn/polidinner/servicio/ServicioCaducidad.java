@@ -28,9 +28,10 @@ public class ServicioCaducidad {
     }
 
     public List<ExistenciaProducto> consultar(FranjaCaducidad franja, LocalDate hoy) {
-        List<ExistenciaProducto> existencias = productoDAO.listarTodos().stream()
-                .map(ExistenciaProducto::desde)
-                .toList();
-        return filtro.filtrar(existencias, franja, hoy);
+        return filtro.filtrar(consultarExistenciasGuardadas(), franja, hoy);
+    }
+
+    private List<ExistenciaProducto> consultarExistenciasGuardadas() {
+        return productoDAO.listarTodos().stream().map(ExistenciaProducto::desde).toList();
     }
 }
