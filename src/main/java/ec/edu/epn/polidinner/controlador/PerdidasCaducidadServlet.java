@@ -65,24 +65,11 @@ public class PerdidasCaducidadServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession sesion = request.getSession();
-        String referenciaTexto = request.getParameter("referencia");
-        String unidadesTexto = request.getParameter("unidades");
-        String token = request.getParameter("token");
         try {
-            if (referenciaTexto == null || referenciaTexto.trim().isEmpty()
-                    || unidadesTexto == null || unidadesTexto.trim().isEmpty()) {
-                throw new DescarteRechazadoException("Seleccione la existencia e indique las unidades descartadas.");
-            }
-            int referencia;
-            int unidades;
-            try {
-                referencia = Integer.parseInt(referenciaTexto.trim());
-                unidades = Integer.parseInt(unidadesTexto.trim());
-            } catch (NumberFormatException e) {
-                throw new DescarteRechazadoException("Las unidades descartadas deben ser un número entero.");
-            }
+            SolicitudDescarte solicitud = SolicitudDescarte.desde(request);
             PersonalComedor personal = (PersonalComedor) sesion.getAttribute("personal");
-            boolean registrada = servicio.registrar(referencia, unidades, personal, token, RelojAplicacion.ahora());
+            boolean registrada = servicio.registrar(solicitud.getReferencia(), solicitud.getUnidades(), personal,
+                    solicitud.getToken(), RelojAplicacion.ahora());
             sesion.setAttribute("flashExito", registrada ? REGISTRADA : REPETIDA);
         } catch (DescarteRechazadoException e) {
             sesion.setAttribute("flashError", e.getMessage());

@@ -18,19 +18,31 @@ import ec.edu.epn.polidinner.persistencia.ProductoDAO;
 import ec.edu.epn.polidinner.servicio.ServicioPerdidas;
 
 /**
- * Prueba de soporte del formulario de HU20 (no es una de las 12 pruebas TDD). Protege la refactorización R2:
- * debe seguir en verde antes y después de extraer SolicitudDescarte.
+ * Prueba de soporte de HU20.
+ * Debe pasar antes y después de R2 Extract Class.
  */
 class PerdidasCaducidadServletTest {
 
-    private final ServicioPerdidas servicio = Mockito.mock(ServicioPerdidas.class);
-    private final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-    private final HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
-    private final HttpSession sesion = Mockito.mock(HttpSession.class);
+    private final ServicioPerdidas servicio =
+            Mockito.mock(ServicioPerdidas.class);
+    private final HttpServletRequest request =
+            Mockito.mock(HttpServletRequest.class);
+    private final HttpServletResponse response =
+            Mockito.mock(HttpServletResponse.class);
+    private final HttpSession sesion =
+            Mockito.mock(HttpSession.class);
+
     private final PersonalComedor maria =
-            new PersonalComedor("1700000001", "María", "Pérez", "Administradora", "comedor123");
-    private final PerdidasCaducidadServlet servlet = new PerdidasCaducidadServlet(servicio,
-            Mockito.mock(ProductoDAO.class), Mockito.mock(PerdidaCaducidadDAO.class), new ValidadorDescarte());
+            new PersonalComedor(
+                    "1700000001", "María", "Pérez",
+                    "Administradora", "comedor123");
+
+    private final PerdidasCaducidadServlet servlet =
+            new PerdidasCaducidadServlet(
+                    servicio,
+                    Mockito.mock(ProductoDAO.class),
+                    Mockito.mock(PerdidaCaducidadDAO.class),
+                    new ValidadorDescarte());
 
     @BeforeEach
     void preparar() {
@@ -40,17 +52,27 @@ class PerdidasCaducidadServletTest {
     }
 
     @Test
-    void registraLaPerdidaConLosDatosDelFormularioYElPersonalDeLaSesion() throws Exception {
+    void registraLaPerdidaConLosDatosDelFormularioYElPersonalDeLaSesion()
+            throws Exception {
+
         Mockito.when(request.getParameter("referencia")).thenReturn("202");
         Mockito.when(request.getParameter("unidades")).thenReturn("6");
         Mockito.when(request.getParameter("token")).thenReturn("op-1");
-        Mockito.when(servicio.registrar(ArgumentMatchers.eq(202), ArgumentMatchers.eq(6), ArgumentMatchers.same(maria),
-                ArgumentMatchers.eq("op-1"), ArgumentMatchers.any(LocalDateTime.class))).thenReturn(true);
+
+        Mockito.when(servicio.registrar(
+                        ArgumentMatchers.eq(202),
+                        ArgumentMatchers.eq(6),
+                        ArgumentMatchers.same(maria),
+                        ArgumentMatchers.eq("op-1"),
+                        ArgumentMatchers.any(LocalDateTime.class)))
+                .thenReturn(true);
 
         servlet.doPost(request, response);
 
-        Mockito.verify(sesion).setAttribute("flashExito", PerdidasCaducidadServlet.REGISTRADA);
-        Mockito.verify(response).sendRedirect("/polidinner/personal/perdidas");
+        Mockito.verify(sesion).setAttribute(
+                "flashExito", PerdidasCaducidadServlet.REGISTRADA);
+        Mockito.verify(response)
+                .sendRedirect("/polidinner/personal/perdidas");
     }
 
     @Test
@@ -61,9 +83,17 @@ class PerdidasCaducidadServletTest {
 
         servlet.doPost(request, response);
 
-        Mockito.verify(servicio, Mockito.never()).registrar(ArgumentMatchers.anyInt(), ArgumentMatchers.anyInt(),
-                ArgumentMatchers.any(), ArgumentMatchers.anyString(), ArgumentMatchers.any());
-        Mockito.verify(sesion).setAttribute("flashError", "Las unidades descartadas deben ser un número entero.");
-        Mockito.verify(response).sendRedirect("/polidinner/personal/perdidas");
+        Mockito.verify(servicio, Mockito.never()).registrar(
+                ArgumentMatchers.anyInt(),
+                ArgumentMatchers.anyInt(),
+                ArgumentMatchers.any(),
+                ArgumentMatchers.anyString(),
+                ArgumentMatchers.any());
+
+        Mockito.verify(sesion).setAttribute(
+                "flashError",
+                "Las unidades descartadas deben ser un número entero.");
+        Mockito.verify(response)
+                .sendRedirect("/polidinner/personal/perdidas");
     }
 }
