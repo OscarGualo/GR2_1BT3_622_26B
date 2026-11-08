@@ -39,7 +39,7 @@ public class ServicioPerdidas {
             throw new DescarteRechazadoException(NO_ADMITE_DESCARTE);
         }
         validador.validarCantidad(producto, unidades);
-        producto.setStockActual(producto.getStockActual() - unidades);
+        descontarUnidades(producto, unidades);
         return new PerdidaCaducidad(producto, unidades, responsable, momento, tokenOperacion);
     }
 
@@ -51,5 +51,9 @@ public class ServicioPerdidas {
     public boolean registrar(int idProducto, int unidades, PersonalComedor responsable, String tokenOperacion,
                              LocalDateTime ahora) {
         return false;
+    }
+
+    private void descontarUnidades(Producto producto, int unidades) {
+        producto.setStockActual(producto.getStockActual() - unidades);
     }
 }
