@@ -33,12 +33,7 @@ public final class CargaDatosIniciales {
         if (script == null || script.isEmpty()) {
             return 0;
         }
-        List<String> sentencias = new ArrayList<>();
-        for (String nombre : script.split(",")) {
-            if (!nombre.trim().isEmpty()) {
-                sentencias.addAll(separarSentencias(leerRecurso(nombre.trim())));
-            }
-        }
+        List<String> sentencias = leerSentenciasDeLosScripts(script);
 
         EntityManager em = JPAUtil.getEntityManager();
         try {
@@ -60,6 +55,17 @@ public final class CargaDatosIniciales {
             em.close();
         }
         return sentencias.size();
+    }
+
+    /** Lee los recursos en el orden configurado; conserva comentarios, separador y política de errores. */
+    private static List<String> leerSentenciasDeLosScripts(String script) throws IOException {
+        List<String> sentencias = new ArrayList<>();
+        for (String nombre : script.split(",")) {
+            if (!nombre.trim().isEmpty()) {
+                sentencias.addAll(separarSentencias(leerRecurso(nombre.trim())));
+            }
+        }
+        return sentencias;
     }
 
     /** Divide el script en sentencias terminadas en ';' e ignora las líneas de comentario (--). */
