@@ -1,2 +1,11 @@
 <%@ page pageEncoding="UTF-8" %>
-<%-- Acceso del panel: se completa en la HU correspondiente. --%>
+                <li>
+                    <a class="accion-fila" href="${pageContext.request.contextPath}/personal/caducidad-productos">
+                        <svg class="icono" aria-hidden="true"><use href="#i-reloj"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Caducidad de productos</strong>
+                            <span>Vea las existencias que caducan hoy, en los próximos 3 días o que ya caducaron.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>

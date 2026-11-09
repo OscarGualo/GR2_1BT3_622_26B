@@ -1,7 +1,6 @@
 package ec.edu.epn.polidinner.servicio;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 
 import ec.edu.epn.polidinner.modelo.ClasificadorCaducidad;
@@ -12,7 +11,7 @@ import ec.edu.epn.polidinner.persistencia.ProductoDAO;
 
 /**
  * Soporte técnico NO modelado - HU19: existencias de la franja elegida a partir de los registros de
- * Producto. Contrato de la iteración: pendiente (Christian, HU19).
+ * Producto (habilitados o no; el filtro decide).
  */
 public class ServicioCaducidad {
 
@@ -29,6 +28,10 @@ public class ServicioCaducidad {
     }
 
     public List<ExistenciaProducto> consultar(FranjaCaducidad franja, LocalDate hoy) {
-        return Collections.emptyList();
+        return filtro.filtrar(consultarExistenciasGuardadas(), franja, hoy);
+    }
+
+    private List<ExistenciaProducto> consultarExistenciasGuardadas() {
+        return productoDAO.listarTodos().stream().map(ExistenciaProducto::desde).toList();
     }
 }
