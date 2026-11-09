@@ -1,0 +1,11 @@
+<%@ page pageEncoding="UTF-8" %>
+                <li>
+                    <a class="accion-fila accion-fila--peligro" href="${pageContext.request.contextPath}/personal/perdidas">
+                        <svg class="icono" aria-hidden="true"><use href="#i-retirar"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Pérdidas por caducidad</strong>
+                            <span>Registre las unidades descartadas de existencias caducadas y revise el historial.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>

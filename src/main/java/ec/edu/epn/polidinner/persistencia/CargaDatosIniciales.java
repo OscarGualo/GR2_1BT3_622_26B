@@ -18,6 +18,7 @@ import org.hibernate.Session;
  * para que el contenedor Docker quede listo para usarse sin ejecutar scripts a mano.
  * Se activa con la variable de entorno POLIDINNER_DATOS_INICIALES, que indica el script del classpath
  * (por ejemplo datos_iniciales_h2.sql). El script debe poder repetirse sin duplicar datos.
+ * Iteración HU18-HU20: admite varios scripts separados por coma, que se ejecutan en ese orden.
  */
 public final class CargaDatosIniciales {
 
@@ -32,7 +33,8 @@ public final class CargaDatosIniciales {
         if (script == null || script.isEmpty()) {
             return 0;
         }
-        List<String> sentencias = separarSentencias(leerRecurso(script));
+        List<String> sentencias = leerSentenciasDeLosScripts(script);
+
         EntityManager em = JPAUtil.getEntityManager();
         try {
             em.getTransaction().begin();
@@ -53,6 +55,17 @@ public final class CargaDatosIniciales {
             em.close();
         }
         return sentencias.size();
+    }
+
+    /** Lee los recursos en el orden configurado; conserva comentarios, separador y política de errores. */
+    private static List<String> leerSentenciasDeLosScripts(String script) throws IOException {
+        List<String> sentencias = new ArrayList<>();
+        for (String nombre : script.split(",")) {
+            if (!nombre.trim().isEmpty()) {
+                sentencias.addAll(separarSentencias(leerRecurso(nombre.trim())));
+            }
+        }
+        return sentencias;
     }
 
     /** Divide el script en sentencias terminadas en ';' e ignora las líneas de comentario (--). */

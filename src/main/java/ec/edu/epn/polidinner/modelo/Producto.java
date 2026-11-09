@@ -90,4 +90,9 @@ public class Producto extends ItemMenu {
     public boolean estaVigente(LocalDate hoy) {
         return fechaCaducidad == null || !hoy.isAfter(DiaComedor.fechaCivilDe(fechaCaducidad));
     }
+
+    /** HU20: solo se descartan existencias habilitadas, con stock y ya caducadas. */
+    public boolean admiteDescarte(LocalDate hoy) {
+        return isHabilitado() && getStockActual() > 0 && !estaVigente(hoy);
+    }
 }

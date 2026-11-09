@@ -1,0 +1,11 @@
+<%@ page pageEncoding="UTF-8" %>
+                <li>
+                    <a class="accion-fila" href="${pageContext.request.contextPath}/personal/ventas-productos">
+                        <svg class="icono" aria-hidden="true"><use href="#i-billetera"/></svg>
+                        <span class="accion-fila__texto">
+                            <strong>Ventas de productos</strong>
+                            <span>Consulte las unidades vendidas de cada registro de producto en un periodo.</span>
+                        </span>
+                        <svg class="icono accion-fila__flecha" aria-hidden="true"><use href="#i-flecha"/></svg>
+                    </a>
+                </li>

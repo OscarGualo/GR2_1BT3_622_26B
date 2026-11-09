@@ -11,7 +11,7 @@
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27%231B1F24%27 stroke-width=%272%27 stroke-linecap=%27round%27%3E%3Cpath d=%27M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7%27/%3E%3C/svg%3E">
     <%-- Fuente Archivo alojada en el proyecto (sin dependencia de Google Fonts) --%>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/fonts/archivo.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilos.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/estilos.css?v=proyecto-1b">
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">

@@ -1,0 +1,38 @@
+<%@ page pageEncoding="UTF-8" %>
+<%-- HU20 (criterio 20.3): historial de pérdidas, de la más reciente a la más antigua. --%>
+<section class="tarjeta" aria-labelledby="titulo-historial">
+    <h2 id="titulo-historial">Historial de pérdidas</h2>
+    <c:choose>
+        <c:when test="${empty historial}">
+            <div class="vacio"><p>Todavía no hay pérdidas registradas.</p></div>
+        </c:when>
+        <c:otherwise>
+            <div class="tabla-contenedor">
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th scope="col">Registrada</th>
+                            <th scope="col">Referencia</th>
+                            <th scope="col">Producto</th>
+                            <th scope="col">Caducidad</th>
+                            <th scope="col" class="numero">Unidades</th>
+                            <th scope="col">Responsable</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="perdida" items="${historial}">
+                            <tr>
+                                <td>${perdida.fechaRegistroTexto}</td>
+                                <td>${perdida.referencia}</td>
+                                <th scope="row"><c:out value="${perdida.nombreProducto}"/></th>
+                                <td>${perdida.caducidadTexto}</td>
+                                <td class="numero">${perdida.unidades}</td>
+                                <td><c:out value="${perdida.responsable.nombres} ${perdida.responsable.apellidos}"/></td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </div>
+        </c:otherwise>
+    </c:choose>
+</section>
